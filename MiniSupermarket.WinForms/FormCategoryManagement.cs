@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,18 +32,30 @@ namespace MiniSupermarket.WinForms
             await LoadDataAsync();
         }
 
-        // Hàm dùng chung: Gọi API GET lấy danh sách và đổ lên DataGridView
+        // Ví dụ áp dụng khi gọi hàm tải dữ liệu LoadDataAsync():
         private async Task LoadDataAsync()
         {
             try
             {
-                // Gửi request GET tới endpoint "categories", tự động giải tuần tự hóa chuỗi JSON thành List<CategoryDto>
-                var categories = await _client.GetFromJsonAsync<List<CategoryDto>>("categories");
-                dgvCategories.DataSource = categories; // Gán nguồn dữ liệu cho bảng hiển thị
+                // Sử dụng client đã gắn token
+                using var client = GetAuthenticatedClient();
+
+                // Gửi request GET tới endpoint "categories",
+                // tự động giải tuần tự hóa chuỗi JSON thành List<CategoryDto>
+                var categories = await client.GetFromJsonAsync<List<CategoryDto>>("categories");
+
+                // Gán nguồn dữ liệu cho bảng hiển thị
+                dgvCategories.DataSource = categories;
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi kết nối Server: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // Hiển thị thông báo nếu không có quyền truy cập
+                // hoặc xảy ra lỗi kết nối đến Server
+                MessageBox.Show(
+                    "Lỗi quyền truy cập hoặc mất kết nối: " + ex.Message,
+                    "Lỗi",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
         }
 
@@ -113,7 +126,11 @@ namespace MiniSupermarket.WinForms
             };
 
             // Gửi request POST kèm theo đối tượng dạng JSON
-            var response = await _client.PostAsJsonAsync("categories", newCat);
+            // Sử dụng client đã gắn JWT Token
+            using var client = GetAuthenticatedClient();
+
+            // Gửi request POST kèm Token
+            var response = await client.PostAsJsonAsync("categories", newCat);
             if (response.IsSuccessStatusCode)
             {
                 MessageBox.Show("Thêm mới thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -143,8 +160,11 @@ namespace MiniSupermarket.WinForms
                 Description = txtDescription.Text
             };
 
-            // Gửi request PUT kèm ID trên đường dẫn URI
-            var response = await _client.PutAsJsonAsync($"categories/{id}", updateCat);
+            // Sử dụng client đã gắn JWT Token
+            using var client = GetAuthenticatedClient();
+
+            // Gửi request PUT kèm Token
+            var response = await client.PutAsJsonAsync($"categories/{id}", updateCat);
             if (response.IsSuccessStatusCode)
             {
                 MessageBox.Show("Cập nhật thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -170,7 +190,11 @@ namespace MiniSupermarket.WinForms
             var confirm = MessageBox.Show($"Bạn có chắc muốn xóa nhóm hàng ID = {id}?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (confirm == DialogResult.Yes)
             {
-                var response = await _client.DeleteAsync($"categories/{id}");
+                // Sử dụng client đã gắn JWT Token
+                using var client = GetAuthenticatedClient();
+
+                // Gửi request DELETE kèm Token
+                var response = await client.DeleteAsync($"categories/{id}");
                 if (response.IsSuccessStatusCode)
                 {
                     MessageBox.Show("Xóa thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -196,8 +220,12 @@ namespace MiniSupermarket.WinForms
 
             try
             {
-                // Gọi API dạng: GET /api/categories/search?keyword=abc
-                var result = await _client.GetFromJsonAsync<List<CategoryDto>>($"categories/search?keyword={keyword}");
+                // Sử dụng client đã gắn JWT Token
+                using var client = GetAuthenticatedClient();
+
+                // Gửi request GET kèm Token
+                var result = await client.GetFromJsonAsync<List<CategoryDto>>(
+                    $"categories/search?keyword={keyword}");
                 dgvCategories.DataSource = result;
             }
             catch (Exception)
@@ -205,6 +233,23 @@ namespace MiniSupermarket.WinForms
                 MessageBox.Show("Không tìm thấy kết quả phù hợp!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
+
+        // Bổ sung phương thức cấu hình HttpClient có gắn kèm Token bảo mật
+        private HttpClient GetAuthenticatedClient()
+        {
+            var client = new HttpClient
+            {
+                BaseAddress = new Uri("https://localhost:7251/api/")
+            };
+
+            // Đính kèm Token vào Header theo chuẩn Bearer Authentication
+            if (!string.IsNullOrEmpty(SessionManager.JwtToken))
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", SessionManager.JwtToken);
+            }
+            return client;
+        }
+
 
         // Hàm phụ trợ: Xóa trắng các ô nhập liệu sau khi thao tác xong
         private void ClearInputs()
