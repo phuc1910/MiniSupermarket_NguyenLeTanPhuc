@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
+using MiniSupermarket.API.Data;
 using System.Text;
 
 // Tạo WebApplication Builder để cấu hình ứng dụng ASP.NET Core
@@ -74,6 +76,14 @@ builder.Services.AddAuthentication(options => {
 
 // Đăng ký các Controller vào ứng dụng
 builder.Services.AddControllers();
+
+// Lấy chuỗi kết nối từ appsettings.json
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// Đăng ký DbContext sử dụng SQL Server
+builder.Services.AddDbContext<SupermarketDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
 
 // Đăng ký dịch vụ hỗ trợ khám phá các API Endpoint
 builder.Services.AddEndpointsApiExplorer();
