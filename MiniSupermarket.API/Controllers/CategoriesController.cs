@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MiniSupermarket.API.Models;
+using Microsoft.AspNetCore.Authorization; // Thư viện dùng để xác thực và phân quyền người dùng trong ASP.NET Core
 
 namespace MiniSupermarket.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize] // Bắt buộc phải có Token mới gọi được các API trong Controller này
     public class CategoriesController : ControllerBase
     {
         private static readonly List<Category> _categories = new() {
@@ -70,10 +72,16 @@ namespace MiniSupermarket.API.Controllers
             cat.CategoryName = updateCat.CategoryName;
             cat.Description = updateCat.Description;
 
-            return NoContent();
+            // Trả về thông báo cập nhật thành công
+            return Ok(new
+            {
+                success = true,
+                message = "Cập nhật nhóm hàng thành công!"
+            });
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")] //Chỉ Admmin mới xóa
         public IActionResult Delete(int id)
         {
             var cat = _categories.FirstOrDefault(c => c.CategoryId == id);
@@ -82,7 +90,29 @@ namespace MiniSupermarket.API.Controllers
                 return NotFound(new { message = "Không tìm thấy nhóm hàng cần xóa!" });
             }
             _categories.Remove(cat);
-            return NoContent();
+            // Trả về thông báo xóa thành công
+            return Ok(new
+            {
+                success = true,
+                message = "Xóa nhóm hàng thành công!"
+            });
         }
+
+        // 4. Kiểm tra quyền Admin (Chỉ tài khoản có Role = Admin mới được gọi)
+        [HttpGet("admin-dashboard")]
+        [Authorize(Roles = "Admin")]
+        public IActionResult GetAdminDashboard()
+        {
+            return Ok(new { message = "Chào mừng Admin! Bạn có toàn quyền quản trị hệ thống siêu thị mini." });
+        }
+
+        // 5. Kiểm tra quyền chung cho nhân viên (Cả Admin và Cashier đều gọi được)
+        [HttpGet("staff-pos")]
+        [Authorize(Roles = "Admin,Cashier")]
+        public IActionResult GetStaffPos()
+        {
+            return Ok(new { message = "Màn hình POS Thu ngân sẵn sàng phục vụ bán hàng." });
+        }
+
     }
 }
