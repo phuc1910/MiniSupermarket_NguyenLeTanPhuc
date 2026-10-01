@@ -19,23 +19,58 @@ builder.Services.AddAuthentication(options => {
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 // Cấu hình xác thực bằng JWT Bearer Token
-.AddJwtBearer(options => {
-    // Cấu hình các tham số để kiểm tra tính hợp lệ của JWT Token
+.AddJwtBearer(options =>
+{
+    // Cấu hình các tham số để kiểm tra JWT Token
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        // Kiểm tra chữ ký của JWT Token có hợp lệ hay không
         ValidateIssuerSigningKey = true,
 
-        // Sử dụng Secret Key để kiểm tra chữ ký của Token
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSecret)),
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.ASCII.GetBytes(jwtSecret)
+        ),
 
-        // Không kiểm tra Issuer của Token
         ValidateIssuer = false,
+        ValidateAudience = false,
 
-        // Không kiểm tra Audience của Token
-        ValidateAudience = false
+        // Nên bật kiểm tra thời gian hết hạn
+        ValidateLifetime = true
+    };
+
+    // Xử lý thông báo Authentication / Authorization
+    options.Events = new JwtBearerEvents
+    {
+        // 401: Không có Token hoặc Token không hợp lệ
+        OnChallenge = async context =>
+        {
+            // Không cho ASP.NET Core trả response mặc định
+            context.HandleResponse();
+
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            context.Response.ContentType = "application/json; charset=utf-8";
+
+            await context.Response.WriteAsJsonAsync(new
+            {
+                success = false,
+                message = "Bạn chưa đăng nhập hoặc Token không hợp lệ!"
+            });
+        },
+
+        // 403: Có Token nhưng không có quyền
+        OnForbidden = async context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            context.Response.ContentType = "application/json; charset=utf-8";
+
+            await context.Response.WriteAsJsonAsync(new
+            {
+                success = false,
+                message = "Bạn không có quyền truy cập chức năng này!"
+            });
+        }
     };
 });
+
 
 // Đăng ký các Controller vào ứng dụng
 builder.Services.AddControllers();
@@ -44,26 +79,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 // Đăng ký Swagger để tạo giao diện kiểm thử API
-builder.Services.AddSwaggerGen(c => {
-    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Description = "Dán token vào đây (không cần gõ chữ Bearer)"
-    });
-    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement {
-        {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme, Id = "Bearer" }
-            },
-            Array.Empty<string>()
-        }
-    });
-});
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 

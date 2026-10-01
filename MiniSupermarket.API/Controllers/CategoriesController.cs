@@ -49,6 +49,7 @@ namespace MiniSupermarket.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult Create([FromBody] Category newCat)
         {
             if (string.IsNullOrWhiteSpace(newCat.CategoryName))
@@ -62,6 +63,7 @@ namespace MiniSupermarket.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult Update(int id, [FromBody] Category updateCat)
         {
             var cat = _categories.FirstOrDefault(c => c.CategoryId == id);
