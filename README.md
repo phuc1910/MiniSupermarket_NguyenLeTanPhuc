@@ -69,6 +69,6 @@ MiniSupermarketSystem/
 ---
 
 ## 👨‍💻 6. Tác giả
-* **Họ tên sinh viên:** [Điền tên của bạn vào đây]
-* **Mã sinh viên:** [Điền MSSV]
-* **Lớp học phần:** [Điền tên lớp]
+* **Họ tên sinh viên:** [Nguyễn Lê Tấn Phúc]
+* **Mã sinh viên:** [2124110108]
+* **Lớp học phần:** [CCQ2411D]
