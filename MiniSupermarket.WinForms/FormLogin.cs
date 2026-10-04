@@ -49,7 +49,7 @@ namespace MiniSupermarket.WinForms
                     MessageBox.Show($"Đăng nhập thành công với quyền: {SessionManager.CurrentRole}", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                     // Mở Form quản lý chính (FormCategoryManagement) và ẩn Form đăng nhập đi
-                    FormCategoryManagement mainForm = new FormCategoryManagement();
+                    FormCustomerManagement mainForm = new FormCustomerManagement();
                     this.Hide();
                     mainForm.ShowDialog();
                     this.Close(); // Đóng hẳn ứng dụng khi form chính tắt
@@ -63,6 +63,11 @@ namespace MiniSupermarket.WinForms
             {
                 MessageBox.Show("Lỗi kết nối đến Server: " + ex.Message, "Lỗi hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void FormLogin_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
