@@ -7,7 +7,7 @@
 namespace MiniSupermarket.API.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreateDatabase : Migration
+    public partial class AddDatabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -24,6 +24,23 @@ namespace MiniSupermarket.API.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Categories", x => x.CategoryId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Customers",
+                columns: table => new
+                {
+                    CustomerId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CustomerName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
+                    Address = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    RewardPoints = table.Column<int>(type: "int", nullable: false),
+                    MembershipRank = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Customers", x => x.CustomerId);
                 });
 
             migrationBuilder.CreateTable(
@@ -77,6 +94,33 @@ namespace MiniSupermarket.API.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "Customers",
+                columns: new[] { "CustomerId", "Address", "CustomerName", "MembershipRank", "PhoneNumber", "RewardPoints" },
+                values: new object[,]
+                {
+                    { 1, "123 Đường Nguyễn Trãi, Phường 2, Quận 5, Thành phố Hồ Chí Minh", "Nguyễn Thị Hoa", "Vàng", "0901122334", 150 },
+                    { 2, "45 Đường Lê Văn Việt, Phường Hiệp Phú, Thành phố Thủ Đức, Thành phố Hồ Chí Minh", "Trần Thị Mai", "Bạc", "0982233445", 80 },
+                    { 3, "88 Đường Đồng Khởi, Phường Bến Nghé, Quận 1, Thành phố Hồ Chí Minh", "Lê Hoàng Yến", "Kim cương", "0913344556", 1200 },
+                    { 4, "12 Đường Cách Mạng Tháng Tám, Phường 7, Quận Tân Bình, Thành phố Hồ Chí Minh", "Phạm Quỳnh Anh", "Thành viên mới", "0394455667", 20 },
+                    { 5, "56 Đường Võ Văn Ngân, Phường Linh Chiểu, Thành phố Thủ Đức, Thành phố Hồ Chí Minh", "Hoàng Thu Thảo", "Vàng", "0975566778", 320 },
+                    { 6, "99 Đường Phan Xích Long, Phường 2, Quận Phú Nhuận, Thành phố Hồ Chí Minh", "Vũ Minh Thư", "Bạc", "0936677889", 95 },
+                    { 7, "234 Đường Hai Bà Trưng, Phường Võ Thị Sáu, Quận 3, Thành phố Hồ Chí Minh", "Đặng Ngọc Hân", "Kim cương", "0927788990", 950 },
+                    { 8, "15 Đường Nguyễn Kiệm, Phường 3, Quận Gò Vấp, Thành phố Hồ Chí Minh", "Bùi Thanh Trúc", "Thành viên mới", "0868899001", 10 },
+                    { 9, "78 Đường Lê Duẩn, Phường Bến Nghé, Quận 1, Thành phố Hồ Chí Minh", "Đỗ Mỹ Linh", "Vàng", "0949900112", 450 },
+                    { 10, "300 Đường Nguyễn Thị Minh Khai, Phường 5, Quận 3, Thành phố Hồ Chí Minh", "Hồ Ngọc Hà", "Kim cương", "0901011223", 1500 },
+                    { 11, "11 Đường Tôn Đức Thắng, Phường Bến Nghé, Quận 1, Thành phố Hồ Chí Minh", "Ngô Thanh Vân", "Bạc", "0982122334", 110 },
+                    { 12, "50 Đường Hoàng Văn Thụ, Phường 15, Quận Phú Nhuận, Thành phố Hồ Chí Minh", "Dương Cẩm Lynh", "Thành viên mới", "0913233445", 35 },
+                    { 13, "77 Đường Thảo Điền, Phường Thảo Điền, Thành phố Thủ Đức, Thành phố Hồ Chí Minh", "Lý Nhã Kỳ", "Vàng", "0394344556", 280 },
+                    { 14, "102 Đường Pasteur, Phường Bến Nghé, Quận 1, Thành phố Hồ Chí Minh", "Trương Ngọc Ánh", "Kim cương", "0975455667", 1100 },
+                    { 15, "45 Đường Thành Thái, Phường 14, Quận 10, Thành phố Hồ Chí Minh", "Phan Như Thảo", "Bạc", "0936566778", 75 },
+                    { 16, "89 Đường Lũy Bán Bích, Phường Tân Thới Hòa, Quận Tân Phú, Thành phố Hồ Chí Minh", "Vương Linh Chi", "Thành viên mới", "0927677889", 15 },
+                    { 17, "210 Đường Điện Biên Phủ, Phường 17, Quận Bình Thạnh, Thành phố Hồ Chí Minh", "Đinh Ngọc Diệp", "Vàng", "0868788990", 510 },
+                    { 18, "66 Đường Quang Trung, Phường 10, Quận Gò Vấp, Thành phố Hồ Chí Minh", "Cao Thái Sơn", "Bạc", "0948900112", 60 },
+                    { 19, "33 Đường Sư Vạn Hạnh, Phường 12, Quận 10, Thành phố Hồ Chí Minh", "Trịnh Thăng Bình", "Thành viên mới", "0909011223", 25 },
+                    { 20, "1 Công Trường Lam Sơn, Phường Bến Nghé, Quận 1, Thành phố Hồ Chí Minh", "Sơn Tùng M-TP", "Kim cương", "0989122334", 2000 }
+                });
+
+            migrationBuilder.InsertData(
                 table: "Products",
                 columns: new[] { "ProductId", "Barcode", "CategoryId", "Price", "ProductName", "StockQuantity" },
                 values: new object[,]
@@ -112,6 +156,9 @@ namespace MiniSupermarket.API.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Customers");
+
             migrationBuilder.DropTable(
                 name: "Products");
 
