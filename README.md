@@ -63,6 +63,8 @@ MiniSupermarketSystem/
 
 Khác với Buổi 2 (tài khoản hard-code trong code), từ Buổi 4 hệ thống xác thực bằng **bảng `Users` lưu trong SQL Server**: `AuthController` truy vấn `Users` để kiểm tra tài khoản/mật khẩu trước khi cấp JWT Token, và `UsersController` cho phép Admin tạo mới/quản lý tài khoản nhân viên ngay trên ứng dụng — không cần sửa code mỗi khi thêm nhân viên.
 
+> Đây là tài khoản demo hard-code phục vụ học tập, không phải thông tin đăng nhập thật.
+
 | Endpoint | Quyền truy cập |
 |----------|----------------|
 | `POST /api/auth/login` | Công khai |
