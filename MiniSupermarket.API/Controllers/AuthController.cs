@@ -1,5 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using MiniSupermarket.API.Data;
+using MiniSupermarket.API.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -11,86 +15,111 @@ namespace MiniSupermarket.API.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        // Đối tượng IConfiguration dùng để đọc cấu hình từ appsettings.json
+        // Đọc cấu hình từ appsettings.json
         private readonly IConfiguration _configuration;
+        private readonly SupermarketDbContext _context;
+        private readonly PasswordHasher<User> _passwordHasher;
 
-        // Constructor nhận IConfiguration thông qua Dependency Injection
-        public AuthController(IConfiguration configuration)
+        public AuthController(IConfiguration configuration, SupermarketDbContext context)
         {
             _configuration = configuration;
+            _context = context;
+            _passwordHasher = new PasswordHasher<User>();
         }
 
-        // Endpoint Đăng nhập: POST /api/auth/login 
+        // POST: api/auth/login
+        // [SỬA] Đăng nhập bằng dữ liệu thật trong bảng Users (không còn danh sách tài khoản cứng)
         [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginRequestDto request)
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
         {
-            // Kiểm tra tài khoản mẫu
-            // Trong thực tế sẽ truy vấn tài khoản từ Database thông qua EF Core / SQL Server
-            if (request.Username == "admin" && request.Password == "123456")
+            string username = request.Username?.Trim() ?? string.Empty;
+
+            // Tìm tài khoản theo tên đăng nhập
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Username == username);
+
+            // Thông báo chung cho cả "không có tài khoản" và "sai mật khẩu"
+            // để không lộ tài khoản nào tồn tại
+            var invalid = Unauthorized(new
             {
-                // Tạo JWT Token cho tài khoản Admin
-                var token = GenerateJwtToken(request.Username, "Admin");
+                success = false,
+                message = "Sai tài khoản hoặc mật khẩu!"
+            });
 
-                // Trả về kết quả đăng nhập thành công cùng token và role
-                return Ok(new { success = true, token = token, role = "Admin" });
-            }
-            else if (request.Username == "cashier" && request.Password == "123456")
+            if (user == null)
             {
-                // Tạo JWT Token cho tài khoản Cashier
-                var token = GenerateJwtToken(request.Username, "Cashier");
-
-                // Trả về kết quả đăng nhập thành công cùng token và role
-                return Ok(new { success = true, token = token, role = "Cashier" });
+                return invalid;
             }
 
-            // Nếu tài khoản hoặc mật khẩu không đúng thì trả về lỗi 401 Unauthorized
-            return Unauthorized(new { success = false, message = "Sai tài khoản hoặc mật khẩu!" });
+            // Kiểm tra mật khẩu với chuỗi băm đã lưu
+            var verify = _passwordHasher.VerifyHashedPassword(
+                user, user.PasswordHash, request.Password ?? string.Empty);
+
+            if (verify == PasswordVerificationResult.Failed)
+            {
+                return invalid;
+            }
+
+            // Tài khoản bị khóa thì không cho đăng nhập (kiểm tra SAU khi đúng mật khẩu)
+            if (!user.IsActive)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new
+                {
+                    success = false,
+                    message = "Tài khoản đã bị khóa!"
+                });
+            }
+
+            // Nếu thuật toán băm đã cũ thì băm lại bằng chuẩn mới
+            if (verify == PasswordVerificationResult.SuccessRehashNeeded)
+            {
+                user.PasswordHash = _passwordHasher.HashPassword(user, request.Password!);
+                await _context.SaveChangesAsync();
+            }
+
+            // Tạo JWT Token chứa username và vai trò
+            var token = GenerateJwtToken(user.Username, user.Role);
+
+            // Giữ nguyên định dạng trả về để WinForms không phải sửa
+            return Ok(new
+            {
+                success = true,
+                token = token,
+                role = user.Role,
+                username = user.Username
+            });
         }
 
         // Hàm tạo JWT Token
         private string GenerateJwtToken(string username, string role)
         {
-            // Tạo đối tượng JwtSecurityTokenHandler để xử lý JWT
             var tokenHandler = new JwtSecurityTokenHandler();
 
-            // Lấy khóa bí mật từ appsettings.json
-            // Nếu không tìm thấy JwtSettings:Secret thì sử dụng khóa mặc định
+            // Khóa bí mật: PHẢI trùng với khóa cấu hình trong Program.cs
             var key = Encoding.ASCII.GetBytes(_configuration["JwtSettings:Secret"] ?? "SupermarketSecretKeyDoAnMonHoc2026SecureString!!");
 
-            // Khai báo các thông tin cấu hình cho JWT Token
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                // Tạo Claims chứa thông tin username và quyền của người dùng
-                Subject = new ClaimsIdentity(new[] { 
-                    // Lưu tên người dùng vào Claim
-                    new Claim(ClaimTypes.Name, username), 
-
-                    // Lưu quyền của người dùng vào Claim
-                    new Claim(ClaimTypes.Role, role)
+                Subject = new ClaimsIdentity(new[] {
+                    new Claim(ClaimTypes.Name, username), // Tên người dùng
+                    new Claim(ClaimTypes.Role, role)      // Quyền của người dùng
                 }),
 
-                // Thời hạn của JWT Token là 2 tiếng kể từ thời điểm tạo
-                Expires = DateTime.UtcNow.AddHours(2), // Thời hạn token là 2 tiếng 
+                // Thời hạn token: 2 tiếng
+                Expires = DateTime.UtcNow.AddHours(2),
 
-                // Thiết lập khóa và thuật toán dùng để ký JWT Token
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
-            // Tạo JWT Token dựa trên các thông tin đã cấu hình
             var token = tokenHandler.CreateToken(tokenDescriptor);
-
-            // Chuyển JWT Token thành chuỗi để trả về cho client
             return tokenHandler.WriteToken(token);
         }
     }
 
-    // DTO dùng để nhận thông tin đăng nhập từ client
+    // DTO nhận thông tin đăng nhập từ client
     public class LoginRequestDto
     {
-        // Tên tài khoản đăng nhập
         public string Username { get; set; } = string.Empty;
-
-        // Mật khẩu đăng nhập
         public string Password { get; set; } = string.Empty;
     }
 }

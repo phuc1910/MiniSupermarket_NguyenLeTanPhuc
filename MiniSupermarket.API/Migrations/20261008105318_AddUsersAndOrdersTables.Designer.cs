@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MiniSupermarket.API.Data;
 
@@ -11,9 +12,11 @@ using MiniSupermarket.API.Data;
 namespace MiniSupermarket.API.Migrations
 {
     [DbContext(typeof(SupermarketDbContext))]
-    partial class SupermarketDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261008105318_AddUsersAndOrdersTables")]
+    partial class AddUsersAndOrdersTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1115,7 +1118,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 1,
                             FullName = "Nguyễn Quản Trị",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAEAACcQAAAAEH...",
                             Role = "Admin",
                             Username = "admin01"
                         },
@@ -1124,7 +1127,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 2,
                             FullName = "Trần Giám Đốc",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAEAACcQAAAAEH...",
                             Role = "Admin",
                             Username = "admin02"
                         },
@@ -1133,7 +1136,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 3,
                             FullName = "Lê Thu Ngân",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAEAACcQAAAAEH...",
                             Role = "Cashier",
                             Username = "cashier01"
                         },
@@ -1142,7 +1145,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 4,
                             FullName = "Phạm Bán Hàng",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAEAACcQAAAAEH...",
                             Role = "Cashier",
                             Username = "cashier02"
                         },
@@ -1151,7 +1154,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 5,
                             FullName = "Hoàng Thu Ngân",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAEAACcQAAAAEH...",
                             Role = "Cashier",
                             Username = "cashier03"
                         },
@@ -1160,7 +1163,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 6,
                             FullName = "Vũ Thị Quầy",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAEAACcQAAAAEH...",
                             Role = "Cashier",
                             Username = "cashier04"
                         },
@@ -1169,7 +1172,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 7,
                             FullName = "Đỗ Bán Lẻ",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAEAACcQAAAAEH...",
                             Role = "Cashier",
                             Username = "cashier05"
                         },
@@ -1178,7 +1181,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 8,
                             FullName = "Ngô Quản Kho",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAEAACcQAAAAEH...",
                             Role = "Warehouse",
                             Username = "ware01"
                         },
@@ -1187,7 +1190,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 9,
                             FullName = "Bùi Kiểm Kê",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAEAACcQAAAAEH...",
                             Role = "Warehouse",
                             Username = "ware02"
                         },
@@ -1196,7 +1199,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 10,
                             FullName = "Dương Thủ Kho",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAEAACcQAAAAEH...",
                             Role = "Warehouse",
                             Username = "ware03"
                         },
@@ -1205,7 +1208,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 11,
                             FullName = "Lý Nhập Hàng",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAEAACcQAAAAEH...",
                             Role = "Warehouse",
                             Username = "ware04"
                         },
@@ -1214,7 +1217,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 12,
                             FullName = "Đặng Hỗ Trợ",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAEAACcQAAAAEH...",
                             Role = "Admin",
                             Username = "admin_backup"
                         },
@@ -1223,7 +1226,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 13,
                             FullName = "Hồ Ca Chiều",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAEAACcQAAAAEH...",
                             Role = "Cashier",
                             Username = "cashier06"
                         },
@@ -1232,7 +1235,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 14,
                             FullName = "Trương Vận Chuyển",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAEAACcQAAAAEH...",
                             Role = "Warehouse",
                             Username = "ware05"
                         },
@@ -1241,7 +1244,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 15,
                             FullName = "Mai Giám Sát",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAEAACcQAAAAEH...",
                             Role = "Admin",
                             Username = "supervisor"
                         });

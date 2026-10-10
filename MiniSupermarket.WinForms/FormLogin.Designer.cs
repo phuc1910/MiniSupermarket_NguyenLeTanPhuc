@@ -44,9 +44,11 @@
             groupBox1.Controls.Add(txtUser);
             groupBox1.Controls.Add(label2);
             groupBox1.Controls.Add(label1);
-            groupBox1.Location = new Point(225, 104);
+            groupBox1.Location = new Point(257, 139);
+            groupBox1.Margin = new Padding(3, 4, 3, 4);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(346, 157);
+            groupBox1.Padding = new Padding(3, 4, 3, 4);
+            groupBox1.Size = new Size(395, 209);
             groupBox1.TabIndex = 0;
             groupBox1.TabStop = false;
             groupBox1.Text = "Đăng nhập";
@@ -55,9 +57,10 @@
             // 
             btnLogin.BackColor = SystemColors.ActiveCaption;
             btnLogin.ForeColor = SystemColors.ControlLightLight;
-            btnLogin.Location = new Point(42, 115);
+            btnLogin.Location = new Point(48, 153);
+            btnLogin.Margin = new Padding(3, 4, 3, 4);
             btnLogin.Name = "btnLogin";
-            btnLogin.Size = new Size(289, 31);
+            btnLogin.Size = new Size(330, 41);
             btnLogin.TabIndex = 4;
             btnLogin.Text = "Đăng nhập hệ thống";
             btnLogin.UseVisualStyleBackColor = false;
@@ -65,47 +68,51 @@
             // 
             // txtPass
             // 
-            txtPass.Location = new Point(111, 71);
+            txtPass.Location = new Point(127, 95);
+            txtPass.Margin = new Padding(3, 4, 3, 4);
             txtPass.Name = "txtPass";
             txtPass.PlaceholderText = "Nhập mật khẩu...";
-            txtPass.Size = new Size(220, 23);
+            txtPass.Size = new Size(251, 27);
             txtPass.TabIndex = 3;
-            txtPass.UseSystemPasswordChar = true;   
+            txtPass.UseSystemPasswordChar = true;
             // 
             // txtUser
             // 
-            txtUser.Location = new Point(111, 35);
+            txtUser.Location = new Point(127, 47);
+            txtUser.Margin = new Padding(3, 4, 3, 4);
             txtUser.Name = "txtUser";
             txtUser.PlaceholderText = "Nhập tài khoản...";
-            txtUser.Size = new Size(220, 23);
+            txtUser.Size = new Size(251, 27);
             txtUser.TabIndex = 2;
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(42, 74);
+            label2.Location = new Point(48, 99);
             label2.Name = "label2";
-            label2.Size = new Size(63, 15);
+            label2.Size = new Size(77, 20);
             label2.TabIndex = 1;
             label2.Text = "Mật khẩu: ";
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(42, 35);
+            label1.Location = new Point(48, 47);
             label1.Name = "label1";
-            label1.Size = new Size(63, 15);
+            label1.Size = new Size(78, 20);
             label1.TabIndex = 0;
             label1.Text = "Tài khoản: ";
             // 
             // FormLogin
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(914, 600);
             Controls.Add(groupBox1);
+            Margin = new Padding(3, 4, 3, 4);
             Name = "FormLogin";
             Text = "FormLogin";
+            Load += FormLogin_Load;
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             ResumeLayout(false);
