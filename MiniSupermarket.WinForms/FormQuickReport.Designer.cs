@@ -34,6 +34,7 @@
             groupBox2 = new GroupBox();
             btnRunReport = new Button();
             groupBox3 = new GroupBox();
+            tableLayoutPanelSummary = new TableLayoutPanel();
             panel1 = new Panel();
             panel2 = new Panel();
             panel3 = new Panel();
@@ -46,6 +47,7 @@
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             groupBox3.SuspendLayout();
+            tableLayoutPanelSummary.SuspendLayout();
             panel1.SuspendLayout();
             panel2.SuspendLayout();
             panel3.SuspendLayout();
@@ -53,6 +55,8 @@
             // 
             // groupBox1
             // 
+            // [RESPONSIVE] Bao toàn bộ Form -> dãn theo cả 4 chiều khi resize
+            groupBox1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             groupBox1.Controls.Add(groupBox3);
             groupBox1.Controls.Add(groupBox2);
             groupBox1.Location = new Point(12, 12);
@@ -80,6 +84,8 @@
             // 
             // groupBox2
             // 
+            // [RESPONSIVE] Thanh bộ lọc dãn theo chiều rộng, giữ nguyên ở trên
+            groupBox2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupBox2.Controls.Add(btnRunReport);
             groupBox2.Controls.Add(label1);
             groupBox2.Controls.Add(dtpReportDate);
@@ -101,9 +107,9 @@
             // 
             // groupBox3
             // 
-            groupBox3.Controls.Add(panel3);
-            groupBox3.Controls.Add(panel2);
-            groupBox3.Controls.Add(panel1);
+            // [RESPONSIVE] Khung 3 thẻ tổng quan: dãn theo cả 2 chiều, chiếm phần không gian còn lại
+            groupBox3.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox3.Controls.Add(tableLayoutPanelSummary);
             groupBox3.Location = new Point(6, 142);
             groupBox3.Name = "groupBox3";
             groupBox3.Size = new Size(764, 278);
@@ -111,35 +117,59 @@
             groupBox3.TabStop = false;
             groupBox3.Text = "Tổng quan doanh thu";
             // 
+            // tableLayoutPanelSummary
+            // 
+            // [RESPONSIVE] Dùng TableLayoutPanel 3 cột tỉ lệ bằng nhau (33.33% mỗi cột) thay cho
+            // Location/Size cố định của panel1/panel2/panel3 -> 3 thẻ luôn chia đều không gian,
+            // không bị dư khoảng trống hay lệch khi Form co giãn ở mọi kích thước màn hình.
+            tableLayoutPanelSummary.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tableLayoutPanelSummary.ColumnCount = 3;
+            tableLayoutPanelSummary.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
+            tableLayoutPanelSummary.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
+            tableLayoutPanelSummary.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.34F));
+            tableLayoutPanelSummary.RowCount = 1;
+            tableLayoutPanelSummary.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanelSummary.Controls.Add(panel1, 0, 0);
+            tableLayoutPanelSummary.Controls.Add(panel2, 1, 0);
+            tableLayoutPanelSummary.Controls.Add(panel3, 2, 0);
+            tableLayoutPanelSummary.Location = new Point(15, 29);
+            tableLayoutPanelSummary.Name = "tableLayoutPanelSummary";
+            tableLayoutPanelSummary.Padding = new Padding(0, 16, 0, 16);
+            tableLayoutPanelSummary.Size = new Size(734, 234);
+            tableLayoutPanelSummary.TabIndex = 3;
+            // 
             // panel1
             // 
+            // [RESPONSIVE] Dock Fill bên trong ô TableLayoutPanel -> tự co giãn theo cột
             panel1.Controls.Add(lblTotalOrders);
             panel1.Controls.Add(label2);
-            panel1.Location = new Point(15, 45);
+            panel1.Dock = DockStyle.Fill;
+            panel1.Margin = new Padding(8, 0, 8, 0);
             panel1.Name = "panel1";
-            panel1.Size = new Size(238, 180);
             panel1.TabIndex = 0;
             // 
             // panel2
             // 
             panel2.Controls.Add(lblTotalRevenue);
             panel2.Controls.Add(label4);
-            panel2.Location = new Point(263, 45);
+            panel2.Dock = DockStyle.Fill;
+            panel2.Margin = new Padding(8, 0, 8, 0);
             panel2.Name = "panel2";
-            panel2.Size = new Size(238, 180);
             panel2.TabIndex = 1;
             // 
             // panel3
             // 
             panel3.Controls.Add(lblBestSeller);
             panel3.Controls.Add(label6);
-            panel3.Location = new Point(511, 45);
+            panel3.Dock = DockStyle.Fill;
+            panel3.Margin = new Padding(8, 0, 8, 0);
             panel3.Name = "panel3";
-            panel3.Size = new Size(238, 180);
             panel3.TabIndex = 2;
             // 
             // label2
             // 
+            // [RESPONSIVE] Căn giữa theo chiều ngang của Panel thay vì tọa độ cố định
+            label2.Anchor = AnchorStyles.Top;
             label2.AutoSize = true;
             label2.Location = new Point(44, 24);
             label2.Name = "label2";
@@ -149,15 +179,18 @@
             // 
             // lblTotalOrders
             // 
+            lblTotalOrders.Anchor = AnchorStyles.Top;
             lblTotalOrders.AutoSize = true;
-            lblTotalOrders.Location = new Point(111, 96);
+            lblTotalOrders.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
+            lblTotalOrders.Location = new Point(90, 70);
             lblTotalOrders.Name = "lblTotalOrders";
-            lblTotalOrders.Size = new Size(17, 20);
+            lblTotalOrders.Size = new Size(30, 37);
             lblTotalOrders.TabIndex = 1;
             lblTotalOrders.Text = "0";
             // 
             // label4
             // 
+            label4.Anchor = AnchorStyles.Top;
             label4.AutoSize = true;
             label4.Location = new Point(50, 24);
             label4.Name = "label4";
@@ -167,15 +200,18 @@
             // 
             // lblTotalRevenue
             // 
+            lblTotalRevenue.Anchor = AnchorStyles.Top;
             lblTotalRevenue.AutoSize = true;
-            lblTotalRevenue.Location = new Point(97, 96);
+            lblTotalRevenue.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
+            lblTotalRevenue.Location = new Point(55, 70);
             lblTotalRevenue.Name = "lblTotalRevenue";
-            lblTotalRevenue.Size = new Size(30, 20);
+            lblTotalRevenue.Size = new Size(60, 30);
             lblTotalRevenue.TabIndex = 1;
             lblTotalRevenue.Text = "0 đ";
             // 
             // label6
             // 
+            label6.Anchor = AnchorStyles.Top;
             label6.AutoSize = true;
             label6.Location = new Point(17, 24);
             label6.Name = "label6";
@@ -185,10 +221,12 @@
             // 
             // lblBestSeller
             // 
+            lblBestSeller.Anchor = AnchorStyles.Top;
             lblBestSeller.AutoSize = true;
-            lblBestSeller.Location = new Point(67, 96);
+            lblBestSeller.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            lblBestSeller.Location = new Point(45, 70);
             lblBestSeller.Name = "lblBestSeller";
-            lblBestSeller.Size = new Size(113, 20);
+            lblBestSeller.Size = new Size(150, 25);
             lblBestSeller.TabIndex = 1;
             lblBestSeller.Text = "Chưa có dữ liệu";
             // 
@@ -197,6 +235,8 @@
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            // [RESPONSIVE] Tránh co quá nhỏ khiến 3 thẻ tổng quan bị đè lên nhau
+            MinimumSize = new Size(820, 420);
             Controls.Add(groupBox1);
             Name = "FormQuickReport";
             Text = "FormQuickReport";
@@ -204,6 +244,7 @@
             groupBox2.ResumeLayout(false);
             groupBox2.PerformLayout();
             groupBox3.ResumeLayout(false);
+            tableLayoutPanelSummary.ResumeLayout(false);
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
             panel2.ResumeLayout(false);
@@ -221,6 +262,7 @@
         private Label label1;
         private Button btnRunReport;
         private GroupBox groupBox3;
+        private TableLayoutPanel tableLayoutPanelSummary;
         private Panel panel3;
         private Panel panel2;
         private Panel panel1;

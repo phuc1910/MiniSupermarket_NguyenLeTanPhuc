@@ -28,8 +28,17 @@
         /// </summary>
         private void InitializeComponent()
         {
+            panelRoot = new Panel();
+            tableLayoutPanelContent = new TableLayoutPanel();
             groupBox1 = new GroupBox();
             dgvUsers = new DataGridView();
+            panelDetail = new Panel();
+            panelButtons = new Panel();
+            btnAddUser = new Button();
+            btnResetPassword = new Button();
+            btnToggleLock = new Button();
+            btnUpdateUser = new Button();
+            btnReload = new Button();
             groupBox2 = new GroupBox();
             cboRole = new ComboBox();
             label4 = new Label();
@@ -39,22 +48,49 @@
             label2 = new Label();
             txtUsername = new TextBox();
             label1 = new Label();
-            btnAddUser = new Button();
-            btnResetPassword = new Button();
-            btnToggleLock = new Button();
+            panelRoot.SuspendLayout();
+            tableLayoutPanelContent.SuspendLayout();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvUsers).BeginInit();
+            panelDetail.SuspendLayout();
+            panelButtons.SuspendLayout();
             groupBox2.SuspendLayout();
             SuspendLayout();
+            // 
+            // panelRoot
+            // 
+            panelRoot.Controls.Add(tableLayoutPanelContent);
+            panelRoot.Dock = DockStyle.Fill;
+            panelRoot.Location = new Point(0, 0);
+            panelRoot.Name = "panelRoot";
+            panelRoot.Padding = new Padding(14, 16, 14, 14);
+            panelRoot.Size = new Size(950, 620);
+            panelRoot.TabIndex = 0;
+            // 
+            // tableLayoutPanelContent
+            // 
+            tableLayoutPanelContent.ColumnCount = 2;
+            tableLayoutPanelContent.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tableLayoutPanelContent.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 300F));
+            tableLayoutPanelContent.Controls.Add(groupBox1, 0, 0);
+            tableLayoutPanelContent.Controls.Add(panelDetail, 1, 0);
+            tableLayoutPanelContent.Dock = DockStyle.Fill;
+            tableLayoutPanelContent.Location = new Point(14, 16);
+            tableLayoutPanelContent.Name = "tableLayoutPanelContent";
+            tableLayoutPanelContent.RowCount = 1;
+            tableLayoutPanelContent.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanelContent.Size = new Size(922, 590);
+            tableLayoutPanelContent.TabIndex = 0;
             // 
             // groupBox1
             // 
             groupBox1.Controls.Add(dgvUsers);
-            groupBox1.Location = new Point(14, 16);
-            groupBox1.Margin = new Padding(3, 4, 3, 4);
+            groupBox1.Dock = DockStyle.Fill;
+            groupBox1.Location = new Point(0, 0);
+            groupBox1.Margin = new Padding(0, 0, 8, 0);
             groupBox1.Name = "groupBox1";
-            groupBox1.Padding = new Padding(3, 4, 3, 4);
-            groupBox1.Size = new Size(594, 568);
+            groupBox1.Padding = new Padding(7);
+            groupBox1.Size = new Size(614, 590);
             groupBox1.TabIndex = 0;
             groupBox1.TabStop = false;
             groupBox1.Text = "Danh sách tài khoản";
@@ -64,18 +100,92 @@
             dgvUsers.AllowUserToAddRows = false;
             dgvUsers.AllowUserToDeleteRows = false;
             dgvUsers.AllowUserToResizeRows = false;
+            dgvUsers.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvUsers.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvUsers.Location = new Point(7, 29);
-            dgvUsers.Margin = new Padding(3, 4, 3, 4);
+            dgvUsers.Dock = DockStyle.Fill;
+            dgvUsers.Location = new Point(7, 27);
             dgvUsers.MultiSelect = false;
             dgvUsers.Name = "dgvUsers";
             dgvUsers.ReadOnly = true;
             dgvUsers.RowHeadersVisible = false;
             dgvUsers.RowHeadersWidth = 51;
             dgvUsers.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvUsers.Size = new Size(581, 531);
+            dgvUsers.Size = new Size(600, 556);
             dgvUsers.TabIndex = 0;
             dgvUsers.CellClick += dgvUsers_CellClick;
+            // 
+            // panelDetail
+            // 
+            panelDetail.Controls.Add(panelButtons);
+            panelDetail.Controls.Add(groupBox2);
+            panelDetail.Dock = DockStyle.Fill;
+            panelDetail.Location = new Point(625, 3);
+            panelDetail.Name = "panelDetail";
+            panelDetail.Size = new Size(294, 584);
+            panelDetail.TabIndex = 1;
+            // 
+            // panelButtons
+            // 
+            panelButtons.Controls.Add(btnAddUser);
+            panelButtons.Controls.Add(btnResetPassword);
+            panelButtons.Controls.Add(btnToggleLock);
+            panelButtons.Controls.Add(btnUpdateUser);
+            panelButtons.Controls.Add(btnReload);
+            panelButtons.Dock = DockStyle.Top;
+            panelButtons.Location = new Point(0, 324);
+            panelButtons.Name = "panelButtons";
+            panelButtons.Size = new Size(294, 130);
+            panelButtons.TabIndex = 1;
+            // 
+            // btnAddUser
+            // 
+            btnAddUser.Location = new Point(2, 10);
+            btnAddUser.Name = "btnAddUser";
+            btnAddUser.Size = new Size(90, 31);
+            btnAddUser.TabIndex = 4;
+            btnAddUser.Text = "Thêm";
+            btnAddUser.UseVisualStyleBackColor = true;
+            btnAddUser.Click += btnAddUser_Click;
+            // 
+            // btnResetPassword
+            // 
+            btnResetPassword.Location = new Point(98, 10);
+            btnResetPassword.Name = "btnResetPassword";
+            btnResetPassword.Size = new Size(90, 31);
+            btnResetPassword.TabIndex = 5;
+            btnResetPassword.Text = "Đặt MK";
+            btnResetPassword.UseVisualStyleBackColor = true;
+            btnResetPassword.Click += btnResetPassword_Click;
+            // 
+            // btnToggleLock
+            // 
+            btnToggleLock.Location = new Point(194, 10);
+            btnToggleLock.Name = "btnToggleLock";
+            btnToggleLock.Size = new Size(104, 31);
+            btnToggleLock.TabIndex = 6;
+            btnToggleLock.Text = "Khóa/Mở";
+            btnToggleLock.UseVisualStyleBackColor = true;
+            btnToggleLock.Click += btnToggleLock_Click;
+            // 
+            // btnUpdateUser
+            // 
+            btnUpdateUser.Location = new Point(2, 49);
+            btnUpdateUser.Name = "btnUpdateUser";
+            btnUpdateUser.Size = new Size(296, 31);
+            btnUpdateUser.TabIndex = 7;
+            btnUpdateUser.Text = "Cập nhật họ tên / vai trò";
+            btnUpdateUser.UseVisualStyleBackColor = true;
+            btnUpdateUser.Click += btnUpdateUser_Click;
+            // 
+            // btnReload
+            // 
+            btnReload.Location = new Point(2, 88);
+            btnReload.Name = "btnReload";
+            btnReload.Size = new Size(296, 31);
+            btnReload.TabIndex = 8;
+            btnReload.Text = "Tải lại danh sách";
+            btnReload.UseVisualStyleBackColor = true;
+            btnReload.Click += btnReload_Click;
             // 
             // groupBox2
             // 
@@ -87,23 +197,22 @@
             groupBox2.Controls.Add(label2);
             groupBox2.Controls.Add(txtUsername);
             groupBox2.Controls.Add(label1);
-            groupBox2.Location = new Point(615, 16);
-            groupBox2.Margin = new Padding(3, 4, 3, 4);
+            groupBox2.Dock = DockStyle.Top;
+            groupBox2.Location = new Point(0, 0);
             groupBox2.Name = "groupBox2";
-            groupBox2.Padding = new Padding(3, 4, 3, 4);
-            groupBox2.Size = new Size(286, 324);
-            groupBox2.TabIndex = 1;
+            groupBox2.Size = new Size(294, 324);
+            groupBox2.TabIndex = 0;
             groupBox2.TabStop = false;
             groupBox2.Text = "Thông tin tài khoản";
             // 
             // cboRole
             // 
+            cboRole.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             cboRole.DropDownStyle = ComboBoxStyle.DropDownList;
             cboRole.FormattingEnabled = true;
             cboRole.Location = new Point(11, 271);
-            cboRole.Margin = new Padding(3, 4, 3, 4);
             cboRole.Name = "cboRole";
-            cboRole.Size = new Size(262, 28);
+            cboRole.Size = new Size(277, 28);
             cboRole.TabIndex = 3;
             // 
             // label4
@@ -117,11 +226,11 @@
             // 
             // txtPassword
             // 
+            txtPassword.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             txtPassword.Location = new Point(11, 200);
-            txtPassword.Margin = new Padding(3, 4, 3, 4);
             txtPassword.Name = "txtPassword";
             txtPassword.PasswordChar = '*';
-            txtPassword.Size = new Size(262, 27);
+            txtPassword.Size = new Size(277, 27);
             txtPassword.TabIndex = 2;
             // 
             // label3
@@ -135,10 +244,10 @@
             // 
             // txtFullName
             // 
+            txtFullName.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             txtFullName.Location = new Point(11, 129);
-            txtFullName.Margin = new Padding(3, 4, 3, 4);
             txtFullName.Name = "txtFullName";
-            txtFullName.Size = new Size(262, 27);
+            txtFullName.Size = new Size(277, 27);
             txtFullName.TabIndex = 1;
             // 
             // label2
@@ -152,10 +261,10 @@
             // 
             // txtUsername
             // 
+            txtUsername.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             txtUsername.Location = new Point(11, 59);
-            txtUsername.Margin = new Padding(3, 4, 3, 4);
             txtUsername.Name = "txtUsername";
-            txtUsername.Size = new Size(262, 27);
+            txtUsername.Size = new Size(277, 27);
             txtUsername.TabIndex = 0;
             // 
             // label1
@@ -167,76 +276,23 @@
             label1.TabIndex = 0;
             label1.Text = "Tên đăng nhập";
             // 
-            // btnAddUser
-            // 
-            btnAddUser.Location = new Point(617, 348);
-            btnAddUser.Margin = new Padding(3, 4, 3, 4);
-            btnAddUser.Name = "btnAddUser";
-            btnAddUser.Size = new Size(86, 31);
-            btnAddUser.TabIndex = 4;
-            btnAddUser.Text = "Thêm";
-            btnAddUser.UseVisualStyleBackColor = true;
-            btnAddUser.Click += btnAddUser_Click;
-            // 
-            // btnResetPassword
-            // 
-            btnResetPassword.Location = new Point(709, 348);
-            btnResetPassword.Margin = new Padding(3, 4, 3, 4);
-            btnResetPassword.Name = "btnResetPassword";
-            btnResetPassword.Size = new Size(86, 31);
-            btnResetPassword.TabIndex = 5;
-            btnResetPassword.Text = "Đặt MK";
-            btnResetPassword.UseVisualStyleBackColor = true;
-            btnResetPassword.Click += btnResetPassword_Click;
-            // 
-            // btnToggleLock
-            // 
-            btnToggleLock.Location = new Point(802, 348);
-            btnToggleLock.Margin = new Padding(3, 4, 3, 4);
-            btnToggleLock.Name = "btnToggleLock";
-            btnToggleLock.Size = new Size(101, 31);
-            btnToggleLock.TabIndex = 6;
-            btnToggleLock.Text = "Khóa/Mở";
-            btnToggleLock.UseVisualStyleBackColor = true;
-            btnToggleLock.Click += btnToggleLock_Click;
-            // btnUpdateUser
-            btnUpdateUser = new Button();
-            btnUpdateUser.Location = new Point(617, 390);
-            btnUpdateUser.Name = "btnUpdateUser";
-            btnUpdateUser.Size = new Size(286, 31);
-            btnUpdateUser.TabIndex = 7;
-            btnUpdateUser.Text = "Cập nhật họ tên / vai trò";
-            btnUpdateUser.UseVisualStyleBackColor = true;
-            btnUpdateUser.Click += btnUpdateUser_Click;
-
-            // btnReload
-            btnReload = new Button();
-            btnReload.Location = new Point(617, 432);
-            btnReload.Name = "btnReload";
-            btnReload.Size = new Size(286, 31);
-            btnReload.TabIndex = 8;
-            btnReload.Text = "Tải lại danh sách";
-            btnReload.UseVisualStyleBackColor = true;
-            btnReload.Click += btnReload_Click;
-            // 
             // FormUserManagement
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(914, 600);
-            Controls.Add(btnUpdateUser);
-            Controls.Add(btnReload);
-            Controls.Add(btnToggleLock);
-            Controls.Add(btnResetPassword);
-            Controls.Add(btnAddUser);
-            Controls.Add(groupBox2);
-            Controls.Add(groupBox1);
+            ClientSize = new Size(950, 620);
+            Controls.Add(panelRoot);
             Margin = new Padding(3, 4, 3, 4);
+            MinimumSize = new Size(930, 600);
             Name = "FormUserManagement";
             Text = "Quản lý tài khoản";
             Load += FormUserManagement_Load;
+            panelRoot.ResumeLayout(false);
+            tableLayoutPanelContent.ResumeLayout(false);
             groupBox1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvUsers).EndInit();
+            panelDetail.ResumeLayout(false);
+            panelButtons.ResumeLayout(false);
             groupBox2.ResumeLayout(false);
             groupBox2.PerformLayout();
             ResumeLayout(false);
@@ -244,9 +300,12 @@
 
         #endregion
 
+        private Panel panelRoot;
+        private TableLayoutPanel tableLayoutPanelContent;
         private GroupBox groupBox1;
         private DataGridView dgvUsers;
 
+        private Panel panelDetail;
         private GroupBox groupBox2;
 
         private Label label1;
@@ -261,6 +320,7 @@
         private Label label4;
         private ComboBox cboRole;
 
+        private Panel panelButtons;
         private Button btnAddUser;
         private Button btnResetPassword;
         private Button btnToggleLock;

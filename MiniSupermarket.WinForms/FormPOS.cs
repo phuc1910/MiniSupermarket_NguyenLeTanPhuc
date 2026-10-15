@@ -25,12 +25,18 @@ namespace MiniSupermarket.WinForms
         private void SetupCartGrid()
         {
             dgvCart.AutoGenerateColumns = false;
+
+            // [SỬA] Dùng FillWeight thay cho Width cố định: lưới đang ở chế độ
+            // AutoSizeColumnsMode = Fill (khai báo trong Designer) nên Width tĩnh bị bỏ qua.
+            // FillWeight quyết định tỉ lệ chia không gian: cột ngắn (Mã SP, SL) hẹp,
+            // cột dài (Tên Sản Phẩm) rộng nhất, vẫn lấp đầy hết chiều rộng khung giỏ hàng.
+            dgvCart.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvCart.Columns.Clear();
-            dgvCart.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "ProductId", HeaderText = "Mã SP", Width = 80 });
-            dgvCart.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "ProductName", HeaderText = "Tên Sản Phẩm", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
-            dgvCart.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "UnitPrice", HeaderText = "Đơn Giá", Width = 110 });
-            dgvCart.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Quantity", HeaderText = "SL", Width = 70 });
-            dgvCart.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "TotalPrice", HeaderText = "Thành Tiền", Width = 120 });
+            dgvCart.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "ProductId", HeaderText = "Mã SP", FillWeight = 12 });
+            dgvCart.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "ProductName", HeaderText = "Tên Sản Phẩm", FillWeight = 38 });
+            dgvCart.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "UnitPrice", HeaderText = "Đơn Giá", FillWeight = 20 });
+            dgvCart.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Quantity", HeaderText = "SL", FillWeight = 10 });
+            dgvCart.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "TotalPrice", HeaderText = "Thành Tiền", FillWeight = 20 });
         }
 
         // Bắt sự kiện quét mã Barcode
@@ -151,4 +157,3 @@ namespace MiniSupermarket.WinForms
         public decimal TotalPrice => UnitPrice * Quantity;
     }
 }
-

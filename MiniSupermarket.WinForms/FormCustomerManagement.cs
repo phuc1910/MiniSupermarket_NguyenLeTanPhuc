@@ -39,6 +39,21 @@ namespace MiniSupermarket.WinForms
             await LoadDataAsync();
         }
 
+        // [MỚI] Gán tiêu đề tiếng Việt + độ rộng cột theo nội dung (Mã KH/Điểm/Hạng ngắn -> hẹp,
+        // Địa chỉ dài -> rộng). Tách riêng thành hàm dùng chung để gọi được ở cả LoadDataAsync
+        // lẫn btnSearch_Click, tránh lặp code và tránh quên áp dụng khi tìm kiếm.
+        private void FormatCustomerGridColumns()
+        {
+            dgvCustomers.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+            if (dgvCustomers.Columns["CustomerId"] != null) { dgvCustomers.Columns["CustomerId"].HeaderText = "Mã KH"; dgvCustomers.Columns["CustomerId"].FillWeight = 10; }
+            if (dgvCustomers.Columns["CustomerName"] != null) { dgvCustomers.Columns["CustomerName"].HeaderText = "Họ và tên"; dgvCustomers.Columns["CustomerName"].FillWeight = 25; }
+            if (dgvCustomers.Columns["PhoneNumber"] != null) { dgvCustomers.Columns["PhoneNumber"].HeaderText = "Số điện thoại"; dgvCustomers.Columns["PhoneNumber"].FillWeight = 18; }
+            if (dgvCustomers.Columns["Address"] != null) { dgvCustomers.Columns["Address"].HeaderText = "Địa chỉ"; dgvCustomers.Columns["Address"].FillWeight = 27; }
+            if (dgvCustomers.Columns["RewardPoints"] != null) { dgvCustomers.Columns["RewardPoints"].HeaderText = "Điểm"; dgvCustomers.Columns["RewardPoints"].FillWeight = 10; }
+            if (dgvCustomers.Columns["MembershipRank"] != null) { dgvCustomers.Columns["MembershipRank"].HeaderText = "Hạng"; dgvCustomers.Columns["MembershipRank"].FillWeight = 10; }
+        }
+
         // ==============================
         // LOAD DANH SÁCH KHÁCH HÀNG
         // ==============================
@@ -96,6 +111,8 @@ namespace MiniSupermarket.WinForms
                 dgvCustomers.AutoGenerateColumns = true;
                 dgvCustomers.DataSource = null;
                 dgvCustomers.DataSource = customers;
+
+                FormatCustomerGridColumns();
 
                 // Thông báo nếu danh sách rỗng
                 if (customers.Count == 0)
@@ -532,6 +549,9 @@ namespace MiniSupermarket.WinForms
 
                 // Hiển thị kết quả tìm kiếm.
                 dgvCustomers.DataSource = result;
+
+                // [MỚI] Áp dụng lại định dạng cột sau khi tìm kiếm -> không bị về mặc định Fill đều
+                FormatCustomerGridColumns();
             }
             catch (Exception ex)
             {

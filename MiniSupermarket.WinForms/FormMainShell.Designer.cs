@@ -49,6 +49,7 @@
             // 
             // panelSidebar
             // 
+            // [RESPONSIVE] Dock Left: luôn bám sát mép trái, giữ nguyên chiều rộng khi Form resize
             panelSidebar.BackColor = Color.FromArgb(24, 30, 48);
             panelSidebar.Controls.Add(panel1);
             panelSidebar.Controls.Add(btnUserManage);
@@ -66,6 +67,7 @@
             // 
             // panel1
             // 
+            // [RESPONSIVE] Dock Bottom: luôn nằm sát đáy Sidebar
             panel1.Controls.Add(btnLogout);
             panel1.Dock = DockStyle.Bottom;
             panel1.Location = new Point(0, 613);
@@ -184,6 +186,7 @@
             // 
             // panelTopHeader
             // 
+            // [RESPONSIVE] Dock Top: luôn bám sát mép trên, dãn theo chiều rộng còn lại sau Sidebar
             panelTopHeader.Controls.Add(lblUserInfo);
             panelTopHeader.Controls.Add(lblTitle);
             panelTopHeader.Dock = DockStyle.Top;
@@ -194,6 +197,7 @@
             // 
             // lblUserInfo
             // 
+            // [RESPONSIVE] Bám góc trên-phải Header: luôn nằm sát phải dù Form co giãn
             lblUserInfo.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             lblUserInfo.AutoSize = true;
             lblUserInfo.Font = new Font("Segoe UI", 10F);
@@ -215,6 +219,8 @@
             // 
             // panelMainContent
             // 
+            // [RESPONSIVE] Dock Fill: lấp đầy toàn bộ phần còn lại -> Form con nhúng vào đây
+            // sẽ tự động co giãn khớp kích thước, không dư cũng không thiếu ở mọi độ phân giải
             panelMainContent.BackColor = Color.FromArgb(244, 245, 247);
             panelMainContent.Dock = DockStyle.Fill;
             panelMainContent.Location = new Point(230, 60);
@@ -227,6 +233,9 @@
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1262, 673);
+            // [RESPONSIVE] Giới hạn kích thước tối thiểu để Sidebar + nội dung không bị
+            // co lại quá nhỏ khiến các control bên trong Form con đè/chồng lên nhau
+            MinimumSize = new Size(1100, 650);
             Controls.Add(panelMainContent);
             Controls.Add(panelTopHeader);
             Controls.Add(panelSidebar);

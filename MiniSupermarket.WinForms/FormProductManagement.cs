@@ -14,6 +14,8 @@ namespace MiniSupermarket.WinForms
 {
     public partial class FormProductManagement : Form
     {
+        private List<CategoryDto> _categoriesCache;
+
         public FormProductManagement()
         {
             InitializeComponent();
@@ -79,6 +81,9 @@ namespace MiniSupermarket.WinForms
                 var categories = await ApiClientService.Client.GetFromJsonAsync<List<CategoryDto>>("categories")
                                  ?? new List<CategoryDto>();
 
+                _categoriesCache = categories;   // THÊM DÒNG NÀY — lưu lại để dùng ở LoadProductsAsync
+
+
                 // --- Combo dùng cho Thêm/Sửa ---
                 // Gán DisplayMember/ValueMember TRƯỚC DataSource để tránh lỗi SelectedValue
                 cboCategory.DisplayMember = "CategoryName";
@@ -121,7 +126,27 @@ namespace MiniSupermarket.WinForms
             try
             {
                 var products = await ApiClientService.Client.GetFromJsonAsync<List<ProductDto>>("products");
+
+                // Tra tên nhóm hàng từ _categoriesCache dựa theo CategoryId của từng sản phẩm
+                if (products != null)
+                {
+                    foreach (var p in products)
+                    {
+                        var cat = _categoriesCache.FirstOrDefault(c => c.CategoryId == p.CategoryId);
+                        p.CategoryName = cat?.CategoryName ?? "(Không xác định)";
+                    }
+                }
+
                 dgvProducts.DataSource = products;
+
+                dgvProducts.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                if (dgvProducts.Columns["ProductId"] != null) { dgvProducts.Columns["ProductId"].HeaderText = "Mã SP"; dgvProducts.Columns["ProductId"].FillWeight = 10; }
+                if (dgvProducts.Columns["Barcode"] != null) { dgvProducts.Columns["Barcode"].HeaderText = "Mã vạch"; dgvProducts.Columns["Barcode"].FillWeight = 20; }
+                if (dgvProducts.Columns["ProductName"] != null) { dgvProducts.Columns["ProductName"].HeaderText = "Tên sản phẩm"; dgvProducts.Columns["ProductName"].FillWeight = 30; }
+                if (dgvProducts.Columns["Price"] != null) { dgvProducts.Columns["Price"].HeaderText = "Đơn giá"; dgvProducts.Columns["Price"].FillWeight = 15; }
+                if (dgvProducts.Columns["StockQuantity"] != null) { dgvProducts.Columns["StockQuantity"].HeaderText = "Tồn kho"; dgvProducts.Columns["StockQuantity"].FillWeight = 10; }
+                if (dgvProducts.Columns["CategoryId"] != null) { dgvProducts.Columns["CategoryId"].Visible = false; }  // Ẩn vì đã có cột CategoryName dễ đọc hơn
+                if (dgvProducts.Columns["CategoryName"] != null) { dgvProducts.Columns["CategoryName"].HeaderText = "Nhóm hàng"; dgvProducts.Columns["CategoryName"].FillWeight = 20; }
             }
             catch (Exception ex)
             {
@@ -191,31 +216,37 @@ namespace MiniSupermarket.WinForms
         {
             try
             {
-                var products = await ApiClientService.Client.GetFromJsonAsync<List<ProductDto>>("products");
-                if (products == null) return;
+                string keyword = txtSearchBarcode.Text.Trim();
 
-                // Lọc theo mã vạch
-                string barcode = txtSearchBarcode.Text.Trim();
-                if (!string.IsNullOrWhiteSpace(barcode))
-                {
-                    // [SỬA] Thêm kiểm tra null cho Barcode để tránh NullReferenceException
-                    products = products
-                        .Where(p => p.Barcode != null && p.Barcode.Contains(barcode))
-                        .ToList();
-                }
-
-                // Lọc theo nhóm hàng
-                // [SỬA] categoryId > 0: mục "-- Tất cả --" (Id = 0) sẽ không lọc
+                int? categoryId = null;
                 if (cboFilterCategory.SelectedValue != null &&
-                    int.TryParse(cboFilterCategory.SelectedValue.ToString(), out int categoryId) &&
-                    categoryId > 0)
+                    int.TryParse(cboFilterCategory.SelectedValue.ToString(), out int cid) &&
+                    cid > 0)
                 {
-                    products = products
-                        .Where(p => p.CategoryId == categoryId)
-                        .ToList();
+                    categoryId = cid;
                 }
 
+                // Xây dựng query string động — chỉ thêm tham số khi có giá trị
+                var queryParams = new List<string>();
+                if (!string.IsNullOrWhiteSpace(keyword))
+                    queryParams.Add($"keyword={Uri.EscapeDataString(keyword)}");
+                if (categoryId.HasValue)
+                    queryParams.Add($"categoryId={categoryId.Value}");
+
+                string url = queryParams.Count > 0
+                    ? "products/search?" + string.Join("&", queryParams)
+                    : "products"; // Không có điều kiện lọc -> lấy toàn bộ
+
+                var products = await ApiClientService.Client.GetFromJsonAsync<List<ProductDto>>(url);
                 dgvProducts.DataSource = products;
+                dgvProducts.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                if (dgvProducts.Columns["ProductId"] != null) { dgvProducts.Columns["ProductId"].HeaderText = "Mã SP"; dgvProducts.Columns["ProductId"].FillWeight = 10; }
+                if (dgvProducts.Columns["Barcode"] != null) { dgvProducts.Columns["Barcode"].HeaderText = "Mã vạch"; dgvProducts.Columns["Barcode"].FillWeight = 20; }
+                if (dgvProducts.Columns["ProductName"] != null) { dgvProducts.Columns["ProductName"].HeaderText = "Tên sản phẩm"; dgvProducts.Columns["ProductName"].FillWeight = 30; }
+                if (dgvProducts.Columns["Price"] != null) { dgvProducts.Columns["Price"].HeaderText = "Đơn giá"; dgvProducts.Columns["Price"].FillWeight = 15; }
+                if (dgvProducts.Columns["StockQuantity"] != null) { dgvProducts.Columns["StockQuantity"].HeaderText = "Tồn kho"; dgvProducts.Columns["StockQuantity"].FillWeight = 10; }
+                if (dgvProducts.Columns["CategoryId"] != null) { dgvProducts.Columns["CategoryId"].Visible = false; }  // Ẩn vì đã có cột CategoryName dễ đọc hơn
+                if (dgvProducts.Columns["CategoryName"] != null) { dgvProducts.Columns["CategoryName"].HeaderText = "Nhóm hàng"; dgvProducts.Columns["CategoryName"].FillWeight = 20; }
             }
             catch (Exception ex)
             {
@@ -309,5 +340,6 @@ namespace MiniSupermarket.WinForms
             nudPrice.Value = 0;
             nudStock.Value = 0;
         }
+
     }
 }
