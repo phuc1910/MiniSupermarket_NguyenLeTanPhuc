@@ -32,6 +32,30 @@ namespace MiniSupermarket.WinForms
             await LoadDataAsync();
         }
 
+        // [MỚI] Gán tên tiêu đề tiếng Việt + độ rộng cột theo nội dung (Mã ID ngắn -> hẹp,
+        // Mô tả dài -> rộng). Tách riêng thành hàm dùng chung để gọi được ở cả LoadDataAsync
+        // lẫn btnSearch_Click, tránh lặp code và tránh quên áp dụng khi tìm kiếm.
+        private void FormatCategoryGridColumns()
+        {
+            dgvCategories.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+            if (dgvCategories.Columns["CategoryId"] != null)
+            {
+                dgvCategories.Columns["CategoryId"].HeaderText = "Mã ID";
+                dgvCategories.Columns["CategoryId"].FillWeight = 15;
+            }
+            if (dgvCategories.Columns["CategoryName"] != null)
+            {
+                dgvCategories.Columns["CategoryName"].HeaderText = "Tên nhóm hàng";
+                dgvCategories.Columns["CategoryName"].FillWeight = 35;
+            }
+            if (dgvCategories.Columns["Description"] != null)
+            {
+                dgvCategories.Columns["Description"].HeaderText = "Mô tả";
+                dgvCategories.Columns["Description"].FillWeight = 50;
+            }
+        }
+
         // Ví dụ áp dụng khi gọi hàm tải dữ liệu LoadDataAsync():
         private async Task LoadDataAsync()
         {
@@ -46,6 +70,8 @@ namespace MiniSupermarket.WinForms
 
                 // Gán nguồn dữ liệu cho bảng hiển thị
                 dgvCategories.DataSource = categories;
+
+                FormatCategoryGridColumns();
             }
             catch (Exception ex)
             {
@@ -227,6 +253,9 @@ namespace MiniSupermarket.WinForms
                 var result = await client.GetFromJsonAsync<List<CategoryDto>>(
                     $"categories/search?keyword={keyword}");
                 dgvCategories.DataSource = result;
+
+                // [MỚI] Áp dụng lại định dạng cột sau khi tìm kiếm -> không bị về mặc định Fill đều
+                FormatCategoryGridColumns();
             }
             catch (Exception)
             {

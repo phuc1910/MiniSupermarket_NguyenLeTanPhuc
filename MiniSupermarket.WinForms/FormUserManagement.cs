@@ -35,6 +35,39 @@ namespace MiniSupermarket.WinForms
             await LoadUsersAsync();
         }
 
+        // [MỚI] Gán tiêu đề tiếng Việt + độ rộng cột theo nội dung (Mã ngắn -> hẹp,
+        // Họ và tên dài -> rộng). Gọi ngay sau mỗi lần gán DataSource cho dgvUsers.
+        private void FormatUserGridColumns()
+        {
+            dgvUsers.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+            if (dgvUsers.Columns["Id"] != null)
+            {
+                dgvUsers.Columns["Id"].HeaderText = "Mã";
+                dgvUsers.Columns["Id"].FillWeight = 10;
+            }
+            if (dgvUsers.Columns["Username"] != null)
+            {
+                dgvUsers.Columns["Username"].HeaderText = "Tên đăng nhập";
+                dgvUsers.Columns["Username"].FillWeight = 25;
+            }
+            if (dgvUsers.Columns["FullName"] != null)
+            {
+                dgvUsers.Columns["FullName"].HeaderText = "Họ và tên";
+                dgvUsers.Columns["FullName"].FillWeight = 30;
+            }
+            if (dgvUsers.Columns["Role"] != null)
+            {
+                dgvUsers.Columns["Role"].HeaderText = "Vai trò";
+                dgvUsers.Columns["Role"].FillWeight = 18;
+            }
+            if (dgvUsers.Columns["IsActive"] != null)
+            {
+                dgvUsers.Columns["IsActive"].HeaderText = "Hoạt động";
+                dgvUsers.Columns["IsActive"].FillWeight = 17;
+            }
+        }
+
         // =========================
         // LOAD DANH SÁCH USER
         // =========================
@@ -60,6 +93,9 @@ namespace MiniSupermarket.WinForms
                     await response.Content.ReadFromJsonAsync<List<UserDto>>();
 
                 dgvUsers.DataSource = users;
+
+                // [MỚI] Áp dụng định dạng cột ngay sau khi gán dữ liệu
+                FormatUserGridColumns();
             }
             catch (Exception ex)
             {
@@ -264,7 +300,7 @@ namespace MiniSupermarket.WinForms
                     MessageBoxIcon.Error);
             }
         }
-        
+
         private async void btnUpdateUser_Click(object sender, EventArgs e)
         {
             // Kiểm tra tài khoản được chọn
