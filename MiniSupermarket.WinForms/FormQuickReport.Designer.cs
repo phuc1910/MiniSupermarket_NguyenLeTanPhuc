@@ -30,7 +30,9 @@
         {
             groupBox1 = new GroupBox();
             label1 = new Label();
-            dtpReportDate = new DateTimePicker();
+            dtpFromDate = new DateTimePicker();
+            label3 = new Label();
+            dtpToDate = new DateTimePicker();
             groupBox2 = new GroupBox();
             btnRunReport = new Button();
             groupBox3 = new GroupBox();
@@ -69,18 +71,34 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(6, 38);
+            label1.Location = new Point(10, 38);
             label1.Name = "label1";
-            label1.Size = new Size(105, 20);
+            label1.Size = new Size(68, 20);
             label1.TabIndex = 0;
-            label1.Text = "Ngày báo cáo:";
+            label1.Text = "Từ ngày:";
             // 
-            // dtpReportDate
+            // dtpFromDate
             // 
-            dtpReportDate.Location = new Point(126, 33);
-            dtpReportDate.Name = "dtpReportDate";
-            dtpReportDate.Size = new Size(253, 27);
-            dtpReportDate.TabIndex = 1;
+            dtpFromDate.Location = new Point(84, 33);
+            dtpFromDate.Name = "dtpFromDate";
+            dtpFromDate.Size = new Size(140, 27);
+            dtpFromDate.TabIndex = 1;
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Location = new Point(240, 38);
+            label3.Name = "label3";
+            label3.Size = new Size(76, 20);
+            label3.TabIndex = 3;
+            label3.Text = "Đến ngày:";
+            // 
+            // dtpToDate
+            // 
+            dtpToDate.Location = new Point(322, 33);
+            dtpToDate.Name = "dtpToDate";
+            dtpToDate.Size = new Size(140, 27);
+            dtpToDate.TabIndex = 4;
             // 
             // groupBox2
             // 
@@ -88,7 +106,9 @@
             groupBox2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupBox2.Controls.Add(btnRunReport);
             groupBox2.Controls.Add(label1);
-            groupBox2.Controls.Add(dtpReportDate);
+            groupBox2.Controls.Add(dtpFromDate);
+            groupBox2.Controls.Add(label3);
+            groupBox2.Controls.Add(dtpToDate);
             groupBox2.Location = new Point(6, 39);
             groupBox2.Name = "groupBox2";
             groupBox2.Size = new Size(764, 84);
@@ -98,7 +118,7 @@
             // 
             // btnRunReport
             // 
-            btnRunReport.Location = new Point(410, 31);
+            btnRunReport.Location = new Point(482, 31);
             btnRunReport.Name = "btnRunReport";
             btnRunReport.Size = new Size(112, 29);
             btnRunReport.TabIndex = 2;
@@ -258,8 +278,10 @@
 
         private GroupBox groupBox1;
         private GroupBox groupBox2;
-        private DateTimePicker dtpReportDate;
+        private DateTimePicker dtpFromDate;
+        private DateTimePicker dtpToDate;
         private Label label1;
+        private Label label3;
         private Button btnRunReport;
         private GroupBox groupBox3;
         private TableLayoutPanel tableLayoutPanelSummary;

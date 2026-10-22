@@ -1,4 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿/*
+ * Ho ten sinh vien: Nguyen Le Tan Phuc
+ * Ma sinh vien: 2124110108
+ * Mo ta: Cau hinh DbContext, cac rang buoc Unique Index va khoi tao du lieu mau cho he thong MiniSupermarket.
+ */
+
+using Microsoft.EntityFrameworkCore;
 using MiniSupermarket.API.Models;
 
 namespace MiniSupermarket.API.Data
@@ -20,6 +26,20 @@ namespace MiniSupermarket.API.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // =========================================================================
+            // [PHỤ LỤC] RÀNG BUỘC CHỈ MỤC DUY NHẤT (UNIQUE INDEX)
+            // Không cho phép trùng giá trị ở các cột dùng để tra cứu / định danh:
+            //  - Username: đăng nhập; CategoryName: tên nhóm hàng
+            //  - Barcode: quét mã vạch tại quầy POS (API barcode chỉ lấy 1 dòng)
+            //  - PhoneNumber: tra khách hàng tích điểm; OrderCode: mã hóa đơn in trên bill
+            // =========================================================================
+            modelBuilder.Entity<User>().HasIndex(u => u.Username).IsUnique();
+            modelBuilder.Entity<Category>().HasIndex(c => c.CategoryName).IsUnique();
+            modelBuilder.Entity<Product>().HasIndex(p => p.Barcode).IsUnique();
+            modelBuilder.Entity<Customer>().HasIndex(c => c.PhoneNumber).IsUnique();
+            modelBuilder.Entity<Order>().HasIndex(o => o.OrderCode).IsUnique();
+
+            // 2. Seed Data cho bảng Category (20 nhóm sản phẩm giữ nguyên tính toàn vẹn)
             modelBuilder.Entity<Category>().HasData(
                 new Category { CategoryId = 1, CategoryName = "Mỹ phẩm Skincare", Description = "Kem dưỡng, serum, toner, sữa rửa mặt chính hãng" },
                 new Category { CategoryId = 2, CategoryName = "Trang điểm (Makeup)", Description = "Son môi, phấn nước, kẻ mắt, má hồng" },
@@ -43,6 +63,7 @@ namespace MiniSupermarket.API.Data
                 new Category { CategoryId = 20, CategoryName = "Quà tặng & Set mỹ phẩm", Description = "Hộp quà sinh nhật, set quà lễ hội, túi giấy Hana Shop" }
             );
 
+            // 2. Seed Data cho bảng Product (20 sản phẩm giữ nguyên tính toàn vẹn)
             modelBuilder.Entity<Product>().HasData(
                 new Product { ProductId = 1, Barcode = "8809123456011", ProductName = "Serum dưỡng ẩm La Roche-Posay Hyalu B5 30ml", Price = 850000, StockQuantity = 25, CategoryId = 1 },
                 new Product { ProductId = 2, Barcode = "8809123456012", ProductName = "Son kem lì Romand Blur Fudge Tint", Price = 180000, StockQuantity = 50, CategoryId = 2 },
@@ -66,6 +87,7 @@ namespace MiniSupermarket.API.Data
                 new Product { ProductId = 20, Barcode = "8809123456030", ProductName = "Set hộp quà mỹ phẩm xách tay cao cấp Hana Shop", Price = 590000, StockQuantity = 10, CategoryId = 20 }
             );
 
+            // 3. Seed Data cho bảng Customer (20 khách hàng giữ nguyên tính toàn vẹn)
             modelBuilder.Entity<Customer>().HasData(
                 new Customer { CustomerId = 1, CustomerName = "Nguyễn Thị Hoa", PhoneNumber = "0901122334", Address = "123 Đường Nguyễn Trãi, Phường 2, Quận 5, Thành phố Hồ Chí Minh", MembershipRank = "Vàng", RewardPoints = 150 },
                 new Customer { CustomerId = 2, CustomerName = "Trần Thị Mai", PhoneNumber = "0982233445", Address = "45 Đường Lê Văn Việt, Phường Hiệp Phú, Thành phố Thủ Đức, Thành phố Hồ Chí Minh", MembershipRank = "Bạc", RewardPoints = 80 },
@@ -89,26 +111,26 @@ namespace MiniSupermarket.API.Data
                 new Customer { CustomerId = 20, CustomerName = "Sơn Tùng M-TP", PhoneNumber = "0989122334", Address = "1 Công Trường Lam Sơn, Phường Bến Nghé, Quận 1, Thành phố Hồ Chí Minh", MembershipRank = "Kim cương", RewardPoints = 2000 }
                 );
 
-            // 1. Seed Data cho bảng Users (15 nhân viên theo danh sách mới)
+            // 4. Seed Data cho bảng Users (15 nhân viên theo danh sách mới)
             modelBuilder.Entity<User>().HasData(
-                new User { UserId = 1, Username = "admin01", PasswordHash = "123456", FullName = "Nguyễn Quản Trị", Role = "Admin", IsActive = true },
-                new User { UserId = 2, Username = "admin02", PasswordHash = "123456", FullName = "Trần Giám Đốc", Role = "Admin", IsActive = true },
-                new User { UserId = 3, Username = "cashier01", PasswordHash = "123456", FullName = "Lê Thu Ngân", Role = "Cashier", IsActive = true },
-                new User { UserId = 4, Username = "cashier02", PasswordHash = "123456", FullName = "Phạm Bán Hàng", Role = "Cashier", IsActive = true },
-                new User { UserId = 5, Username = "cashier03", PasswordHash = "123456", FullName = "Hoàng Thu Ngân", Role = "Cashier", IsActive = true },
-                new User { UserId = 6, Username = "cashier04", PasswordHash = "123456", FullName = "Vũ Thị Quầy", Role = "Cashier", IsActive = true },
-                new User { UserId = 7, Username = "cashier05", PasswordHash = "123456", FullName = "Đỗ Bán Lẻ", Role = "Cashier", IsActive = true },
-                new User { UserId = 8, Username = "ware01", PasswordHash = "123456", FullName = "Ngô Quản Kho", Role = "Warehouse", IsActive = true },
-                new User { UserId = 9, Username = "ware02", PasswordHash = "123456", FullName = "Bùi Kiểm Kê", Role = "Warehouse", IsActive = true },
-                new User { UserId = 10, Username = "ware03", PasswordHash = "123456", FullName = "Dương Thủ Kho", Role = "Warehouse", IsActive = true },
-                new User { UserId = 11, Username = "ware04", PasswordHash = "123456", FullName = "Lý Nhập Hàng", Role = "Warehouse", IsActive = true },
-                new User { UserId = 12, Username = "admin_backup", PasswordHash = "123456", FullName = "Đặng Hỗ Trợ", Role = "Admin", IsActive = true },
-                new User { UserId = 13, Username = "cashier06", PasswordHash = "123456", FullName = "Hồ Ca Chiều", Role = "Cashier", IsActive = true },
-                new User { UserId = 14, Username = "ware05", PasswordHash = "123456", FullName = "Trương Vận Chuyển", Role = "Warehouse", IsActive = true },
-                new User { UserId = 15, Username = "supervisor", PasswordHash = "123456", FullName = "Mai Giám Sát", Role = "Admin", IsActive = true }
+                new User { UserId = 1, Username = "admin01", PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==", FullName = "Nguyễn Quản Trị", Role = "Admin", IsActive = true },
+                new User { UserId = 2, Username = "admin02", PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==", FullName = "Trần Giám Đốc", Role = "Admin", IsActive = true },
+                new User { UserId = 3, Username = "cashier01", PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==", FullName = "Lê Thu Ngân", Role = "Cashier", IsActive = true },
+                new User { UserId = 4, Username = "cashier02", PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==", FullName = "Phạm Bán Hàng", Role = "Cashier", IsActive = true },
+                new User { UserId = 5, Username = "cashier03", PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==", FullName = "Hoàng Thu Ngân", Role = "Cashier", IsActive = true },
+                new User { UserId = 6, Username = "cashier04", PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==", FullName = "Vũ Thị Quầy", Role = "Cashier", IsActive = true },
+                new User { UserId = 7, Username = "cashier05", PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==", FullName = "Đỗ Bán Lẻ", Role = "Cashier", IsActive = true },
+                new User { UserId = 8, Username = "ware01", PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==", FullName = "Ngô Quản Kho", Role = "Warehouse", IsActive = true },
+                new User { UserId = 9, Username = "ware02", PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==", FullName = "Bùi Kiểm Kê", Role = "Warehouse", IsActive = true },
+                new User { UserId = 10, Username = "ware03", PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==", FullName = "Dương Thủ Kho", Role = "Warehouse", IsActive = true },
+                new User { UserId = 11, Username = "ware04", PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==", FullName = "Lý Nhập Hàng", Role = "Warehouse", IsActive = true },
+                new User { UserId = 12, Username = "admin_backup", PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==", FullName = "Đặng Hỗ Trợ", Role = "Admin", IsActive = true },
+                new User { UserId = 13, Username = "cashier06", PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==", FullName = "Hồ Ca Chiều", Role = "Cashier", IsActive = true },
+                new User { UserId = 14, Username = "ware05", PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==", FullName = "Trương Vận Chuyển", Role = "Warehouse", IsActive = true },
+                new User { UserId = 15, Username = "supervisor", PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==", FullName = "Mai Giám Sát", Role = "Admin", IsActive = true }
             );
 
-            // 2. Seed Data cho bảng Orders (20 hóa đơn bán hàng - Cập nhật CashierUsername khớp với danh sách 15 Users mới)
+            // 5. Seed Data cho bảng Orders (20 hóa đơn bán hàng - Cập nhật CashierUsername khớp với danh sách 15 Users mới)
             modelBuilder.Entity<Order>().HasData(
                 new Order { OrderId = 1, OrderCode = "HD-20260301-001", CreatedDate = new DateTime(2026, 3, 1, 9, 15, 0), CashierUsername = "cashier01", CustomerId = 1, TotalItems = 2, FinalAmount = 1030000, RewardPoints = 10 },
                 new Order { OrderId = 2, OrderCode = "HD-20260301-002", CreatedDate = new DateTime(2026, 3, 1, 10, 30, 0), CashierUsername = "cashier02", CustomerId = 2, TotalItems = 1, FinalAmount = 780000, RewardPoints = 7 },
@@ -132,7 +154,7 @@ namespace MiniSupermarket.API.Data
                 new Order { OrderId = 20, OrderCode = "HD-20260310-002", CreatedDate = new DateTime(2026, 3, 10, 20, 0, 0), CashierUsername = "cashier02", CustomerId = 20, TotalItems = 1, FinalAmount = 520000, RewardPoints = 5 }
             );
 
-            // 3. Seed Data cho bảng OrderDetails (20 chi tiết hóa đơn giữ nguyên tính toàn vẹn)
+            // 6. Seed Data cho bảng OrderDetails (20 chi tiết hóa đơn giữ nguyên tính toàn vẹn)
             modelBuilder.Entity<OrderDetail>().HasData(
                 new OrderDetail { OrderDetailId = 1, OrderId = 1, ProductId = 1, Quantity = 1, UnitPrice = 850000, LineTotal = 850000 },
                 new OrderDetail { OrderDetailId = 2, OrderId = 1, ProductId = 2, Quantity = 1, UnitPrice = 180000, LineTotal = 180000 },
