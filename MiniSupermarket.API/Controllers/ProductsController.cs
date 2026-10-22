@@ -4,6 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 // Import Entity Framework Core để truy vấn và thao tác với Database
 using Microsoft.EntityFrameworkCore;
 
+// [BUỔI 5] Import ADO.NET thuần để tra cứu mã vạch tốc độ cao
+// (gói Microsoft.Data.SqlClient đã đi kèm EF Core SqlServer, không cần cài thêm)
+using Microsoft.Data.SqlClient;
+
 // Import các thuộc tính dùng để phân quyền truy cập API
 using Microsoft.AspNetCore.Authorization;
 
@@ -30,10 +34,14 @@ namespace MiniSupermarket.API.Controllers
         // Khai báo DbContext để thao tác với Database
         private readonly SupermarketDbContext _context;
 
-        // Tiêm DbContext vào Controller thông qua Dependency Injection
-        public ProductsController(SupermarketDbContext context)
+        // [BUỔI 5] Đọc chuỗi kết nối từ appsettings.json cho các hàm ADO.NET
+        private readonly IConfiguration _configuration;
+
+        // Tiêm DbContext và IConfiguration vào Controller thông qua Dependency Injection
+        public ProductsController(SupermarketDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         // GET: api/Products
@@ -142,6 +150,98 @@ namespace MiniSupermarket.API.Controllers
             // Trả về HTTP 200 cùng danh sách sản phẩm tìm được.
             // Nếu không có sản phẩm phù hợp, trả về danh sách rỗng.
             return Ok(products);
+        }
+
+        // =========================================================================
+        // [PHỤ LỤC - Bài tập 1] GET: api/Products/with-category
+        // Danh sách sản phẩm kèm tên nhóm hàng (Eager Loading)
+        //  - Include(p => p.Category): nạp kèm nhóm hàng bằng 1 câu JOIN, tránh truy vấn N+1
+        //  - AsNoTracking(): chỉ đọc, không cần EF theo dõi thay đổi nên nhanh hơn
+        //  - Select(...): chỉ lấy các trường cần thiết, không trả dữ liệu dư thừa
+        // =========================================================================
+        [HttpGet("with-category")]
+        public async Task<IActionResult> GetWithCategory()
+        {
+            var products = await _context.Products
+                .Include(p => p.Category)
+                .AsNoTracking()
+                .OrderBy(p => p.ProductId)
+                .Select(p => new
+                {
+                    p.ProductId,
+                    p.Barcode,
+                    p.ProductName,
+                    p.Price,
+                    p.StockQuantity,
+                    // Trong Select phải viết lại điều kiện: EF không dịch được thuộc tính [NotMapped] sang SQL
+                    IsLowStock = p.StockQuantity <= 20,
+                    p.CategoryId,
+                    CategoryName = p.Category != null ? p.Category.CategoryName : string.Empty
+                })
+                .ToListAsync();
+
+            return Ok(products);
+        }
+
+        // =========================================================================
+        // [BUỔI 5] GET: api/Products/barcode/8809123456011
+        // Tra cứu sản phẩm theo mã vạch bằng ADO.NET (Connected Mode - SqlDataReader)
+        // FormPOS gọi sẵn đường dẫn này: products/barcode/{barcode}
+        // =========================================================================
+        [HttpGet("barcode/{barcode}")]
+        public IActionResult GetByBarcode(string barcode)
+        {
+            // Kiểm tra mã vạch đầu vào
+            if (string.IsNullOrWhiteSpace(barcode))
+            {
+                return BadRequest(new { message = "Mã vạch không được để trống!" });
+            }
+
+            // Lấy chuỗi kết nối tới SQL Server
+            string connectionString = _configuration.GetConnectionString("DefaultConnection")!;
+
+            // using đảm bảo SqlConnection luôn được đóng dù có lỗi
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                // Câu SELECT có tham số @Barcode để chống SQL Injection
+                string query = @"SELECT ProductId, Barcode, ProductName, Price, StockQuantity, CategoryId
+                                 FROM Products
+                                 WHERE Barcode = @Barcode";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Barcode", barcode.Trim());
+
+                    try
+                    {
+                        connection.Open();
+
+                        // Luồng đọc nhanh một chiều, chỉ cần đọc đúng 1 dòng
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                return Ok(new
+                                {
+                                    ProductId = Convert.ToInt32(reader["ProductId"]),
+                                    Barcode = reader["Barcode"].ToString(),
+                                    ProductName = reader["ProductName"].ToString(),
+                                    Price = Convert.ToDecimal(reader["Price"]),
+                                    StockQuantity = Convert.ToInt32(reader["StockQuantity"]),
+                                    CategoryId = Convert.ToInt32(reader["CategoryId"])
+                                });
+                            }
+                        }
+                    }
+                    catch (SqlException ex)
+                    {
+                        return StatusCode(500, new { message = "Lỗi truy vấn SQL: " + ex.Message });
+                    }
+                }
+            }
+
+            // Không có dòng nào khớp mã vạch -> 404
+            return NotFound(new { message = $"Không tìm thấy sản phẩm có mã vạch: {barcode}" });
         }
 
         // POST: api/Products

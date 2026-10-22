@@ -46,5 +46,11 @@ namespace MiniSupermarket.API.Models
         // Product thuộc về một Category
         [ForeignKey("CategoryId")]
         public virtual Category? Category { get; set; }
+
+        // [PHỤ LỤC - Bài tập 2] Cảnh báo hàng sắp hết: true nếu tồn kho <= 20
+        // Thuộc tính tính toán (chỉ có get), [NotMapped] = KHÔNG tạo cột trong database
+        // nên không cần chạy migration. Giá trị tự cập nhật theo StockQuantity.
+        [NotMapped]
+        public bool IsLowStock => StockQuantity <= 20;
     }
 }

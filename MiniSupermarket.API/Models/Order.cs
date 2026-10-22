@@ -38,11 +38,12 @@ namespace MiniSupermarket.API.Models
 
         // ID của khách hàng mua hàng
         // Đây là khóa ngoại liên kết với bảng Customers
-        [Required]
-        public int CustomerId { get; set; }
+        // [BUỔI 5] Cho phép NULL (int?) để hỗ trợ khách vãng lai không có thẻ thành viên
+        // (đã bỏ [Required] - nếu để nguyên, INSERT khách vãng lai sẽ bị lỗi NOT NULL)
+        public int? CustomerId { get; set; }
 
         // Thiết lập khóa ngoại CustomerId
-        // Mỗi hóa đơn thuộc về một khách hàng
+        // Mỗi hóa đơn thuộc về một khách hàng (hoặc không có nếu là khách vãng lai)
         // Dấu ? cho biết đối tượng Customer có thể nhận giá trị null
         [ForeignKey(nameof(CustomerId))]
         public virtual Customer? Customer { get; set; }

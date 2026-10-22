@@ -12,8 +12,8 @@ using MiniSupermarket.API.Data;
 namespace MiniSupermarket.API.Migrations
 {
     [DbContext(typeof(SupermarketDbContext))]
-    [Migration("20261008111439_PassWord")]
-    partial class PassWord
+    [Migration("20261015105001_AddDatabase")]
+    partial class AddDatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -43,6 +43,9 @@ namespace MiniSupermarket.API.Migrations
                         .HasColumnType("nvarchar(255)");
 
                     b.HasKey("CategoryId");
+
+                    b.HasIndex("CategoryName")
+                        .IsUnique();
 
                     b.ToTable("Categories");
 
@@ -200,6 +203,9 @@ namespace MiniSupermarket.API.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("CustomerId");
+
+                    b.HasIndex("PhoneNumber")
+                        .IsUnique();
 
                     b.ToTable("Customers");
 
@@ -402,7 +408,7 @@ namespace MiniSupermarket.API.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("CustomerId")
+                    b.Property<int?>("CustomerId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("FinalAmount")
@@ -422,6 +428,9 @@ namespace MiniSupermarket.API.Migrations
                     b.HasKey("OrderId");
 
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("OrderCode")
+                        .IsUnique();
 
                     b.ToTable("Orders");
 
@@ -891,6 +900,9 @@ namespace MiniSupermarket.API.Migrations
 
                     b.HasKey("ProductId");
 
+                    b.HasIndex("Barcode")
+                        .IsUnique();
+
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Products");
@@ -1110,6 +1122,9 @@ namespace MiniSupermarket.API.Migrations
 
                     b.HasKey("UserId");
 
+                    b.HasIndex("Username")
+                        .IsUnique();
+
                     b.ToTable("Users");
 
                     b.HasData(
@@ -1118,7 +1133,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 1,
                             FullName = "Nguyễn Quản Trị",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==",
                             Role = "Admin",
                             Username = "admin01"
                         },
@@ -1127,7 +1142,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 2,
                             FullName = "Trần Giám Đốc",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==",
                             Role = "Admin",
                             Username = "admin02"
                         },
@@ -1136,7 +1151,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 3,
                             FullName = "Lê Thu Ngân",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==",
                             Role = "Cashier",
                             Username = "cashier01"
                         },
@@ -1145,7 +1160,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 4,
                             FullName = "Phạm Bán Hàng",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==",
                             Role = "Cashier",
                             Username = "cashier02"
                         },
@@ -1154,7 +1169,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 5,
                             FullName = "Hoàng Thu Ngân",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==",
                             Role = "Cashier",
                             Username = "cashier03"
                         },
@@ -1163,7 +1178,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 6,
                             FullName = "Vũ Thị Quầy",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==",
                             Role = "Cashier",
                             Username = "cashier04"
                         },
@@ -1172,7 +1187,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 7,
                             FullName = "Đỗ Bán Lẻ",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==",
                             Role = "Cashier",
                             Username = "cashier05"
                         },
@@ -1181,7 +1196,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 8,
                             FullName = "Ngô Quản Kho",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==",
                             Role = "Warehouse",
                             Username = "ware01"
                         },
@@ -1190,7 +1205,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 9,
                             FullName = "Bùi Kiểm Kê",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==",
                             Role = "Warehouse",
                             Username = "ware02"
                         },
@@ -1199,7 +1214,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 10,
                             FullName = "Dương Thủ Kho",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==",
                             Role = "Warehouse",
                             Username = "ware03"
                         },
@@ -1208,7 +1223,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 11,
                             FullName = "Lý Nhập Hàng",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==",
                             Role = "Warehouse",
                             Username = "ware04"
                         },
@@ -1217,7 +1232,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 12,
                             FullName = "Đặng Hỗ Trợ",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==",
                             Role = "Admin",
                             Username = "admin_backup"
                         },
@@ -1226,7 +1241,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 13,
                             FullName = "Hồ Ca Chiều",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==",
                             Role = "Cashier",
                             Username = "cashier06"
                         },
@@ -1235,7 +1250,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 14,
                             FullName = "Trương Vận Chuyển",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==",
                             Role = "Warehouse",
                             Username = "ware05"
                         },
@@ -1244,7 +1259,7 @@ namespace MiniSupermarket.API.Migrations
                             UserId = 15,
                             FullName = "Mai Giám Sát",
                             IsActive = true,
-                            PasswordHash = "123456",
+                            PasswordHash = "AQAAAAIAAYagAAAAEBeYnFrb0rJke9YF78POqmg9fkjE/LywVhuIDh+4lD0tNIizbMwbq6jB58hoGRlmEw==",
                             Role = "Admin",
                             Username = "supervisor"
                         });
@@ -1254,9 +1269,7 @@ namespace MiniSupermarket.API.Migrations
                 {
                     b.HasOne("MiniSupermarket.API.Models.Customer", "Customer")
                         .WithMany()
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CustomerId");
 
                     b.Navigation("Customer");
                 });
