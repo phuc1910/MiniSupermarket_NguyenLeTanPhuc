@@ -29,6 +29,10 @@
         private void InitializeComponent()
         {
             panelRoot = new Panel();
+            panelPaging = new Panel();
+            btnPrev = new Button();
+            lblPaging = new Label();
+            btnNext = new Button();
             tableLayoutPanelContent = new TableLayoutPanel();
             groupBox2 = new GroupBox();
             dgvProducts = new DataGridView();
@@ -60,6 +64,7 @@
             panelRoot.SuspendLayout();
             tableLayoutPanelContent.SuspendLayout();
             groupBox2.SuspendLayout();
+            panelPaging.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvProducts).BeginInit();
             panelDetail.SuspendLayout();
             panelButtons.SuspendLayout();
@@ -100,6 +105,7 @@
             // groupBox2
             // 
             groupBox2.Controls.Add(dgvProducts);
+            groupBox2.Controls.Add(panelPaging);
             groupBox2.Dock = DockStyle.Fill;
             groupBox2.Location = new Point(0, 8);
             groupBox2.Margin = new Padding(0, 0, 8, 0);
@@ -110,6 +116,38 @@
             groupBox2.TabStop = false;
             groupBox2.Text = "Danh sách sản phẩm";
             // 
+            // panelPaging: thanh chuyển trang (Buổi 6)
+            panelPaging.Controls.Add(btnPrev);
+            panelPaging.Controls.Add(lblPaging);
+            panelPaging.Controls.Add(btnNext);
+            panelPaging.Dock = DockStyle.Bottom;
+            panelPaging.Name = "panelPaging";
+            panelPaging.Size = new Size(600, 40);
+            panelPaging.TabIndex = 1;
+            // btnPrev
+            btnPrev.Location = new Point(3, 5);
+            btnPrev.Name = "btnPrev";
+            btnPrev.Size = new Size(130, 30);
+            btnPrev.TabIndex = 0;
+            btnPrev.Text = "<< Trang trước";
+            btnPrev.UseVisualStyleBackColor = true;
+            btnPrev.Click += btnPrev_Click;
+            // lblPaging
+            lblPaging.AutoSize = false;
+            lblPaging.Location = new Point(139, 5);
+            lblPaging.Name = "lblPaging";
+            lblPaging.Size = new Size(200, 30);
+            lblPaging.TabIndex = 1;
+            lblPaging.Text = "Trang 1 / 1";
+            lblPaging.TextAlign = ContentAlignment.MiddleCenter;
+            // btnNext
+            btnNext.Location = new Point(345, 5);
+            btnNext.Name = "btnNext";
+            btnNext.Size = new Size(130, 30);
+            btnNext.TabIndex = 2;
+            btnNext.Text = "Trang sau >>";
+            btnNext.UseVisualStyleBackColor = true;
+            btnNext.Click += btnNext_Click;
             // dgvProducts
             // 
             dgvProducts.AllowUserToAddRows = false;
@@ -394,6 +432,7 @@
             panelRoot.ResumeLayout(false);
             tableLayoutPanelContent.ResumeLayout(false);
             groupBox2.ResumeLayout(false);
+            panelPaging.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvProducts).EndInit();
             panelDetail.ResumeLayout(false);
             panelButtons.ResumeLayout(false);
@@ -409,6 +448,10 @@
 
         #endregion
 
+        private Panel panelPaging;
+        private Button btnPrev;
+        private Label lblPaging;
+        private Button btnNext;
         private Panel panelRoot;
         private GroupBox groupBox1;
         private Panel panelSearchActions;

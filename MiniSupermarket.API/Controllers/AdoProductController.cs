@@ -39,7 +39,7 @@ namespace MiniSupermarket.API.Controllers
         // GET: api/ado-products/barcode/8809123456011
         // =========================================================================
         [HttpGet("barcode/{barcode}")]
-        public IActionResult GetProductByBarcode(string barcode)
+        public async Task<IActionResult> GetProductByBarcode(string barcode)
         {
             if (string.IsNullOrWhiteSpace(barcode))
             {
@@ -61,12 +61,12 @@ namespace MiniSupermarket.API.Controllers
 
                     try
                     {
-                        connection.Open();
+                        await connection.OpenAsync();
 
                         // Luồng đọc nhanh một chiều (Forward-Only), đọc đúng 1 dòng rồi đóng
-                        using (SqlDataReader reader = command.ExecuteReader())
+                        using (SqlDataReader reader = await command.ExecuteReaderAsync())
                         {
-                            if (reader.Read())
+                            if (await reader.ReadAsync())
                             {
                                 var productDto = new ProductLookupDto
                                 {
@@ -97,7 +97,7 @@ namespace MiniSupermarket.API.Controllers
         // GET: api/ado-products/disconnected-cache
         // =========================================================================
         [HttpGet("disconnected-cache")]
-        public IActionResult GetProductsDisconnected()
+        public async Task<IActionResult> GetProductsDisconnected()
         {
             string connectionString = _configuration.GetConnectionString("DefaultConnection")!;
 
@@ -119,7 +119,7 @@ namespace MiniSupermarket.API.Controllers
                         {
                             // 3. Fill(): tự động Open -> đọc dữ liệu đổ vào DataTable -> tự động Close
                             //    (nên KHÔNG cần gọi connection.Open() ở đây)
-                            adapter.Fill(productTable);
+                            await Task.Run(() => adapter.Fill(productTable));
                         }
                     }
                 } // Tại đây kết nối đã đóng hoàn toàn
@@ -158,7 +158,7 @@ namespace MiniSupermarket.API.Controllers
         // Trả về các sản phẩm có tồn kho <= minStock để nhắc nhập thêm hàng
         // =========================================================================
         [HttpGet("filter-stock")]
-        public IActionResult FilterByStock([FromQuery] int minStock)
+        public async Task<IActionResult> FilterByStock([FromQuery] int minStock)
         {
             if (minStock < 0)
             {
@@ -181,11 +181,11 @@ namespace MiniSupermarket.API.Controllers
 
                     try
                     {
-                        connection.Open();
+                        await connection.OpenAsync();
 
-                        using (SqlDataReader reader = command.ExecuteReader())
+                        using (SqlDataReader reader = await command.ExecuteReaderAsync())
                         {
-                            while (reader.Read())
+                            while (await reader.ReadAsync())
                             {
                                 list.Add(new ProductLookupDto
                                 {
@@ -213,7 +213,7 @@ namespace MiniSupermarket.API.Controllers
         // GET: api/ado-products/count-by-category
         // =========================================================================
         [HttpGet("count-by-category")]
-        public IActionResult CountByCategory()
+        public async Task<IActionResult> CountByCategory()
         {
             string connectionString = _configuration.GetConnectionString("DefaultConnection")!;
             DataTable table = new DataTable("CategoryCount");
@@ -231,7 +231,7 @@ namespace MiniSupermarket.API.Controllers
 
                     using (SqlDataAdapter adapter = new SqlDataAdapter(query, connection))
                     {
-                        adapter.Fill(table); // Tự mở và đóng kết nối
+                        await Task.Run(() => adapter.Fill(table)); // Tự mở và đóng kết nối
                     }
                 }
             }

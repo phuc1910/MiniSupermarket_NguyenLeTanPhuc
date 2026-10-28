@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using MiniSupermarket.API.Data;
 using System.Text;
@@ -77,6 +78,13 @@ builder.Services.AddAuthentication(options => {
 // Đăng ký các Controller vào ứng dụng
 builder.Services.AddControllers();
 
+// Bật CORS để Client (WinForms / trình duyệt) gọi được Web API
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+});
+
 // Lấy chuỗi kết nối từ appsettings.json
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -89,7 +97,30 @@ builder.Services.AddDbContext<SupermarketDbContext>(options =>
 builder.Services.AddEndpointsApiExplorer();
 
 // Đăng ký Swagger để tạo giao diện kiểm thử API
-builder.Services.AddSwaggerGen();
+// Có nút ổ khóa "Authorize": dán JWT Token vào để gọi các API được bảo vệ
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Description = "Dán JWT Token nhận từ POST /api/auth/login (không cần gõ chữ Bearer).",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 var app = builder.Build();
 
@@ -105,6 +136,9 @@ if (app.Environment.IsDevelopment())
 
 // Chuyển hướng các request HTTP sang HTTPS
 app.UseHttpsRedirection();
+
+// Áp dụng chính sách CORS (đặt trước Authentication/Authorization)
+app.UseCors("AllowAll");
 
 // Bắt buộc gọi UseAuthentication trước UseAuthorization
 // UseAuthentication: Xác thực người dùng dựa trên JWT Token

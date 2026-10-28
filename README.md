@@ -1,4 +1,4 @@
-# 🛒 HỆ THỐNG QUẢN LÝ SIÊU THỊ MINI (MINISUPERMARKET SYSTEM)
+﻿# 🛒 HỆ THỐNG QUẢN LÝ SIÊU THỊ MINI (MINISUPERMARKET SYSTEM)
 > **Đề tài:** Xây dựng Ứng dụng Quản lý Cửa hàng Tiện lợi với ASP.NET Core và Windows Forms — Tiệm Tạp hóa Mỹ phẩm Xách tay Hana Shop  
 > **Môn học:** Lập trình Ứng dụng .NET Core (Mã môn: 229162)  
 > **Nội dung thực hành:**
@@ -7,6 +7,7 @@
 > - **Buổi 3:** Tích hợp SQL Server và Entity Framework Core Code-First
 > - **Buổi 4:** Giao diện Shell hợp nhất, phân quyền 3 cấp (Admin / Cashier / Warehouse), đăng nhập và quản trị tài khoản bằng bảng `Users` thật, quản lý Sản phẩm
 > - **Buổi 5:** ADO.NET nâng cao, Stored Procedure báo cáo doanh thu và thanh toán POS bằng giao dịch `SqlTransaction`
+> - **Buổi 6:** EF Core nâng cao: phân trang LINQ `.Skip()/.Take()`, Eager Loading `.Include()`, `ApiClientService`, màn hình Sản phẩm phân trang + lọc nhóm hàng
 
 ---
 
@@ -105,7 +106,7 @@ Khác với Buổi 2 (tài khoản hard-code trong code), từ Buổi 4 hệ th�
 | `Orders` | Hóa đơn bán lẻ: mã hóa đơn, ngày lập, thu ngân, khách hàng (cho phép NULL với khách vãng lai), tổng tiền, điểm thưởng (Buổi 5) |
 | `OrderDetails` | Chi tiết hóa đơn: sản phẩm, số lượng, đơn giá, thành tiền (Buổi 5) |
 
-Chuỗi kết nối cấu hình tại `appsettings.json`, cơ sở dữ liệu được khởi tạo bằng EF Core Migrations (`Add-Migration`, `Update-Database`), không cần viết `CREATE TABLE` thủ công. Các cột `Username`, `CategoryName`, `Barcode`, `PhoneNumber`, `OrderCode` có ràng buộc duy nhất (Unique Index). Các Stored Procedure báo cáo (`sp_GetRevenueByCashier`, `sp_GetRevenueByDateRange`, `sp_GetTop5SellingProducts`) được tạo bằng script T-SQL trong SSMS.
+Chuỗi kết nối cấu hình tại `appsettings.json`, cơ sở dữ liệu được khởi tạo bằng EF Core Migrations (`Add-Migration`, `Update-Database`), không cần viết `CREATE TABLE` thủ công. Các cột `Username`, `CategoryName`, `Barcode`, `PhoneNumber`, `OrderCode` có ràng buộc duy nhất (Unique Index). Các Stored Procedure báo cáo (`sp_GetRevenueByCashier`, `sp_GetRevenueByDateRange`, `sp_GetTop5SellingProducts`) được tạo tự động bằng migration `AddReportStoredProcedures` (nội dung giống `Scripts/StoredProcedures.sql`).
 
 ---
 
@@ -140,17 +141,17 @@ Nếu dùng SQL Express, đổi `Server=localhost` thành `Server=.\SQLEXPRESS`.
 ### Bước 1: Chạy phía Backend (Web API)
 1. Mở Solution bằng Visual Studio 2022.
 2. Mở **Package Manager Console**, chọn Default project là `MiniSupermarket.API`, chạy `Update-Database` để khởi tạo `TanPhucMiniSupermarketDb` (nếu chưa có) — bước này sẽ tạo đủ 6 bảng kèm dữ liệu mẫu và tài khoản mẫu (mật khẩu `123456`). Nếu đã có database cũ từ các buổi trước, hãy xóa database đó rồi chạy lại vì lịch sử migration đã được gộp thành một migration `AddDatabase`.
-3. Mở SSMS, chạy script tạo 3 Stored Procedure (`sp_GetRevenueByCashier`, `sp_GetRevenueByDateRange`, `sp_GetTop5SellingProducts`) trên database `TanPhucMiniSupermarketDb`.
+3. Các Stored Procedure (`sp_GetRevenueByCashier`, `sp_GetRevenueByDateRange`, `sp_GetTop5SellingProducts`) được tạo tự động bởi migration `AddReportStoredProcedures` ngay khi chạy `Update-Database` — xóa database rồi chạy lại vẫn đầy đủ. File `Scripts/StoredProcedures.sql` chỉ để chạy thủ công trong SSMS khi cần.
 4. Nhấp chuột phải project `MiniSupermarket.API` chọn **Set as Startup Project**, chọn profile **https** (cổng `7251`), nhấn **F5**.
 5. Gọi `POST /api/auth/login` để lấy token, đính kèm token vào header `Authorization: Bearer <token>` để thử các endpoint Categories, Products, Customers, Users, Orders, Reports.
 
-> ⚠️ Swagger mặc định **không có sẵn nút Authorize**. Cách xử lý: dùng extension **ModHeader** trên Chrome để tự động thêm header `Authorization: Bearer <token>` vào mỗi request khi test trên Swagger UI.
+> 🔐 Swagger đã có nút ổ khóa **Authorize**: gọi `POST /api/auth/login`, copy chuỗi `token`, bấm **Authorize** rồi dán token (không cần gõ chữ `Bearer`) để gọi các API được bảo vệ. Thử phân trang tại `GET /api/products/paged?pageNumber=1&pageSize=5`.
 
 ### Bước 2: Chạy phía Frontend (WinForms Client)
 1. Đảm bảo cổng (Port) trong `HttpClient` của WinForms khớp với cổng `https://localhost:XXXXX` của Web API đang chạy.
 2. Nhấp chuột phải project `MiniSupermarket.WinForms` chọn **Debug -> Start new instance**.
 3. Đăng nhập bằng các tài khoản có vai trò khác nhau (lấy từ bảng `Users` trong SQL Server) để kiểm tra Sidebar hiển thị đúng chức năng theo từng vai trò.
-4. Thử nghiệm Danh mục, Sản phẩm, Khách hàng: Tải danh sách, Thêm, Sửa, Xóa, Tìm kiếm.
+4. Thử nghiệm Danh mục, Sản phẩm, Khách hàng: Tải danh sách, Thêm, Sửa, Xóa, Tìm kiếm. Màn hình Sản phẩm có nút **<< Trang trước / Trang sau >>** và lọc theo nhóm hàng (Buổi 6).
 5. Với tài khoản Admin, thử tạo tài khoản nhân viên mới trong màn hình Quản trị Tài khoản.
 6. Đăng nhập tài khoản Cashier, mở màn hình Bán hàng: quét mã vạch, nhập số điện thoại khách (hoặc bỏ trống nếu là khách vãng lai) rồi bấm **THANH TOÁN** (hoặc F9). Thử mua vượt tồn kho để thấy giao dịch bị Rollback.
 7. Đăng nhập tài khoản Admin, mở Báo cáo Doanh thu, chọn khoảng **Từ ngày – Đến ngày** rồi bấm **Xem báo cáo**.
@@ -166,6 +167,7 @@ Nếu dùng SQL Express, đổi `Server=localhost` thành `Server=.\SQLEXPRESS`.
 * **ADO.NET nâng cao (Buổi 5):** tra mã vạch bằng `SqlDataReader`, tải danh sách bằng `DataTable` + `SqlDataAdapter`, truy vấn có tham số chống SQL Injection.
 * **Thanh toán POS bằng giao dịch (Buổi 5):** `OrdersController` dùng `SqlTransaction` để tạo hóa đơn, lưu chi tiết, trừ tồn kho và cộng điểm thưởng; có lỗi thì Rollback toàn bộ. Hỗ trợ khách vãng lai và hủy hóa đơn hoàn trả tồn kho.
 * **Báo cáo doanh thu (Buổi 5):** Stored Procedure theo thu ngân, theo khoảng ngày, Top 5 sản phẩm bán chạy; `FormQuickReport` xem nhanh theo khoảng ngày.
+* **Phân trang & Eager Loading (Buổi 6):** API `products/paged` (từ khóa + nhóm hàng) và `customers/paged` dùng `.Skip()/.Take()`, `.Include()`, `.AsNoTracking()`, trả `PagedResult<T>`; toàn bộ Controller dùng `async/await`; `ApiClientService` dùng chung tự gắn Bearer Token; màn hình Sản phẩm phân trang trên WinForms; bật CORS và nút Authorize trên Swagger.
 
 ---
 

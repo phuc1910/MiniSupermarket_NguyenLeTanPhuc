@@ -49,6 +49,50 @@ namespace MiniSupermarket.API.Controllers
             return Ok(cat);
         }
 
+        // [BUỔI 6] GET: api/Categories/paged?keyword=tra&pageNumber=1&pageSize=5
+        // Phân trang nhóm hàng bằng LINQ .Skip() / .Take()
+        [HttpGet("paged")]
+        public async Task<IActionResult> GetPagedCategories(
+            [FromQuery] string? keyword,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 5)
+        {
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1 || pageSize > 50) pageSize = 5;
+
+            var query = _context.Categories.AsNoTracking().AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                string search = keyword.Trim();
+                query = query.Where(c => c.CategoryName.Contains(search));
+            }
+
+            int totalItems = await query.CountAsync();
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            var items = await query
+                .OrderBy(c => c.CategoryId)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(c => new CategoryItemDto
+                {
+                    CategoryId = c.CategoryId,
+                    CategoryName = c.CategoryName,
+                    Description = c.Description
+                })
+                .ToListAsync();
+
+            return Ok(new PagedResult<CategoryItemDto>
+            {
+                CurrentPage = pageNumber,
+                PageSize = pageSize,
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                Items = items
+            });
+        }
+
         // GET: api/Categories/search?keyword=sữa
         [HttpGet("search")]
         public async Task<IActionResult> Search([FromQuery] string keyword)

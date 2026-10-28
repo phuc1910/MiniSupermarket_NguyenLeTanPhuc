@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using MiniSupermarket.WinForms.Models;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -21,9 +22,18 @@ namespace MiniSupermarket.WinForms
             BaseAddress = new Uri("https://localhost:7251/api/")
         };
 
+        // [BUỔI 6] Phân trang phía máy chủ
+        private int _currentPage = 1;
+        private const int PageSize = 5;
+        private readonly PagingBar _paging = new();
+
         public FormCategoryManagement()
         {
             InitializeComponent();
+
+            dgvCategories.Parent!.Controls.Add(_paging);
+            _paging.PrevClicked += async (s, e) => { if (_currentPage > 1) { _currentPage--; await LoadDataAsync(); } };
+            _paging.NextClicked += async (s, e) => { if (_currentPage < _paging.TotalPages) { _currentPage++; await LoadDataAsync(); } };
         }
 
         // Sự kiện Form vừa bật lên: Tự động tải dữ liệu từ API lên bảng
@@ -61,22 +71,25 @@ namespace MiniSupermarket.WinForms
         {
             try
             {
-                // Sử dụng client đã gắn token
-                using var client = GetAuthenticatedClient();
+                // [BUỔI 6] Gọi API phân trang: GET /api/categories/paged
+                string url = $"categories/paged?keyword={Uri.EscapeDataString(txtKeyword.Text.Trim())}&pageNumber={_currentPage}&pageSize={PageSize}";
+                var result = await ApiClientService.Client.GetFromJsonAsync<PagedViewResult<CategoryDto>>(url);
+                if (result == null) return;
 
-                // Gửi request GET tới endpoint "categories",
-                // tự động giải tuần tự hóa chuỗi JSON thành List<CategoryDto>
-                var categories = await client.GetFromJsonAsync<List<CategoryDto>>("categories");
+                if (result.Items.Count == 0 && result.CurrentPage > 1 && result.TotalPages > 0)
+                {
+                    _currentPage = result.TotalPages;
+                    await LoadDataAsync();
+                    return;
+                }
 
-                // Gán nguồn dữ liệu cho bảng hiển thị
-                dgvCategories.DataSource = categories;
-
+                _currentPage = result.CurrentPage;
+                dgvCategories.DataSource = result.Items;
                 FormatCategoryGridColumns();
+                _paging.UpdateState(result.CurrentPage, result.TotalPages, result.TotalItems);
             }
             catch (Exception ex)
             {
-                // Hiển thị thông báo nếu không có quyền truy cập
-                // hoặc xảy ra lỗi kết nối đến Server
                 MessageBox.Show(
                     "Lỗi quyền truy cập hoặc mất kết nối: " + ex.Message,
                     "Lỗi",
@@ -237,30 +250,9 @@ namespace MiniSupermarket.WinForms
         // Nút TÌM KIẾM (SEARCH): Gọi API lọc danh mục theo từ khóa Query String
         private async void btnSearch_Click(object sender, EventArgs e)
         {
-            string keyword = txtKeyword.Text.Trim();
-            if (string.IsNullOrEmpty(keyword))
-            {
-                await LoadDataAsync(); // Nếu ô tìm kiếm trống thì tải lại toàn bộ
-                return;
-            }
-
-            try
-            {
-                // Sử dụng client đã gắn JWT Token
-                using var client = GetAuthenticatedClient();
-
-                // Gửi request GET kèm Token
-                var result = await client.GetFromJsonAsync<List<CategoryDto>>(
-                    $"categories/search?keyword={keyword}");
-                dgvCategories.DataSource = result;
-
-                // [MỚI] Áp dụng lại định dạng cột sau khi tìm kiếm -> không bị về mặc định Fill đều
-                FormatCategoryGridColumns();
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("Không tìm thấy kết quả phù hợp!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
+            // Tìm kiếm từ khóa mới -> luôn quay về trang 1 rồi gọi lại API phân trang
+            _currentPage = 1;
+            await LoadDataAsync();
         }
 
         // Bổ sung phương thức cấu hình HttpClient có gắn kèm Token bảo mật
