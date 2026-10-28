@@ -117,40 +117,91 @@ namespace MiniSupermarket.WinForms
         private async void btnLoad_Click(object sender, EventArgs e)
         {
             txtSearchBarcode.Clear();
+            _currentPage = 1;
             await LoadCategoriesToComboAsync();
             await LoadProductsAsync();
         }
 
+        // [BUỔI 6] Phân trang phía máy chủ: mỗi lần chỉ tải 1 trang (pageSize dòng) từ API
+        private int _currentPage = 1;
+        private int _totalPages = 1;
+        private const int PageSize = 5;
+
+        // Lấy từ khóa + nhóm hàng đang chọn để gửi lên API
+        private string BuildPagedUrl()
+        {
+            string keyword = txtSearchBarcode.Text.Trim();
+            string url = $"products/paged?keyword={Uri.EscapeDataString(keyword)}&pageNumber={_currentPage}&pageSize={PageSize}";
+
+            if (cboFilterCategory.SelectedValue != null &&
+                int.TryParse(cboFilterCategory.SelectedValue.ToString(), out int cid) && cid > 0)
+            {
+                url += $"&categoryId={cid}";
+            }
+            return url;
+        }
+
+        // Gọi API products/paged (async/await) rồi hiển thị lên DataGridView
         private async Task LoadProductsAsync()
         {
             try
             {
-                var products = await ApiClientService.Client.GetFromJsonAsync<List<ProductDto>>("products");
+                var result = await ApiClientService.Client.GetFromJsonAsync<PagedViewResult<ProductDto>>(BuildPagedUrl());
+                if (result == null) return;
 
-                // Tra tên nhóm hàng từ _categoriesCache dựa theo CategoryId của từng sản phẩm
-                if (products != null)
+                // Xóa dòng cuối của trang cuối -> lùi về trang trước
+                if (result.Items.Count == 0 && result.CurrentPage > 1 && result.TotalPages > 0)
                 {
-                    foreach (var p in products)
-                    {
-                        var cat = _categoriesCache.FirstOrDefault(c => c.CategoryId == p.CategoryId);
-                        p.CategoryName = cat?.CategoryName ?? "(Không xác định)";
-                    }
+                    _currentPage = result.TotalPages;
+                    await LoadProductsAsync();
+                    return;
                 }
 
-                dgvProducts.DataSource = products;
+                _currentPage = result.CurrentPage;
+                _totalPages = result.TotalPages == 0 ? 1 : result.TotalPages;
 
-                dgvProducts.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-                if (dgvProducts.Columns["ProductId"] != null) { dgvProducts.Columns["ProductId"].HeaderText = "Mã SP"; dgvProducts.Columns["ProductId"].FillWeight = 10; }
-                if (dgvProducts.Columns["Barcode"] != null) { dgvProducts.Columns["Barcode"].HeaderText = "Mã vạch"; dgvProducts.Columns["Barcode"].FillWeight = 20; }
-                if (dgvProducts.Columns["ProductName"] != null) { dgvProducts.Columns["ProductName"].HeaderText = "Tên sản phẩm"; dgvProducts.Columns["ProductName"].FillWeight = 30; }
-                if (dgvProducts.Columns["Price"] != null) { dgvProducts.Columns["Price"].HeaderText = "Đơn giá"; dgvProducts.Columns["Price"].FillWeight = 15; }
-                if (dgvProducts.Columns["StockQuantity"] != null) { dgvProducts.Columns["StockQuantity"].HeaderText = "Tồn kho"; dgvProducts.Columns["StockQuantity"].FillWeight = 10; }
-                if (dgvProducts.Columns["CategoryId"] != null) { dgvProducts.Columns["CategoryId"].Visible = false; }  // Ẩn vì đã có cột CategoryName dễ đọc hơn
-                if (dgvProducts.Columns["CategoryName"] != null) { dgvProducts.Columns["CategoryName"].HeaderText = "Nhóm hàng"; dgvProducts.Columns["CategoryName"].FillWeight = 20; }
+                dgvProducts.DataSource = result.Items;
+                FormatProductGrid();
+
+                lblPaging.Text = $"Trang {_currentPage} / {_totalPages}  (Tổng: {result.TotalItems} SP)";
+                btnPrev.Enabled = _currentPage > 1;
+                btnNext.Enabled = _currentPage < _totalPages;
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Lỗi nạp sản phẩm: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // Đặt tiêu đề cột tiếng Việt cho lưới sản phẩm
+        private void FormatProductGrid()
+        {
+            dgvProducts.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            if (dgvProducts.Columns["ProductId"] != null) { dgvProducts.Columns["ProductId"].HeaderText = "Mã SP"; dgvProducts.Columns["ProductId"].FillWeight = 10; }
+            if (dgvProducts.Columns["Barcode"] != null) { dgvProducts.Columns["Barcode"].HeaderText = "Mã vạch"; dgvProducts.Columns["Barcode"].FillWeight = 20; }
+            if (dgvProducts.Columns["ProductName"] != null) { dgvProducts.Columns["ProductName"].HeaderText = "Tên sản phẩm"; dgvProducts.Columns["ProductName"].FillWeight = 30; }
+            if (dgvProducts.Columns["Price"] != null) { dgvProducts.Columns["Price"].HeaderText = "Đơn giá"; dgvProducts.Columns["Price"].FillWeight = 15; }
+            if (dgvProducts.Columns["StockQuantity"] != null) { dgvProducts.Columns["StockQuantity"].HeaderText = "Tồn kho"; dgvProducts.Columns["StockQuantity"].FillWeight = 10; }
+            if (dgvProducts.Columns["CategoryId"] != null) { dgvProducts.Columns["CategoryId"].Visible = false; }
+            if (dgvProducts.Columns["CategoryName"] != null) { dgvProducts.Columns["CategoryName"].HeaderText = "Nhóm hàng"; dgvProducts.Columns["CategoryName"].FillWeight = 20; }
+        }
+
+        // Sự kiện chuyển trang
+        private async void btnPrev_Click(object sender, EventArgs e)
+        {
+            if (_currentPage > 1)
+            {
+                _currentPage--;
+                await LoadProductsAsync();
+            }
+        }
+
+        private async void btnNext_Click(object sender, EventArgs e)
+        {
+            if (_currentPage < _totalPages)
+            {
+                _currentPage++;
+                await LoadProductsAsync();
             }
         }
 
@@ -212,46 +263,11 @@ namespace MiniSupermarket.WinForms
             }
         }
 
+        // Tìm kiếm / lọc nhóm hàng: luôn quay về trang 1 rồi gọi lại API phân trang
         private async void btnSearch_Click(object sender, EventArgs e)
         {
-            try
-            {
-                string keyword = txtSearchBarcode.Text.Trim();
-
-                int? categoryId = null;
-                if (cboFilterCategory.SelectedValue != null &&
-                    int.TryParse(cboFilterCategory.SelectedValue.ToString(), out int cid) &&
-                    cid > 0)
-                {
-                    categoryId = cid;
-                }
-
-                // Xây dựng query string động — chỉ thêm tham số khi có giá trị
-                var queryParams = new List<string>();
-                if (!string.IsNullOrWhiteSpace(keyword))
-                    queryParams.Add($"keyword={Uri.EscapeDataString(keyword)}");
-                if (categoryId.HasValue)
-                    queryParams.Add($"categoryId={categoryId.Value}");
-
-                string url = queryParams.Count > 0
-                    ? "products/search?" + string.Join("&", queryParams)
-                    : "products"; // Không có điều kiện lọc -> lấy toàn bộ
-
-                var products = await ApiClientService.Client.GetFromJsonAsync<List<ProductDto>>(url);
-                dgvProducts.DataSource = products;
-                dgvProducts.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-                if (dgvProducts.Columns["ProductId"] != null) { dgvProducts.Columns["ProductId"].HeaderText = "Mã SP"; dgvProducts.Columns["ProductId"].FillWeight = 10; }
-                if (dgvProducts.Columns["Barcode"] != null) { dgvProducts.Columns["Barcode"].HeaderText = "Mã vạch"; dgvProducts.Columns["Barcode"].FillWeight = 20; }
-                if (dgvProducts.Columns["ProductName"] != null) { dgvProducts.Columns["ProductName"].HeaderText = "Tên sản phẩm"; dgvProducts.Columns["ProductName"].FillWeight = 30; }
-                if (dgvProducts.Columns["Price"] != null) { dgvProducts.Columns["Price"].HeaderText = "Đơn giá"; dgvProducts.Columns["Price"].FillWeight = 15; }
-                if (dgvProducts.Columns["StockQuantity"] != null) { dgvProducts.Columns["StockQuantity"].HeaderText = "Tồn kho"; dgvProducts.Columns["StockQuantity"].FillWeight = 10; }
-                if (dgvProducts.Columns["CategoryId"] != null) { dgvProducts.Columns["CategoryId"].Visible = false; }  // Ẩn vì đã có cột CategoryName dễ đọc hơn
-                if (dgvProducts.Columns["CategoryName"] != null) { dgvProducts.Columns["CategoryName"].HeaderText = "Nhóm hàng"; dgvProducts.Columns["CategoryName"].FillWeight = 20; }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi tìm kiếm sản phẩm: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            _currentPage = 1;
+            await LoadProductsAsync();
         }
 
         private async void btnUpdate_Click(object sender, EventArgs e)

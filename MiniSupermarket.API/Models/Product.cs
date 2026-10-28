@@ -32,6 +32,7 @@ namespace MiniSupermarket.API.Models
         // Trong Database lưu dưới dạng decimal(18,2)
         // 18: tổng số chữ số
         // 2: số chữ số sau dấu thập phân
+        [Range(typeof(decimal), "0.01", "9999999999999999.99", ErrorMessage = "Đơn giá phải lớn hơn 0!")]
         [Column(TypeName = "decimal(18,2)")]
         public decimal Price { get; set; }
 

@@ -31,7 +31,7 @@ namespace MiniSupermarket.API.Controllers
         // =========================================================================
         [HttpPost("checkout")]
         [Authorize(Roles = "Admin,Cashier")]
-        public IActionResult Checkout([FromBody] CheckoutRequestDto request)
+        public async Task<IActionResult> Checkout([FromBody] CheckoutRequestDto request)
         {
             // 1. Kiểm tra tính hợp lệ của yêu cầu
             if (request.Items == null || request.Items.Count == 0)
@@ -54,10 +54,10 @@ namespace MiniSupermarket.API.Controllers
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                connection.Open();
+                await connection.OpenAsync();
 
                 // 2. BẮT ĐẦU TRANSACTION: từ đây mọi lệnh phải gắn transaction
-                SqlTransaction transaction = connection.BeginTransaction();
+                SqlTransaction transaction = (SqlTransaction)await connection.BeginTransactionAsync();
 
                 try
                 {
@@ -75,9 +75,9 @@ namespace MiniSupermarket.API.Controllers
                         {
                             cmdFind.Parameters.AddWithValue("@Phone", request.CustomerPhone.Trim());
 
-                            using (SqlDataReader reader = cmdFind.ExecuteReader())
+                            using (SqlDataReader reader = await cmdFind.ExecuteReaderAsync())
                             {
-                                if (reader.Read())
+                                if (await reader.ReadAsync())
                                 {
                                     customerId = Convert.ToInt32(reader["CustomerId"]);
                                     customerName = reader["CustomerName"].ToString() ?? customerName;
@@ -114,7 +114,7 @@ namespace MiniSupermarket.API.Controllers
                         cmdOrder.Parameters.AddWithValue("@FinalAmount", finalAmount);
                         cmdOrder.Parameters.AddWithValue("@RewardPoints", rewardPoints);
 
-                        orderId = Convert.ToInt32(cmdOrder.ExecuteScalar());
+                        orderId = Convert.ToInt32(await cmdOrder.ExecuteScalarAsync());
                     }
 
                     // ---------------------------------------------------------------
@@ -136,9 +136,9 @@ namespace MiniSupermarket.API.Controllers
                         {
                             cmdCheck.Parameters.AddWithValue("@ProductId", item.ProductId);
 
-                            using (SqlDataReader reader = cmdCheck.ExecuteReader())
+                            using (SqlDataReader reader = await cmdCheck.ExecuteReaderAsync())
                             {
-                                if (!reader.Read())
+                                if (!await reader.ReadAsync())
                                 {
                                     throw new InvalidOperationException($"Không tìm thấy sản phẩm có ID: {item.ProductId}");
                                 }
@@ -177,7 +177,7 @@ namespace MiniSupermarket.API.Controllers
                             cmdDetail.Parameters.AddWithValue("@Quantity", item.Quantity);
                             cmdDetail.Parameters.AddWithValue("@UnitPrice", item.UnitPrice);
                             cmdDetail.Parameters.AddWithValue("@LineTotal", item.Quantity * item.UnitPrice);
-                            cmdDetail.ExecuteNonQuery();
+                            await cmdDetail.ExecuteNonQueryAsync();
                         }
 
                         // Trừ tồn kho
@@ -189,7 +189,7 @@ namespace MiniSupermarket.API.Controllers
                         {
                             cmdStock.Parameters.AddWithValue("@Qty", item.Quantity);
                             cmdStock.Parameters.AddWithValue("@ProductId", item.ProductId);
-                            cmdStock.ExecuteNonQuery();
+                            await cmdStock.ExecuteNonQueryAsync();
                         }
                     }
 
@@ -206,12 +206,12 @@ namespace MiniSupermarket.API.Controllers
                         {
                             cmdPoints.Parameters.AddWithValue("@Points", rewardPoints);
                             cmdPoints.Parameters.AddWithValue("@CustomerId", customerId.Value);
-                            cmdPoints.ExecuteNonQuery();
+                            await cmdPoints.ExecuteNonQueryAsync();
                         }
                     }
 
                     // BƯỚC 5: Mọi thứ thành công -> XÁC NHẬN LƯU VĨNH VIỄN
-                    transaction.Commit();
+                    await transaction.CommitAsync();
 
                     return Ok(new
                     {
@@ -230,7 +230,7 @@ namespace MiniSupermarket.API.Controllers
                     // BƯỚC 6: Có bất kỳ lỗi nào -> HOÀN TÁC TOÀN BỘ
                     try
                     {
-                        transaction.Rollback();
+                        await transaction.RollbackAsync();
                     }
                     catch (Exception rollbackEx)
                     {
@@ -258,14 +258,14 @@ namespace MiniSupermarket.API.Controllers
         // =========================================================================
         [HttpDelete("cancel/{orderId}")]
         [Authorize(Roles = "Admin")]
-        public IActionResult CancelOrder(int orderId)
+        public async Task<IActionResult> CancelOrder(int orderId)
         {
             string connectionString = _configuration.GetConnectionString("DefaultConnection")!;
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                connection.Open();
-                SqlTransaction transaction = connection.BeginTransaction();
+                await connection.OpenAsync();
+                SqlTransaction transaction = (SqlTransaction)await connection.BeginTransactionAsync();
 
                 try
                 {
@@ -278,9 +278,9 @@ namespace MiniSupermarket.API.Controllers
                     {
                         cmdGet.Parameters.AddWithValue("@OrderId", orderId);
 
-                        using (SqlDataReader reader = cmdGet.ExecuteReader())
+                        using (SqlDataReader reader = await cmdGet.ExecuteReaderAsync())
                         {
-                            if (!reader.Read())
+                            if (!await reader.ReadAsync())
                             {
                                 throw new InvalidOperationException($"Không tìm thấy hóa đơn ID = {orderId} để hủy!");
                             }
@@ -303,9 +303,9 @@ namespace MiniSupermarket.API.Controllers
                     {
                         cmdDetails.Parameters.AddWithValue("@OrderId", orderId);
 
-                        using (SqlDataReader reader = cmdDetails.ExecuteReader())
+                        using (SqlDataReader reader = await cmdDetails.ExecuteReaderAsync())
                         {
-                            while (reader.Read())
+                            while (await reader.ReadAsync())
                             {
                                 itemsToRestore.Add((
                                     Convert.ToInt32(reader["ProductId"]),
@@ -323,7 +323,7 @@ namespace MiniSupermarket.API.Controllers
                         {
                             cmdRestore.Parameters.AddWithValue("@Qty", item.Quantity);
                             cmdRestore.Parameters.AddWithValue("@ProductId", item.ProductId);
-                            cmdRestore.ExecuteNonQuery();
+                            await cmdRestore.ExecuteNonQueryAsync();
                         }
                     }
 
@@ -339,7 +339,7 @@ namespace MiniSupermarket.API.Controllers
                         {
                             cmdDeduct.Parameters.AddWithValue("@Pts", pointsToDeduct);
                             cmdDeduct.Parameters.AddWithValue("@CustomerId", customerId.Value);
-                            cmdDeduct.ExecuteNonQuery();
+                            await cmdDeduct.ExecuteNonQueryAsync();
                         }
                     }
 
@@ -348,18 +348,18 @@ namespace MiniSupermarket.API.Controllers
                         "DELETE FROM OrderDetails WHERE OrderId = @OrderId", connection, transaction))
                     {
                         cmdDelDetails.Parameters.AddWithValue("@OrderId", orderId);
-                        cmdDelDetails.ExecuteNonQuery();
+                        await cmdDelDetails.ExecuteNonQueryAsync();
                     }
 
                     using (SqlCommand cmdDelOrder = new SqlCommand(
                         "DELETE FROM Orders WHERE OrderId = @OrderId", connection, transaction))
                     {
                         cmdDelOrder.Parameters.AddWithValue("@OrderId", orderId);
-                        cmdDelOrder.ExecuteNonQuery();
+                        await cmdDelOrder.ExecuteNonQueryAsync();
                     }
 
                     // 6. Xác nhận lưu vĩnh viễn
-                    transaction.Commit();
+                    await transaction.CommitAsync();
 
                     return Ok(new
                     {
@@ -369,7 +369,7 @@ namespace MiniSupermarket.API.Controllers
                 }
                 catch (Exception ex)
                 {
-                    transaction.Rollback();
+                    await transaction.RollbackAsync();
 
                     return BadRequest(new
                     {

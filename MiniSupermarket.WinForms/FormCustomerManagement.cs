@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using MiniSupermarket.WinForms.Models;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -22,9 +23,18 @@ namespace MiniSupermarket.WinForms
         // ============================================================
         // CONSTRUCTOR
         // ============================================================
+        // [BUỔI 6] Phân trang phía máy chủ
+        private int _currentPage = 1;
+        private const int PageSize = 5;
+        private readonly PagingBar _paging = new();
+
         public FormCustomerManagement()
         {
             InitializeComponent();
+
+            dgvCustomers.Parent!.Controls.Add(_paging);
+            _paging.PrevClicked += async (s, e) => { if (_currentPage > 1) { _currentPage--; await LoadDataAsync(); } };
+            _paging.NextClicked += async (s, e) => { if (_currentPage < _paging.TotalPages) { _currentPage++; await LoadDataAsync(); } };
         }
 
         // ============================================================
@@ -61,86 +71,34 @@ namespace MiniSupermarket.WinForms
         {
             try
             {
-                // Tạo HttpClient có gắn JWT Token
-                using var client = GetAuthenticatedClient();
+                // [BUỔI 6] Gọi API phân trang: GET /api/customers/paged (sắp xếp giảm dần theo điểm thưởng)
+                string url = $"customers/paged?keyword={Uri.EscapeDataString(txtKeyword.Text.Trim())}&pageNumber={_currentPage}&pageSize={PageSize}";
+                var result = await ApiClientService.Client.GetFromJsonAsync<PagedViewResult<CustomerDto>>(url);
+                if (result == null) return;
 
-                // Gọi API GET /api/customers
-                var response = await client.GetAsync("customers");
-
-                // Nếu API trả về lỗi
-                if (!response.IsSuccessStatusCode)
+                // Xóa dòng cuối của trang cuối -> lùi về trang trước
+                if (result.Items.Count == 0 && result.CurrentPage > 1 && result.TotalPages > 0)
                 {
-                    string error = await response.Content.ReadAsStringAsync();
-
-                    MessageBox.Show(
-                        $"Không thể lấy danh sách khách hàng!\n\n" +
-                        $"Mã lỗi: {(int)response.StatusCode} - {response.StatusCode}\n\n" +
-                        $"Chi tiết: {error}",
-                        "Lỗi API",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
-
+                    _currentPage = result.TotalPages;
+                    await LoadDataAsync();
                     return;
                 }
 
-                // Đọc dữ liệu JSON từ API
-                var json = await response.Content.ReadAsStringAsync();
-
-                // Chuyển JSON thành List<CustomerDto>
-                var customers =
-                    System.Text.Json.JsonSerializer.Deserialize<List<CustomerDto>>(
-                        json,
-                        new System.Text.Json.JsonSerializerOptions
-                        {
-                            PropertyNameCaseInsensitive = true
-                        });
-
-                // Kiểm tra dữ liệu trả về
-                if (customers == null)
-                {
-                    MessageBox.Show(
-                        "API không trả về dữ liệu khách hàng!",
-                        "Thông báo",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
-
-                    return;
-                }
-
-                // Hiển thị dữ liệu lên DataGridView
+                _currentPage = result.CurrentPage;
                 dgvCustomers.AutoGenerateColumns = true;
                 dgvCustomers.DataSource = null;
-                dgvCustomers.DataSource = customers;
-
+                dgvCustomers.DataSource = result.Items;
                 FormatCustomerGridColumns();
-
-                // Thông báo nếu danh sách rỗng
-                if (customers.Count == 0)
-                {
-                    MessageBox.Show(
-                        "API đã kết nối thành công nhưng database không có khách hàng.",
-                        "Thông báo",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
-                }
+                _paging.UpdateState(result.CurrentPage, result.TotalPages, result.TotalItems);
             }
             catch (HttpRequestException ex)
             {
-                MessageBox.Show(
-                    "Không thể kết nối đến Web API!\n\n" +
-                    ex.Message,
-                    "Lỗi kết nối",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                MessageBox.Show("Không thể kết nối đến Web API!\n\n" + ex.Message, "Lỗi kết nối",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    "Lỗi khi tải dữ liệu khách hàng:\n\n" +
-                    ex.Message,
-                    "Lỗi",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         // ============================================================
@@ -520,48 +478,9 @@ namespace MiniSupermarket.WinForms
             object sender,
             EventArgs e)
         {
-            // Lấy từ khóa và loại bỏ khoảng trắng đầu/cuối.
-            string keyword =
-                txtKeyword.Text.Trim();
-
-            // Nếu không nhập từ khóa thì tải lại toàn bộ dữ liệu.
-            if (string.IsNullOrEmpty(keyword))
-            {
-                await LoadDataAsync();
-                return;
-            }
-
-            try
-            {
-                // Sử dụng client đã gắn JWT Token.
-                using var client = GetAuthenticatedClient();
-
-                // Escape keyword để tránh lỗi khi keyword
-                // chứa khoảng trắng hoặc ký tự đặc biệt.
-                string encodedKeyword =
-                    Uri.EscapeDataString(keyword);
-
-                // Gửi request GET:
-                // GET: api/customers/search?keyword=...
-                var result =
-                    await client.GetFromJsonAsync<List<CustomerDto>>(
-                        $"customers/search?keyword={encodedKeyword}");
-
-                // Hiển thị kết quả tìm kiếm.
-                dgvCustomers.DataSource = result;
-
-                // [MỚI] Áp dụng lại định dạng cột sau khi tìm kiếm -> không bị về mặc định Fill đều
-                FormatCustomerGridColumns();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    "Không tìm thấy kết quả phù hợp!\n"
-                    + ex.Message,
-                    "Thông báo",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
-            }
+            // Tìm kiếm từ khóa mới -> luôn quay về trang 1 rồi gọi lại API phân trang
+            _currentPage = 1;
+            await LoadDataAsync();
         }
 
         // ============================================================

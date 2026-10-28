@@ -22,4 +22,14 @@ namespace MiniSupermarket.WinForms.Models
 
         public string CategoryName { get; set; } = string.Empty;
     }
+
+    // [BUỔI 6] Cấu trúc phân trang do API trả về (khớp PagedResult<T> bên API)
+    public class PagedViewResult<T>
+    {
+        public int CurrentPage { get; set; }
+        public int PageSize { get; set; }
+        public int TotalItems { get; set; }
+        public int TotalPages { get; set; }
+        public List<T> Items { get; set; } = new();
+    }
 }

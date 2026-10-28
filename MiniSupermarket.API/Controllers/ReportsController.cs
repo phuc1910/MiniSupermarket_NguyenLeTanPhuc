@@ -26,7 +26,7 @@ namespace MiniSupermarket.API.Controllers
         // GET: api/Reports/revenue-by-cashier
         // Gọi Stored Procedure sp_GetRevenueByCashier bằng SqlDataReader
         [HttpGet("revenue-by-cashier")]
-        public IActionResult GetRevenueByCashier()
+        public async Task<IActionResult> GetRevenueByCashier()
         {
             var reportList = new List<CashierRevenueDto>();
             string connectionString = _configuration.GetConnectionString("DefaultConnection")!;
@@ -41,11 +41,11 @@ namespace MiniSupermarket.API.Controllers
 
                     try
                     {
-                        connection.Open();
+                        await connection.OpenAsync();
 
-                        using (SqlDataReader reader = command.ExecuteReader())
+                        using (SqlDataReader reader = await command.ExecuteReaderAsync())
                         {
-                            while (reader.Read())
+                            while (await reader.ReadAsync())
                             {
                                 reportList.Add(new CashierRevenueDto
                                 {
@@ -87,7 +87,7 @@ namespace MiniSupermarket.API.Controllers
         // Gọi sp_GetRevenueByDateRange có 2 tham số (CommandType.StoredProcedure + SqlParameter)
         // =========================================================================
         [HttpGet("revenue-by-date")]
-        public IActionResult GetRevenueByDate([FromQuery] DateTime fromDate, [FromQuery] DateTime toDate)
+        public async Task<IActionResult> GetRevenueByDate([FromQuery] DateTime fromDate, [FromQuery] DateTime toDate)
         {
             if (fromDate > toDate)
             {
@@ -111,11 +111,11 @@ namespace MiniSupermarket.API.Controllers
 
                     try
                     {
-                        connection.Open();
+                        await connection.OpenAsync();
 
-                        using (SqlDataReader reader = command.ExecuteReader())
+                        using (SqlDataReader reader = await command.ExecuteReaderAsync())
                         {
-                            while (reader.Read())
+                            while (await reader.ReadAsync())
                             {
                                 reportList.Add(new CashierRevenueDto
                                 {
@@ -156,7 +156,7 @@ namespace MiniSupermarket.API.Controllers
         // Gọi sp_GetTop5SellingProducts - phục vụ Dashboard Admin
         // =========================================================================
         [HttpGet("top-products")]
-        public IActionResult GetTopProducts()
+        public async Task<IActionResult> GetTopProducts()
         {
             var list = new List<TopProductDto>();
             string connectionString = _configuration.GetConnectionString("DefaultConnection")!;
@@ -169,11 +169,11 @@ namespace MiniSupermarket.API.Controllers
 
                     try
                     {
-                        connection.Open();
+                        await connection.OpenAsync();
 
-                        using (SqlDataReader reader = command.ExecuteReader())
+                        using (SqlDataReader reader = await command.ExecuteReaderAsync())
                         {
-                            while (reader.Read())
+                            while (await reader.ReadAsync())
                             {
                                 list.Add(new TopProductDto
                                 {
@@ -207,7 +207,7 @@ namespace MiniSupermarket.API.Controllers
         // - Vẫn hỗ trợ ?date=... (tham số cũ) để không làm hỏng chỗ nào đang gọi theo kiểu cũ
         // =========================================================================
         [HttpGet("quick-report")]
-        public IActionResult GetQuickReport(
+        public async Task<IActionResult> GetQuickReport(
             [FromQuery] DateTime? fromDate,
             [FromQuery] DateTime? toDate,
             [FromQuery] DateTime? date)
@@ -235,7 +235,7 @@ namespace MiniSupermarket.API.Controllers
             {
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync();
 
                     // Truy vấn 1: tổng số hóa đơn và tổng doanh thu trong khoảng ngày
                     string summarySql = @"SELECT COUNT(*) AS TotalOrders, ISNULL(SUM(FinalAmount), 0) AS TotalRevenue
@@ -247,9 +247,9 @@ namespace MiniSupermarket.API.Controllers
                         cmdSummary.Parameters.AddWithValue("@From", fromValue);
                         cmdSummary.Parameters.AddWithValue("@To", toValue);
 
-                        using (SqlDataReader reader = cmdSummary.ExecuteReader())
+                        using (SqlDataReader reader = await cmdSummary.ExecuteReaderAsync())
                         {
-                            if (reader.Read())
+                            if (await reader.ReadAsync())
                             {
                                 totalOrders = Convert.ToInt32(reader["TotalOrders"]);
                                 totalRevenue = Convert.ToDecimal(reader["TotalRevenue"]);
@@ -272,9 +272,9 @@ namespace MiniSupermarket.API.Controllers
                         cmdBest.Parameters.AddWithValue("@From", fromValue);
                         cmdBest.Parameters.AddWithValue("@To", toValue);
 
-                        using (SqlDataReader reader = cmdBest.ExecuteReader())
+                        using (SqlDataReader reader = await cmdBest.ExecuteReaderAsync())
                         {
-                            if (reader.Read())
+                            if (await reader.ReadAsync())
                             {
                                 bestSeller = new
                                 {

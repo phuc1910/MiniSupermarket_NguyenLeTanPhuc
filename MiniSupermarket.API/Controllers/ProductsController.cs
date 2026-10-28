@@ -153,6 +153,74 @@ namespace MiniSupermarket.API.Controllers
         }
 
         // =========================================================================
+        // [BUỔI 6] GET: api/Products/paged?keyword=sua&categoryId=2&pageNumber=1&pageSize=5
+        // Phân trang phía máy chủ bằng LINQ .Skip() / .Take() + tìm kiếm gần đúng .Contains()
+        // + lọc theo nhóm hàng (Bài tập 6.2). Trả về PagedResult<ProductItemDto> (DTO, không trả Entity)
+        // =========================================================================
+        [HttpGet("paged")]
+        public async Task<IActionResult> GetPagedProducts(
+            [FromQuery] string? keyword,
+            [FromQuery] int? categoryId,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 5)
+        {
+            // 1. Kiểm tra tham số trang đầu vào hợp lệ
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1 || pageSize > 50) pageSize = 5; // Mặc định 5 dòng, tối đa 50 dòng
+
+            // 2. IQueryable + Eager Loading (.Include) + AsNoTracking (truy vấn chỉ đọc)
+            var query = _context.Products
+                .Include(p => p.Category)
+                .AsNoTracking()
+                .AsQueryable();
+
+            // 3. Tìm kiếm gần đúng theo tên hoặc mã vạch
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                string search = keyword.Trim().ToLower();
+                query = query.Where(p => p.ProductName.ToLower().Contains(search)
+                                      || p.Barcode.Contains(search));
+            }
+
+            // 4. Lọc theo nhóm hàng (nếu có chọn)
+            if (categoryId.HasValue && categoryId.Value > 0)
+            {
+                query = query.Where(p => p.CategoryId == categoryId.Value);
+            }
+
+            // 5. Đếm tổng số bản ghi và tính tổng số trang
+            int totalItems = await query.CountAsync();
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            // 6. Skip + Take -> EF Core dịch thành OFFSET ... FETCH NEXT ... trên SQL Server
+            var items = await query
+                .OrderBy(p => p.ProductId) // Bắt buộc phải OrderBy trước khi Skip/Take
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(p => new ProductItemDto
+                {
+                    ProductId = p.ProductId,
+                    Barcode = p.Barcode,
+                    ProductName = p.ProductName,
+                    Price = p.Price,
+                    StockQuantity = p.StockQuantity,
+                    CategoryId = p.CategoryId,
+                    CategoryName = p.Category != null ? p.Category.CategoryName : string.Empty
+                })
+                .ToListAsync();
+
+            // 7. Đóng gói kết quả trả về cho Client
+            return Ok(new PagedResult<ProductItemDto>
+            {
+                CurrentPage = pageNumber,
+                PageSize = pageSize,
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                Items = items
+            });
+        }
+
+        // =========================================================================
         // [PHỤ LỤC - Bài tập 1] GET: api/Products/with-category
         // Danh sách sản phẩm kèm tên nhóm hàng (Eager Loading)
         //  - Include(p => p.Category): nạp kèm nhóm hàng bằng 1 câu JOIN, tránh truy vấn N+1
@@ -189,7 +257,7 @@ namespace MiniSupermarket.API.Controllers
         // FormPOS gọi sẵn đường dẫn này: products/barcode/{barcode}
         // =========================================================================
         [HttpGet("barcode/{barcode}")]
-        public IActionResult GetByBarcode(string barcode)
+        public async Task<IActionResult> GetByBarcode(string barcode)
         {
             // Kiểm tra mã vạch đầu vào
             if (string.IsNullOrWhiteSpace(barcode))
@@ -214,12 +282,12 @@ namespace MiniSupermarket.API.Controllers
 
                     try
                     {
-                        connection.Open();
+                        await connection.OpenAsync();
 
                         // Luồng đọc nhanh một chiều, chỉ cần đọc đúng 1 dòng
-                        using (SqlDataReader reader = command.ExecuteReader())
+                        using (SqlDataReader reader = await command.ExecuteReaderAsync())
                         {
-                            if (reader.Read())
+                            if (await reader.ReadAsync())
                             {
                                 return Ok(new
                                 {

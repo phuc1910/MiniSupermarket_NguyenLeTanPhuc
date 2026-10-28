@@ -49,6 +49,53 @@ namespace MiniSupermarket.API.Controllers
             return Ok(customer);
         }
 
+        // [BUỔI 6 - Bài tập 6.1] GET: api/Customers/paged?keyword=an&pageNumber=1&pageSize=5
+        // Phân trang khách hàng thân thiết, sắp xếp tăng dần theo Mã KH (CustomerId)
+        [HttpGet("paged")]
+        public async Task<IActionResult> GetPagedCustomers(
+            [FromQuery] string? keyword,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 5)
+        {
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1 || pageSize > 50) pageSize = 5;
+
+            var query = _context.Customers.AsNoTracking().AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                string search = keyword.Trim();
+                query = query.Where(c => c.CustomerName.Contains(search) || c.PhoneNumber.Contains(search));
+            }
+
+            int totalItems = await query.CountAsync();
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            var items = await query
+                .OrderBy(c => c.CustomerId) // Sắp xếp theo Mã KH tăng dần
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(c => new CustomerItemDto
+                {
+                    CustomerId = c.CustomerId,
+                    CustomerName = c.CustomerName,
+                    PhoneNumber = c.PhoneNumber,
+                    Address = c.Address,
+                    RewardPoints = c.RewardPoints,
+                    MembershipRank = c.MembershipRank
+                })
+                .ToListAsync();
+
+            return Ok(new PagedResult<CustomerItemDto>
+            {
+                CurrentPage = pageNumber,
+                PageSize = pageSize,
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                Items = items
+            });
+        }
+
         // GET: api/Customers/search?keyword=Nguyen
         // Tìm theo tên hoặc số điện thoại
         [HttpGet("search")]
