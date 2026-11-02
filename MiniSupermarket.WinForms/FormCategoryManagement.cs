@@ -16,12 +16,6 @@ namespace MiniSupermarket.WinForms
     public partial class FormCategoryManagement : Form
     {
 
-        // Khởi tạo HttpClient tĩnh kết nối trực tiếp đến Web API (Đảm bảo số Port https://localhost:7123 khớp với API của bạn)
-        private static readonly HttpClient _client = new HttpClient
-        {
-            BaseAddress = new Uri("https://localhost:7251/api/")
-        };
-
         // [BUỔI 6] Phân trang phía máy chủ
         private int _currentPage = 1;
         private const int PageSize = 5;
@@ -166,7 +160,7 @@ namespace MiniSupermarket.WinForms
 
             // Gửi request POST kèm theo đối tượng dạng JSON
             // Sử dụng client đã gắn JWT Token
-            using var client = GetAuthenticatedClient();
+            var client = ApiClientService.Client; // HttpClient dùng chung (tự gắn Bearer Token), KHÔNG được Dispose
 
             // Gửi request POST kèm Token
             var response = await client.PostAsJsonAsync("categories", newCat);
@@ -200,7 +194,7 @@ namespace MiniSupermarket.WinForms
             };
 
             // Sử dụng client đã gắn JWT Token
-            using var client = GetAuthenticatedClient();
+            var client = ApiClientService.Client; // HttpClient dùng chung (tự gắn Bearer Token), KHÔNG được Dispose
 
             // Gửi request PUT kèm Token
             var response = await client.PutAsJsonAsync($"categories/{id}", updateCat);
@@ -230,7 +224,7 @@ namespace MiniSupermarket.WinForms
             if (confirm == DialogResult.Yes)
             {
                 // Sử dụng client đã gắn JWT Token
-                using var client = GetAuthenticatedClient();
+                var client = ApiClientService.Client; // HttpClient dùng chung (tự gắn Bearer Token), KHÔNG được Dispose
 
                 // Gửi request DELETE kèm Token
                 var response = await client.DeleteAsync($"categories/{id}");
@@ -242,7 +236,17 @@ namespace MiniSupermarket.WinForms
                 }
                 else
                 {
-                    MessageBox.Show("Xóa thất bại!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    // Hiển thị đúng lý do máy chủ trả về (vd: 409 - nhóm hàng còn sản phẩm)
+                    string reason = "Xóa thất bại!";
+                    try
+                    {
+                        using var doc = System.Text.Json.JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+                        if (doc.RootElement.TryGetProperty("message", out var msg) && !string.IsNullOrWhiteSpace(msg.GetString()))
+                            reason = msg.GetString()!;
+                    }
+                    catch { /* giữ thông báo mặc định nếu không đọc được JSON */ }
+
+                    MessageBox.Show(reason, "Không thể xóa", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
         }
@@ -254,23 +258,6 @@ namespace MiniSupermarket.WinForms
             _currentPage = 1;
             await LoadDataAsync();
         }
-
-        // Bổ sung phương thức cấu hình HttpClient có gắn kèm Token bảo mật
-        private HttpClient GetAuthenticatedClient()
-        {
-            var client = new HttpClient
-            {
-                BaseAddress = new Uri("https://localhost:7251/api/")
-            };
-
-            // Đính kèm Token vào Header theo chuẩn Bearer Authentication
-            if (!string.IsNullOrEmpty(SessionManager.JwtToken))
-            {
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", SessionManager.JwtToken);
-            }
-            return client;
-        }
-
 
         // Hàm phụ trợ: Xóa trắng các ô nhập liệu sau khi thao tác xong
         private void ClearInputs()

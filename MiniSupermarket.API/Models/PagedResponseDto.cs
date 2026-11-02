@@ -15,6 +15,7 @@ namespace MiniSupermarket.API.Models
         public int StockQuantity { get; set; }
         public int CategoryId { get; set; }
         public string CategoryName { get; set; } = string.Empty; // Lấy từ bảng Categories qua Eager Loading
+        public bool IsLowStock => StockQuantity <= Product.LowStockThreshold; // Tồn kho <= 10
     }
 
     // DTO khách hàng trả về cho API phân trang (Bài tập 6.1)
@@ -26,6 +27,7 @@ namespace MiniSupermarket.API.Models
         public string? Address { get; set; }
         public int RewardPoints { get; set; }
         public string MembershipRank { get; set; } = string.Empty;
+        public DateTime CreatedDate { get; set; }
     }
 
     // DTO nhóm hàng trả về cho API phân trang

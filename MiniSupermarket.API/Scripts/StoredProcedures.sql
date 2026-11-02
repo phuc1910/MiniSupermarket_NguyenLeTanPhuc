@@ -102,3 +102,34 @@ GO
 -- Chay thu: EXEC sp_GetTop5SellingProducts;
 GO
 
+
+-- =========================================================================
+-- Ho ten sinh vien: Nguyen Le Tan Phuc
+-- Ma sinh vien: 2124110108
+-- Mo ta: [TC 45] Thu tuc thong ke doanh thu theo TUNG NGAY cho bieu do cot tren Dashboard
+-- =========================================================================
+IF OBJECT_ID('sp_GetRevenueByDay', 'P') IS NOT NULL
+    DROP PROCEDURE sp_GetRevenueByDay;
+GO
+
+CREATE PROCEDURE sp_GetRevenueByDay
+    @FromDate DATE,
+    @ToDate DATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Gom nhom theo ngay (bo phan gio), tinh tron ca ngay cuoi
+    SELECT
+        CAST(CreatedDate AS DATE) AS OrderDate,
+        COUNT(OrderId) AS TotalOrders,
+        SUM(FinalAmount) AS TotalRevenue
+    FROM Orders
+    WHERE CreatedDate >= @FromDate AND CreatedDate < DATEADD(DAY, 1, @ToDate)
+    GROUP BY CAST(CreatedDate AS DATE)
+    ORDER BY OrderDate;
+END
+GO
+
+-- Chay thu: EXEC sp_GetRevenueByDay @FromDate = '2026-10-01', @ToDate = '2026-10-31';
+GO

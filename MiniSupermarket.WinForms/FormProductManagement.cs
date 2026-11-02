@@ -16,9 +16,15 @@ namespace MiniSupermarket.WinForms
     {
         private List<CategoryDto> _categoriesCache;
 
+        // [TC 43] Ngưỡng cảnh báo hàng sắp hết kho
+        private const int LowStockThreshold = 10;
+
         public FormProductManagement()
         {
             InitializeComponent();
+
+            // [TC 43] Đăng ký sự kiện tô màu dòng có tồn kho thấp
+            dgvProducts.CellFormatting += dgvProducts_CellFormatting;
         }
 
         // Khi form mở: nạp danh mục trước, rồi nạp sản phẩm
@@ -163,7 +169,9 @@ namespace MiniSupermarket.WinForms
                 dgvProducts.DataSource = result.Items;
                 FormatProductGrid();
 
-                lblPaging.Text = $"Trang {_currentPage} / {_totalPages}  (Tổng: {result.TotalItems} SP)";
+                int lowStockCount = result.Items.Count(x => x.StockQuantity <= LowStockThreshold);
+                lblPaging.Text = $"Trang {_currentPage} / {_totalPages}  (Tổng: {result.TotalItems} SP)"
+                               + (lowStockCount > 0 ? $"  |  ⚠ {lowStockCount} SP sắp hết hàng (<= {LowStockThreshold})" : "");
                 btnPrev.Enabled = _currentPage > 1;
                 btnNext.Enabled = _currentPage < _totalPages;
             }
@@ -184,6 +192,22 @@ namespace MiniSupermarket.WinForms
             if (dgvProducts.Columns["StockQuantity"] != null) { dgvProducts.Columns["StockQuantity"].HeaderText = "Tồn kho"; dgvProducts.Columns["StockQuantity"].FillWeight = 10; }
             if (dgvProducts.Columns["CategoryId"] != null) { dgvProducts.Columns["CategoryId"].Visible = false; }
             if (dgvProducts.Columns["CategoryName"] != null) { dgvProducts.Columns["CategoryName"].HeaderText = "Nhóm hàng"; dgvProducts.Columns["CategoryName"].FillWeight = 20; }
+        }
+
+        // [TC 43] Cảnh báo hàng sắp hết: tồn kho <= 10 thì tô nền đỏ/cam cho cả dòng
+        private void dgvProducts_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+
+            if (dgvProducts.Rows[e.RowIndex].DataBoundItem is ProductDto product
+                && product.StockQuantity <= LowStockThreshold)
+            {
+                e.CellStyle.BackColor = Color.LightCoral;
+                e.CellStyle.ForeColor = Color.Black;
+                // Giữ màu chọn dòng dễ nhìn khi người dùng click vào
+                e.CellStyle.SelectionBackColor = Color.IndianRed;
+                e.CellStyle.SelectionForeColor = Color.White;
+            }
         }
 
         // Sự kiện chuyển trang

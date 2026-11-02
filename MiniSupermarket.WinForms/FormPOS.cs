@@ -18,6 +18,12 @@ namespace MiniSupermarket.WinForms
     {
         private readonly List<CartItemDto> _cart = new();
 
+        // [TC 47] Quy tắc đổi điểm (phải khớp với API): dùng 50 điểm -> trừ 50.000 đ
+        private const int PointsPerRedemption = 50;
+        private const decimal RedeemValue = 50000m;
+        private int _customerPoints = 0;         // điểm hiện có của khách đang chọn
+        private string _lookedUpPhone = string.Empty; // SĐT đã tra cứu (tránh gọi API lặp)
+
         public FormPOS()
         {
             InitializeComponent();
@@ -31,6 +37,12 @@ namespace MiniSupermarket.WinForms
             txtCashReceived.TextChanged += txtCashReceived_TextChanged;
             btnCheckout.Click += btnCheckout_Click;
             btnClearCart.Click += btnClearCart_Click;
+
+            // [TC 47] Tra điểm khách hàng khi nhập xong SĐT (Enter hoặc rời ô), bật/tắt ô "Dùng điểm"
+            txtCustomerPhone.KeyDown += txtCustomerPhone_KeyDown;
+            txtCustomerPhone.Leave += txtCustomerPhone_Leave;
+            txtCustomerPhone.TextChanged += (s, e) => ResetCustomerInfo();
+            chkUsePoints.CheckedChanged += (s, e) => RefreshTotals();
 
             // [BUỔI 5] Phím tắt F9 = THANH TOÁN (nút đang ghi "THANH TOÁN (F9)")
             KeyPreview = true;
@@ -135,9 +147,99 @@ namespace MiniSupermarket.WinForms
             dgvCart.DataSource = null;
             dgvCart.DataSource = _cart;
 
-            decimal total = _cart.Sum(x => x.TotalPrice);
-            lblTotalAmount.Text = $"{total:N0} đ";
+            RefreshTotals();
+        }
+
+        // ================== [TC 47] ĐỔI ĐIỂM THƯỞNG TRỪ TIỀN ==================
+
+        private decimal GetSubtotal() => _cart.Sum(x => x.TotalPrice);
+
+        private decimal GetDiscount() => chkUsePoints.Checked ? RedeemValue : 0m;
+
+        // Số tiền khách phải trả = tiền hàng - tiền giảm từ điểm
+        private decimal GetPayable() => Math.Max(0m, GetSubtotal() - GetDiscount());
+
+        // Ô "Dùng điểm" chỉ cho tick khi khách đủ điểm VÀ hóa đơn đủ lớn để trừ
+        private void UpdateRedeemState()
+        {
+            bool eligible = _customerPoints >= PointsPerRedemption && GetSubtotal() >= RedeemValue;
+            if (!eligible && chkUsePoints.Checked)
+            {
+                chkUsePoints.Checked = false; // tự bỏ tick (vd: xóa bớt hàng làm hóa đơn < 50.000 đ)
+            }
+            chkUsePoints.Enabled = eligible;
+        }
+
+        private void RefreshTotals()
+        {
+            UpdateRedeemState();
+
+            decimal discount = GetDiscount();
+            lblTotalAmount.Text = $"{GetPayable():N0} đ";
+            lblDiscountInfo.Text = discount > 0 ? $"Đã trừ {discount:N0} đ ({PointsPerRedemption} điểm)" : string.Empty;
             CalculateChange();
+        }
+
+        // Đổi SĐT thì thông tin khách cũ không còn đúng -> xóa điểm và bỏ tick
+        private void ResetCustomerInfo()
+        {
+            _customerPoints = 0;
+            _lookedUpPhone = string.Empty;
+            lblCustomerPoints.Text = string.Empty;
+            lblCustomerName.Text = "Chưa chọn khách hàng";
+            RefreshTotals();
+        }
+
+        private void txtCustomerPhone_KeyDown(object? sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.SuppressKeyPress = true;
+                txtBarcode.Focus(); // rời ô SĐT -> sự kiện Leave sẽ tự tra cứu khách hàng
+            }
+        }
+
+        private async void txtCustomerPhone_Leave(object? sender, EventArgs e)
+        {
+            await LookupCustomerAsync();
+        }
+
+        // Tra khách hàng theo SĐT: GET api/customers/search?keyword=... rồi chọn đúng SĐT trùng khớp
+        private async Task LookupCustomerAsync()
+        {
+            string phone = txtCustomerPhone.Text.Trim();
+            if (phone.Length == 0 || phone == _lookedUpPhone) return;
+
+            try
+            {
+                var response = await ApiClientService.Client.GetAsync($"customers/search?keyword={Uri.EscapeDataString(phone)}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show(await ReadErrorMessageAsync(response), "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+                foreach (var c in doc.RootElement.EnumerateArray())
+                {
+                    if (c.GetProperty("phoneNumber").GetString() == phone)
+                    {
+                        _lookedUpPhone = phone;
+                        _customerPoints = c.GetProperty("rewardPoints").GetInt32();
+                        lblCustomerName.Text = c.GetProperty("customerName").GetString() ?? string.Empty;
+                        lblCustomerPoints.Text = $"Điểm tích lũy: {_customerPoints:N0}";
+                        RefreshTotals();
+                        return;
+                    }
+                }
+
+                // Không có khách trùng SĐT: vẫn bán được như khách vãng lai
+                lblCustomerName.Text = "Không tìm thấy - tính khách vãng lai";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi kết nối máy chủ: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void txtCashReceived_TextChanged(object? sender, EventArgs e)
@@ -147,7 +249,7 @@ namespace MiniSupermarket.WinForms
 
         private void CalculateChange()
         {
-            decimal total = _cart.Sum(x => x.TotalPrice);
+            decimal total = GetPayable(); // [TC 47] đã trừ tiền giảm từ điểm
             if (decimal.TryParse(txtCashReceived.Text, out decimal cashReceived))
             {
                 decimal change = cashReceived - total;
@@ -169,7 +271,7 @@ namespace MiniSupermarket.WinForms
             }
 
             // [BUỔI 5] Nếu đã nhập tiền khách đưa thì phải đủ tiền mới cho thanh toán
-            decimal total = _cart.Sum(x => x.TotalPrice);
+            decimal total = GetPayable(); // [TC 47] khách chỉ phải đưa đủ số tiền sau khi trừ điểm
             if (decimal.TryParse(txtCashReceived.Text, out decimal cashReceived) && cashReceived < total)
             {
                 MessageBox.Show("Tiền khách đưa chưa đủ để thanh toán!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -180,6 +282,7 @@ namespace MiniSupermarket.WinForms
             {
                 CashierUsername = SessionManager.CurrentUsername,
                 CustomerPhone = txtCustomerPhone.Text.Trim(),
+                UsePoints = chkUsePoints.Checked, // [TC 47] máy chủ kiểm tra lại điều kiện và trừ điểm trong Transaction
                 Items = _cart.Select(i => new { i.ProductId, i.Quantity, i.UnitPrice }).ToList()
             };
 
@@ -201,9 +304,14 @@ namespace MiniSupermarket.WinForms
                     string customerName = root.GetProperty("customerName").GetString() ?? "Khách vãng lai";
                     decimal finalAmount = root.GetProperty("finalAmount").GetDecimal();
                     int points = root.GetProperty("rewardPointsAdded").GetInt32();
+                    int pointsRedeemed = root.TryGetProperty("pointsRedeemed", out var pr) ? pr.GetInt32() : 0;
+
+                    string redeemLine = pointsRedeemed > 0
+                        ? $"\nĐã dùng {pointsRedeemed} điểm (giảm {RedeemValue:N0} đ)"
+                        : string.Empty;
 
                     MessageBox.Show(
-                        $"Thanh toán thành công!\n\nMã hóa đơn: {orderCode}\nKhách hàng: {customerName}\n" +
+                        $"Thanh toán thành công!\n\nMã hóa đơn: {orderCode}\nKhách hàng: {customerName}" + redeemLine + "\n" +
                         $"Tổng tiền: {finalAmount:N0} đ\nĐiểm thưởng cộng thêm: {points}",
                         "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
 

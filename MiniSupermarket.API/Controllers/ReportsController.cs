@@ -6,6 +6,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using MiniSupermarket.API.Data;
 using MiniSupermarket.API.Models;
 using System.Data;
 
@@ -17,10 +19,180 @@ namespace MiniSupermarket.API.Controllers
     public class ReportsController : ControllerBase
     {
         private readonly IConfiguration _configuration;
+        private readonly SupermarketDbContext _context; // [TC 46] dùng LINQ cho Top 5 bán chạy
 
-        public ReportsController(IConfiguration configuration)
+        public ReportsController(IConfiguration configuration, SupermarketDbContext context)
         {
             _configuration = configuration;
+            _context = context;
+        }
+
+        // =========================================================================
+        // [TC 44] GET: api/Reports/dashboard-summary
+        // Trả về 4 chỉ số tổng quan cho Dashboard bằng ADO.NET ExecuteScalar:
+        //   1. Doanh thu hôm nay (VNĐ)
+        //   2. Tổng số hóa đơn đã xuất (kèm số hóa đơn hôm nay)
+        //   3. Số khách hàng mới đăng ký hôm nay
+        //   4. Số mặt hàng sắp hết hàng (tồn kho <= 10)
+        // =========================================================================
+        [HttpGet("dashboard-summary")]
+        public async Task<IActionResult> GetDashboardSummary()
+        {
+            const int lowStockThreshold = Product.LowStockThreshold;
+            DateTime today = DateTime.Today;
+            DateTime tomorrow = today.AddDays(1);
+
+            string connectionString = _configuration.GetConnectionString("DefaultConnection")!;
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+
+                    // Hàm cục bộ: chạy 1 câu lệnh trả về đúng 1 giá trị (ExecuteScalar), dùng tham số chống SQL Injection
+                    async Task<object?> ScalarAsync(string sql, params (string Name, object Value)[] parameters)
+                    {
+                        using (SqlCommand cmd = new SqlCommand(sql, connection))
+                        {
+                            foreach (var p in parameters)
+                            {
+                                cmd.Parameters.AddWithValue(p.Name, p.Value);
+                            }
+                            return await cmd.ExecuteScalarAsync();
+                        }
+                    }
+
+                    decimal revenueToday = Convert.ToDecimal(await ScalarAsync(
+                        @"SELECT ISNULL(SUM(FinalAmount), 0) FROM Orders
+                          WHERE CreatedDate >= @From AND CreatedDate < @To",
+                        ("@From", today), ("@To", tomorrow)));
+
+                    int totalInvoices = Convert.ToInt32(await ScalarAsync(
+                        "SELECT COUNT(*) FROM Orders"));
+
+                    int invoicesToday = Convert.ToInt32(await ScalarAsync(
+                        "SELECT COUNT(*) FROM Orders WHERE CreatedDate >= @From AND CreatedDate < @To",
+                        ("@From", today), ("@To", tomorrow)));
+
+                    int newCustomersToday = Convert.ToInt32(await ScalarAsync(
+                        "SELECT COUNT(*) FROM Customers WHERE CreatedDate >= @From AND CreatedDate < @To",
+                        ("@From", today), ("@To", tomorrow)));
+
+                    int lowStockProducts = Convert.ToInt32(await ScalarAsync(
+                        "SELECT COUNT(*) FROM Products WHERE StockQuantity <= @Threshold",
+                        ("@Threshold", lowStockThreshold)));
+
+                    return Ok(new
+                    {
+                        success = true,
+                        revenueToday,
+                        totalInvoices,
+                        invoicesToday,
+                        newCustomersToday,
+                        lowStockProducts,
+                        lowStockThreshold
+                    });
+                }
+            }
+            catch (SqlException ex)
+            {
+                return StatusCode(500, new { success = false, message = "Lỗi truy vấn dashboard: " + ex.Message });
+            }
+        }
+
+        // =========================================================================
+        // [TC 45] GET: api/Reports/revenue-by-day?fromDate=2026-10-01&toDate=2026-10-31
+        // Gọi Stored Procedure sp_GetRevenueByDay (GROUP BY CAST(CreatedDate AS DATE))
+        // để WinForms vẽ biểu đồ cột doanh thu từng ngày.
+        // =========================================================================
+        [HttpGet("revenue-by-day")]
+        public async Task<IActionResult> GetRevenueByDay([FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate)
+        {
+            DateTime fromDay = (fromDate ?? DateTime.Today.AddDays(-6)).Date;
+            DateTime toDay = (toDate ?? DateTime.Today).Date;
+
+            if (fromDay > toDay)
+            {
+                return BadRequest(new { success = false, message = "Từ ngày không được lớn hơn đến ngày!" });
+            }
+            if ((toDay - fromDay).TotalDays > 366)
+            {
+                return BadRequest(new { success = false, message = "Chỉ xem tối đa 366 ngày mỗi lần!" });
+            }
+
+            var data = new List<object>();
+            string connectionString = _configuration.GetConnectionString("DefaultConnection")!;
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                using (SqlCommand command = new SqlCommand("sp_GetRevenueByDay", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@FromDate", fromDay);
+                    command.Parameters.AddWithValue("@ToDate", toDay);
+
+                    await connection.OpenAsync();
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            data.Add(new
+                            {
+                                date = Convert.ToDateTime(reader["OrderDate"]).ToString("yyyy-MM-dd"),
+                                totalOrders = Convert.ToInt32(reader["TotalOrders"]),
+                                totalRevenue = Convert.ToDecimal(reader["TotalRevenue"])
+                            });
+                        }
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                // Thường do chưa chạy script tạo sp_GetRevenueByDay trong StoredProcedures.sql
+                return StatusCode(500, new { success = false, message = "Lỗi thực thi Stored Procedure: " + ex.Message });
+            }
+
+            return Ok(new { success = true, data });
+        }
+
+        // =========================================================================
+        // [TC 46] GET: api/Reports/best-sellers
+        // Top 5 mặt hàng bán chạy nhất bằng LINQ: GroupBy -> OrderByDescending(Sum Quantity) -> Take(5)
+        // =========================================================================
+        [HttpGet("best-sellers")]
+        public async Task<IActionResult> GetBestSellers()
+        {
+            var top5 = await _context.OrderDetails
+                .AsNoTracking()
+                .GroupBy(od => od.ProductId)
+                .Select(g => new
+                {
+                    ProductId = g.Key,
+                    TotalSold = g.Sum(od => od.Quantity),
+                    TotalRevenue = g.Sum(od => od.LineTotal)
+                })
+                .OrderByDescending(x => x.TotalSold)
+                .Take(5)
+                .ToListAsync();
+
+            // Lấy tên sản phẩm bằng 1 truy vấn riêng (tránh join phức tạp sau GroupBy)
+            var ids = top5.Select(x => x.ProductId).ToList();
+            var names = await _context.Products
+                .AsNoTracking()
+                .Where(p => ids.Contains(p.ProductId))
+                .ToDictionaryAsync(p => p.ProductId, p => p.ProductName);
+
+            var data = top5.Select(x => new TopProductDto
+            {
+                ProductId = x.ProductId,
+                ProductName = names.TryGetValue(x.ProductId, out var name) ? name : "(Đã xóa)",
+                TotalSold = x.TotalSold,
+                TotalRevenue = x.TotalRevenue
+            }).ToList();
+
+            return Ok(new { success = true, data });
         }
 
         // GET: api/Reports/revenue-by-cashier

@@ -18,6 +18,10 @@ namespace MiniSupermarket.API.Controllers
     {
         private readonly IConfiguration _configuration;
 
+        // [TC 47] Quy tắc đổi điểm: dùng 50 điểm -> trừ 50.000 đ (tức 1 điểm = 1.000 đ)
+        private const int PointsPerRedemption = 50;
+        private const decimal RedeemValue = 50000m;
+
         // Tiêm IConfiguration để đọc chuỗi kết nối từ appsettings.json
         public OrdersController(IConfiguration configuration)
         {
@@ -66,10 +70,14 @@ namespace MiniSupermarket.API.Controllers
                     // ---------------------------------------------------------------
                     int? customerId = null;
                     string customerName = "Khách vãng lai";
+                    int customerPoints = 0; // [TC 47] điểm hiện có của khách, đọc trong Transaction
 
                     if (!string.IsNullOrWhiteSpace(request.CustomerPhone))
                     {
-                        string findSql = "SELECT CustomerId, CustomerName FROM Customers WHERE PhoneNumber = @Phone";
+                        // UPDLOCK khóa dòng khách hàng đến hết Transaction: 2 quầy POS không thể cùng dùng một lượng điểm
+                        string findSql = @"SELECT CustomerId, CustomerName, RewardPoints
+                                           FROM Customers WITH (UPDLOCK, ROWLOCK)
+                                           WHERE PhoneNumber = @Phone";
 
                         using (SqlCommand cmdFind = new SqlCommand(findSql, connection, transaction))
                         {
@@ -81,14 +89,48 @@ namespace MiniSupermarket.API.Controllers
                                 {
                                     customerId = Convert.ToInt32(reader["CustomerId"]);
                                     customerName = reader["CustomerName"].ToString() ?? customerName;
+                                    customerPoints = Convert.ToInt32(reader["RewardPoints"]);
                                 }
                             }
                         }
                     }
 
-                    // Tính tổng tiền, tổng số lượng, điểm thưởng (10.000đ = 1 điểm, chỉ khi có khách)
-                    decimal finalAmount = request.Items.Sum(i => i.Quantity * i.UnitPrice);
+                    // Tổng tiền hàng, tổng số lượng
+                    decimal subtotal = request.Items.Sum(i => i.Quantity * i.UnitPrice);
                     int totalItems = request.Items.Sum(i => i.Quantity);
+
+                    // ---------------------------------------------------------------
+                    // [TC 47] Đổi điểm thưởng trừ tiền: kiểm tra điều kiện NGAY trong Transaction.
+                    // Sai điều kiện -> ném lỗi -> nhảy xuống catch -> Rollback, không lưu gì cả.
+                    // ---------------------------------------------------------------
+                    decimal discountAmount = 0;
+                    int pointsRedeemed = 0;
+
+                    if (request.UsePoints)
+                    {
+                        if (!customerId.HasValue)
+                        {
+                            throw new InvalidOperationException("Cần nhập đúng SĐT khách hàng thân thiết mới được dùng điểm!");
+                        }
+                        if (customerPoints < PointsPerRedemption)
+                        {
+                            throw new InvalidOperationException(
+                                $"Khách hàng chỉ có {customerPoints} điểm, cần tối thiểu {PointsPerRedemption} điểm để đổi!");
+                        }
+                        if (subtotal < RedeemValue)
+                        {
+                            throw new InvalidOperationException(
+                                $"Hóa đơn phải từ {RedeemValue:N0} đ trở lên mới được dùng điểm (hiện tại {subtotal:N0} đ)!");
+                        }
+
+                        pointsRedeemed = PointsPerRedemption;
+                        discountAmount = RedeemValue;
+                    }
+
+                    // Số tiền thực thu (FinalAmount) = tiền hàng - tiền giảm từ điểm
+                    decimal finalAmount = subtotal - discountAmount;
+
+                    // Điểm thưởng mới (10.000đ = 1 điểm, chỉ khi có khách) tính trên số tiền khách thực trả
                     int rewardPoints = customerId.HasValue ? (int)(finalAmount / 10000) : 0;
 
                     // Mã hóa đơn: HD-YYYYMMDD-XXXXXXXX (8 ký tự ngẫu nhiên vì OrderCode có Unique Index,
@@ -194,19 +236,28 @@ namespace MiniSupermarket.API.Controllers
                     }
 
                     // ---------------------------------------------------------------
-                    // BƯỚC 4: Cộng điểm tích lũy (chỉ khi xác định được khách hàng)
                     // ---------------------------------------------------------------
-                    if (rewardPoints > 0 && customerId.HasValue)
+                    // BƯỚC 4: Cập nhật điểm tích lũy của khách trong CÙNG Transaction:
+                    //   điểm mới = điểm cũ - điểm đã dùng + điểm thưởng của hóa đơn này
+                    // Điều kiện RewardPoints >= @Redeem chặn trường hợp điểm bị trừ âm
+                    // ---------------------------------------------------------------
+                    if (customerId.HasValue && (rewardPoints > 0 || pointsRedeemed > 0))
                     {
                         string updatePointsSql = @"UPDATE Customers
-                                                   SET RewardPoints = RewardPoints + @Points
-                                                   WHERE CustomerId = @CustomerId";
+                                                   SET RewardPoints = RewardPoints - @Redeem + @Earned
+                                                   WHERE CustomerId = @CustomerId AND RewardPoints >= @Redeem";
 
                         using (SqlCommand cmdPoints = new SqlCommand(updatePointsSql, connection, transaction))
                         {
-                            cmdPoints.Parameters.AddWithValue("@Points", rewardPoints);
+                            cmdPoints.Parameters.AddWithValue("@Redeem", pointsRedeemed);
+                            cmdPoints.Parameters.AddWithValue("@Earned", rewardPoints);
                             cmdPoints.Parameters.AddWithValue("@CustomerId", customerId.Value);
-                            await cmdPoints.ExecuteNonQueryAsync();
+
+                            int affected = await cmdPoints.ExecuteNonQueryAsync();
+                            if (affected == 0)
+                            {
+                                throw new InvalidOperationException("Không thể trừ điểm của khách hàng (không đủ điểm)!");
+                            }
                         }
                     }
 
@@ -221,6 +272,9 @@ namespace MiniSupermarket.API.Controllers
                         orderCode = orderCode,
                         customerName = customerName,
                         totalItems = totalItems,
+                        subtotal = subtotal,
+                        discountAmount = discountAmount,
+                        pointsRedeemed = pointsRedeemed,
                         finalAmount = finalAmount,
                         rewardPointsAdded = rewardPoints
                     });
@@ -272,9 +326,10 @@ namespace MiniSupermarket.API.Controllers
                     // 1. Kiểm tra hóa đơn tồn tại, lấy khách hàng và điểm thưởng đã tặng
                     int? customerId = null;
                     int pointsToDeduct = 0;
+                    decimal finalAmountPaid = 0; // [TC 47] số tiền khách đã thực trả (sau khi trừ điểm)
 
                     using (SqlCommand cmdGet = new SqlCommand(
-                        "SELECT CustomerId, RewardPoints FROM Orders WHERE OrderId = @OrderId", connection, transaction))
+                        "SELECT CustomerId, RewardPoints, FinalAmount FROM Orders WHERE OrderId = @OrderId", connection, transaction))
                     {
                         cmdGet.Parameters.AddWithValue("@OrderId", orderId);
 
@@ -291,15 +346,17 @@ namespace MiniSupermarket.API.Controllers
                                 customerId = Convert.ToInt32(reader["CustomerId"]);
                             }
                             pointsToDeduct = Convert.ToInt32(reader["RewardPoints"]);
+                            finalAmountPaid = Convert.ToDecimal(reader["FinalAmount"]);
                         }
                     }
 
                     // 2. Đọc hết chi tiết vào danh sách RAM TRƯỚC khi cập nhật
                     //    (không chạy lệnh khác khi reader còn mở)
                     var itemsToRestore = new List<(int ProductId, int Quantity)>();
+                    decimal linesTotal = 0; // [TC 47] tổng tiền hàng trước khi trừ điểm
 
                     using (SqlCommand cmdDetails = new SqlCommand(
-                        "SELECT ProductId, Quantity FROM OrderDetails WHERE OrderId = @OrderId", connection, transaction))
+                        "SELECT ProductId, Quantity, LineTotal FROM OrderDetails WHERE OrderId = @OrderId", connection, transaction))
                     {
                         cmdDetails.Parameters.AddWithValue("@OrderId", orderId);
 
@@ -310,6 +367,7 @@ namespace MiniSupermarket.API.Controllers
                                 itemsToRestore.Add((
                                     Convert.ToInt32(reader["ProductId"]),
                                     Convert.ToInt32(reader["Quantity"])));
+                                linesTotal += Convert.ToDecimal(reader["LineTotal"]);
                             }
                         }
                     }
@@ -327,17 +385,22 @@ namespace MiniSupermarket.API.Controllers
                         }
                     }
 
-                    // 4. Thu hồi điểm thưởng (không để điểm bị âm)
-                    if (pointsToDeduct > 0 && customerId.HasValue)
+                    // 4. Thu hồi điểm thưởng đã tặng VÀ hoàn lại điểm khách đã dùng để trừ tiền (nếu có)
+                    //    [TC 47] Tiền giảm = tổng chi tiết - FinalAmount; 1 điểm = RedeemValue / PointsPerRedemption = 1.000 đ
+                    decimal discountGiven = Math.Max(0, linesTotal - finalAmountPaid);
+                    int pointsToRefund = (int)(discountGiven / (RedeemValue / PointsPerRedemption));
+
+                    if (customerId.HasValue && (pointsToDeduct > 0 || pointsToRefund > 0))
                     {
                         string deductSql = @"UPDATE Customers
-                                             SET RewardPoints = CASE WHEN RewardPoints >= @Pts
-                                                                     THEN RewardPoints - @Pts ELSE 0 END
+                                             SET RewardPoints = (CASE WHEN RewardPoints >= @Pts
+                                                                      THEN RewardPoints - @Pts ELSE 0 END) + @Refund
                                              WHERE CustomerId = @CustomerId";
 
                         using (SqlCommand cmdDeduct = new SqlCommand(deductSql, connection, transaction))
                         {
                             cmdDeduct.Parameters.AddWithValue("@Pts", pointsToDeduct);
+                            cmdDeduct.Parameters.AddWithValue("@Refund", pointsToRefund);
                             cmdDeduct.Parameters.AddWithValue("@CustomerId", customerId.Value);
                             await cmdDeduct.ExecuteNonQueryAsync();
                         }

@@ -25,5 +25,10 @@ namespace MiniSupermarket.API.Models
 
         [StringLength(50)] // Tối đa 50 ký tự
         public string MembershipRank { get; set; } = "Chuẩn"; // Hạng thành viên
+
+        // [TC 44] Ngày đăng ký - phục vụ thẻ "Khách hàng mới" trên Dashboard.
+        // Không gán giá trị mặc định ở đây (tránh HasData sinh migration lệch);
+        // CustomersController.Create sẽ gán DateTime.Now khi thêm khách mới.
+        public DateTime CreatedDate { get; set; }
     }
 }
