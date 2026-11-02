@@ -48,10 +48,13 @@ namespace MiniSupermarket.API.Models
         [ForeignKey("CategoryId")]
         public virtual Category? Category { get; set; }
 
-        // [PHỤ LỤC - Bài tập 2] Cảnh báo hàng sắp hết: true nếu tồn kho <= 20
+        // [PHỤ LỤC - Bài tập 2] Cảnh báo hàng sắp hết: true nếu tồn kho <= 10 (Product.LowStockThreshold)
         // Thuộc tính tính toán (chỉ có get), [NotMapped] = KHÔNG tạo cột trong database
         // nên không cần chạy migration. Giá trị tự cập nhật theo StockQuantity.
+        // Ngưỡng cảnh báo hàng sắp hết dùng chung toàn hệ thống (tồn kho <= 10)
+        public const int LowStockThreshold = 10;
+
         [NotMapped]
-        public bool IsLowStock => StockQuantity <= 20;
+        public bool IsLowStock => StockQuantity <= LowStockThreshold;
     }
 }

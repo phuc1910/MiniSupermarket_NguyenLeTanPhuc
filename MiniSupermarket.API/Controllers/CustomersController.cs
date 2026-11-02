@@ -19,24 +19,49 @@ namespace MiniSupermarket.API.Controllers
             _context = context;
         }
 
+        // Phép chiếu Entity -> DTO: không trả nguyên Entity CSDL ra ngoài
+        private static CustomerItemDto ToDto(Customer c) => new CustomerItemDto
+        {
+            CustomerId = c.CustomerId,
+            CustomerName = c.CustomerName,
+            PhoneNumber = c.PhoneNumber,
+            Address = c.Address,
+            RewardPoints = c.RewardPoints,
+            MembershipRank = c.MembershipRank,
+            CreatedDate = c.CreatedDate
+        };
+
         // GET: api/Customers
-        // Lấy toàn bộ khách hàng
+        // Lấy toàn bộ khách hàng (trả về DTO)
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var list = await _context.Customers
                 .AsNoTracking()
+                .OrderBy(c => c.CustomerId)
+                .Select(c => new CustomerItemDto
+                {
+                    CustomerId = c.CustomerId,
+                    CustomerName = c.CustomerName,
+                    PhoneNumber = c.PhoneNumber,
+                    Address = c.Address,
+                    RewardPoints = c.RewardPoints,
+                    MembershipRank = c.MembershipRank,
+                    CreatedDate = c.CreatedDate
+                })
                 .ToListAsync();
 
             return Ok(list);
         }
 
         // GET: api/Customers/1
-        // Lấy khách hàng theo ID
+        // Lấy khách hàng theo ID (trả về DTO)
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var customer = await _context.Customers.FindAsync(id);
+            var customer = await _context.Customers
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.CustomerId == id);
 
             if (customer == null)
             {
@@ -46,7 +71,7 @@ namespace MiniSupermarket.API.Controllers
                 });
             }
 
-            return Ok(customer);
+            return Ok(ToDto(customer));
         }
 
         // [BUỔI 6 - Bài tập 6.1] GET: api/Customers/paged?keyword=an&pageNumber=1&pageSize=5
@@ -82,7 +107,8 @@ namespace MiniSupermarket.API.Controllers
                     PhoneNumber = c.PhoneNumber,
                     Address = c.Address,
                     RewardPoints = c.RewardPoints,
-                    MembershipRank = c.MembershipRank
+                    MembershipRank = c.MembershipRank,
+                    CreatedDate = c.CreatedDate
                 })
                 .ToListAsync();
 
@@ -97,7 +123,7 @@ namespace MiniSupermarket.API.Controllers
         }
 
         // GET: api/Customers/search?keyword=Nguyen
-        // Tìm theo tên hoặc số điện thoại
+        // Tìm theo tên hoặc số điện thoại (trả về DTO)
         [HttpGet("search")]
         public async Task<IActionResult> Search([FromQuery] string keyword)
         {
@@ -109,48 +135,80 @@ namespace MiniSupermarket.API.Controllers
                 });
             }
 
+            string search = keyword.Trim();
+
             var result = await _context.Customers
-                .Where(c =>
-                    c.CustomerName.Contains(keyword) ||
-                    c.PhoneNumber.Contains(keyword))
                 .AsNoTracking()
+                .Where(c =>
+                    c.CustomerName.Contains(search) ||
+                    c.PhoneNumber.Contains(search))
+                .OrderBy(c => c.CustomerId)
+                .Select(c => new CustomerItemDto
+                {
+                    CustomerId = c.CustomerId,
+                    CustomerName = c.CustomerName,
+                    PhoneNumber = c.PhoneNumber,
+                    Address = c.Address,
+                    RewardPoints = c.RewardPoints,
+                    MembershipRank = c.MembershipRank,
+                    CreatedDate = c.CreatedDate
+                })
                 .ToListAsync();
 
             return Ok(result);
         }
 
         // POST: api/Customers
-        // Thêm khách hàng
+        // Thêm khách hàng - nhận CustomerRequestDto (không nhận thẳng Entity)
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create([FromBody] Customer newCustomer)
+        public async Task<IActionResult> Create([FromBody] CustomerRequestDto dto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            // Thêm vào Database
-            _context.Customers.Add(newCustomer);
+            string phone = dto.PhoneNumber.Trim();
 
-            // Lưu thay đổi
+            // PhoneNumber có Unique Index: kiểm tra trước để trả 409 thay vì lỗi 500
+            if (await _context.Customers.AnyAsync(c => c.PhoneNumber == phone))
+            {
+                return Conflict(new { message = "Số điện thoại đã được đăng ký!" });
+            }
+
+            var newCustomer = new Customer
+            {
+                CustomerName = dto.CustomerName.Trim(),
+                PhoneNumber = phone,
+                Address = dto.Address,
+                RewardPoints = dto.RewardPoints,
+                MembershipRank = dto.MembershipRank,
+                // [TC 44] Ghi nhận thời điểm đăng ký khách hàng
+                CreatedDate = DateTime.Now
+            };
+
+            _context.Customers.Add(newCustomer);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(
                 nameof(GetById),
                 new { id = newCustomer.CustomerId },
-                newCustomer
+                ToDto(newCustomer)
             );
         }
 
         // PUT: api/Customers/1
-        // Cập nhật khách hàng
+        // Cập nhật khách hàng - nhận CustomerRequestDto
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Update(
-            int id,
-            [FromBody] Customer updateCustomer)
+        public async Task<IActionResult> Update(int id, [FromBody] CustomerRequestDto dto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var customer = await _context.Customers.FindAsync(id);
 
             if (customer == null)
@@ -161,11 +219,18 @@ namespace MiniSupermarket.API.Controllers
                 });
             }
 
-            customer.CustomerName = updateCustomer.CustomerName;
-            customer.PhoneNumber = updateCustomer.PhoneNumber;
-            customer.Address = updateCustomer.Address;
-            customer.RewardPoints = updateCustomer.RewardPoints;
-            customer.MembershipRank = updateCustomer.MembershipRank;
+            string phone = dto.PhoneNumber.Trim();
+
+            if (await _context.Customers.AnyAsync(c => c.PhoneNumber == phone && c.CustomerId != id))
+            {
+                return Conflict(new { message = "Số điện thoại đã được khách hàng khác sử dụng!" });
+            }
+
+            customer.CustomerName = dto.CustomerName.Trim();
+            customer.PhoneNumber = phone;
+            customer.Address = dto.Address;
+            customer.RewardPoints = dto.RewardPoints;
+            customer.MembershipRank = dto.MembershipRank;
 
             await _context.SaveChangesAsync();
 

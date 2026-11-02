@@ -11,16 +11,6 @@ namespace MiniSupermarket.WinForms
     public partial class FormCustomerManagement : Form
     {
         // ============================================================
-        // KHỞI TẠO HTTP CLIENT
-        // ============================================================
-        // HttpClient dùng để kết nối trực tiếp đến Web API.
-        // Port 7251 phải trùng với port của project MiniSupermarket.API.
-        private static readonly HttpClient _client = new HttpClient
-        {
-            BaseAddress = new Uri("https://localhost:7251/api/")
-        };
-
-        // ============================================================
         // CONSTRUCTOR
         // ============================================================
         // [BUỔI 6] Phân trang phía máy chủ
@@ -221,7 +211,7 @@ namespace MiniSupermarket.WinForms
             try
             {
                 // Sử dụng client đã gắn JWT Token.
-                using var client = GetAuthenticatedClient();
+                var client = ApiClientService.Client; // HttpClient dùng chung (tự gắn Bearer Token), KHÔNG được Dispose
 
                 // Gửi request POST:
                 // POST: api/customers
@@ -347,7 +337,7 @@ namespace MiniSupermarket.WinForms
             try
             {
                 // Sử dụng client đã gắn JWT Token.
-                using var client = GetAuthenticatedClient();
+                var client = ApiClientService.Client; // HttpClient dùng chung (tự gắn Bearer Token), KHÔNG được Dispose
 
                 // Gửi request PUT:
                 // PUT: api/customers/{id}
@@ -427,7 +417,7 @@ namespace MiniSupermarket.WinForms
             try
             {
                 // Sử dụng client đã gắn JWT Token.
-                using var client = GetAuthenticatedClient();
+                var client = ApiClientService.Client; // HttpClient dùng chung (tự gắn Bearer Token), KHÔNG được Dispose
 
                 // Gửi request DELETE:
                 // DELETE: api/customers/{id}
@@ -481,35 +471,6 @@ namespace MiniSupermarket.WinForms
             // Tìm kiếm từ khóa mới -> luôn quay về trang 1 rồi gọi lại API phân trang
             _currentPage = 1;
             await LoadDataAsync();
-        }
-
-        // ============================================================
-        // TẠO HTTP CLIENT CÓ GẮN JWT TOKEN
-        // ============================================================
-        // API của bạn đang sử dụng JWT Authentication.
-        // Vì vậy mỗi request cần gửi Token trong Authorization Header.
-        private HttpClient GetAuthenticatedClient()
-        {
-            var client = new HttpClient
-            {
-                BaseAddress =
-                    new Uri("https://localhost:7251/api/")
-            };
-
-            // Kiểm tra SessionManager có Token hay không.
-            if (!string.IsNullOrEmpty(
-                SessionManager.JwtToken))
-            {
-                // Gắn JWT Token vào Header:
-                //
-                // Authorization: Bearer <token>
-                client.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue(
-                        "Bearer",
-                        SessionManager.JwtToken);
-            }
-
-            return client;
         }
 
         // ============================================================

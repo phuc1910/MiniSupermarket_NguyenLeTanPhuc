@@ -6,12 +6,6 @@ namespace MiniSupermarket.WinForms
     public partial class FormLogin : Form
     {
 
-        // Khởi tạo HttpClient trỏ đến địa chỉ của Web API Backend
-        private static readonly HttpClient _client = new HttpClient
-        {
-            BaseAddress = new Uri("https://localhost:7251/api/")
-        };
-
         public FormLogin()
         {
             InitializeComponent();
@@ -32,21 +26,11 @@ namespace MiniSupermarket.WinForms
 
             try
             {
-                // Đóng gói dữ liệu gửi lên endpoint POST /api/auth/login
-                var loginData = new { Username = username, Password = password };
-                var response = await _client.PostAsJsonAsync("auth/login", loginData);
+                // Gọi ApiClientService dùng chung: POST /api/auth/login, tự lưu Token/Role/Username vào SessionManager
+                bool success = await ApiClientService.LoginAsync(username, password);
 
-                if (response.IsSuccessStatusCode)
+                if (success)
                 {
-                    // Đọc chuỗi JSON trả về từ Server khi đăng nhập thành công
-                    var jsonString = await response.Content.ReadAsStringAsync();
-                    using var doc = JsonDocument.Parse(jsonString);
-
-                    // Trích xuất Token và Role lưu vào lớp tĩnh SessionManager dùng chung toàn ứng dụng
-                    SessionManager.JwtToken = doc.RootElement.GetProperty("token").GetString() ?? string.Empty;
-                    SessionManager.CurrentRole = doc.RootElement.GetProperty("role").GetString() ?? string.Empty;
-                    SessionManager.CurrentUsername = doc.RootElement.GetProperty("username").GetString() ?? string.Empty;
-
                     MessageBox.Show($"Đăng nhập thành công với quyền: {SessionManager.CurrentRole}", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                     // Mở Form quản lý chính (FormCategoryManagement) và ẩn Form đăng nhập đi

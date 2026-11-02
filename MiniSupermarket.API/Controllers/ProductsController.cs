@@ -1,6 +1,9 @@
 ﻿// Import các thành phần dùng để xây dựng Controller API
 using Microsoft.AspNetCore.Mvc;
 
+// Dùng Expression để tái sử dụng phép chiếu Entity -> DTO trong truy vấn LINQ
+using System.Linq.Expressions;
+
 // Import Entity Framework Core để truy vấn và thao tác với Database
 using Microsoft.EntityFrameworkCore;
 
@@ -44,119 +47,101 @@ namespace MiniSupermarket.API.Controllers
             _configuration = configuration;
         }
 
+        // Phép chiếu Entity -> DTO dùng chung: API không trả nguyên Entity CSDL ra ngoài
+        private static readonly Expression<Func<Product, ProductItemDto>> ToDto = p => new ProductItemDto
+        {
+            ProductId = p.ProductId,
+            Barcode = p.Barcode,
+            ProductName = p.ProductName,
+            Price = p.Price,
+            StockQuantity = p.StockQuantity,
+            CategoryId = p.CategoryId,
+            CategoryName = p.Category != null ? p.Category.CategoryName : string.Empty
+        };
+
         // GET: api/Products
-        // Lấy danh sách toàn bộ sản phẩm
+        // Lấy danh sách toàn bộ sản phẩm (trả về DTO)
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            // Truy vấn danh sách sản phẩm
-            // Include(Category) để lấy thêm thông tin nhóm hàng
-            // AsNoTracking() tối ưu truy vấn chỉ đọc
+            // Include(Category) để lấy tên nhóm hàng, AsNoTracking() tối ưu truy vấn chỉ đọc
             var products = await _context.Products
                 .Include(p => p.Category)
                 .AsNoTracking()
+                .OrderBy(p => p.ProductId)
+                .Select(ToDto)
                 .ToListAsync();
 
-            // Trả về HTTP 200 OK cùng danh sách sản phẩm
             return Ok(products);
         }
 
         // GET: api/Products/1
-        // Lấy thông tin sản phẩm theo ID
+        // Lấy thông tin sản phẩm theo ID (trả về DTO)
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            // Tìm sản phẩm theo khóa chính ProductId
-            // Include(Category) để lấy thông tin nhóm hàng của sản phẩm
             var product = await _context.Products
                 .Include(p => p.Category)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.ProductId == id);
+                .Where(p => p.ProductId == id)
+                .Select(ToDto)
+                .FirstOrDefaultAsync();
 
-            // Kiểm tra sản phẩm có tồn tại hay không
             if (product == null)
             {
-                // Trả về HTTP 404 Not Found nếu không tìm thấy
                 return NotFound(new
                 {
                     message = "Không tìm thấy sản phẩm!"
                 });
             }
 
-            // Trả về HTTP 200 OK cùng thông tin sản phẩm
             return Ok(product);
         }
 
-
-        // GET: api/Products/search?keyword=893456789001
-        // GET: api/Products/search?keyword=nuoc
-        // GET: api/Products/search?categoryId=1
         // GET: api/Products/search?keyword=nuoc&categoryId=1
-
-        // Khai báo API tìm kiếm sản phẩm.
-        // keyword dùng để tìm theo mã vạch hoặc tên sản phẩm.
-        // categoryId dùng để lọc sản phẩm theo nhóm hàng.
+        // keyword: tìm gần đúng theo mã vạch hoặc tên; categoryId: lọc theo nhóm hàng
         [HttpGet("search")]
         public async Task<IActionResult> Search(
-            [FromQuery] string? keyword, // Từ khóa tìm kiếm, có thể bỏ trống.
-            [FromQuery] int? categoryId) // Mã nhóm hàng, có thể bỏ trống.
+            [FromQuery] string? keyword,
+            [FromQuery] int? categoryId)
         {
-            // Khởi tạo truy vấn lấy sản phẩm từ Database.
             var query = _context.Products
-
-                // Lấy thêm thông tin nhóm hàng liên quan đến sản phẩm.
                 .Include(p => p.Category)
-
-                // Không theo dõi thay đổi vì chức năng này chỉ đọc dữ liệu.
                 .AsNoTracking()
-
-                // Cho phép bổ sung các điều kiện lọc trước khi truy vấn Database.
                 .AsQueryable();
 
-            // Kiểm tra người dùng có nhập từ khóa tìm kiếm hay không.
             if (!string.IsNullOrWhiteSpace(keyword))
             {
-                // Xóa khoảng trắng ở đầu và cuối từ khóa.
                 keyword = keyword.Trim();
-
-                // Tìm sản phẩm có mã vạch chứa từ khóa
-                // HOẶC tên sản phẩm chứa từ khóa.
                 query = query.Where(p =>
                     p.Barcode.Contains(keyword) ||
                     p.ProductName.Contains(keyword));
             }
 
-            // Kiểm tra người dùng có chọn nhóm hàng để lọc hay không.
             if (categoryId.HasValue)
             {
-                // Kiểm tra mã nhóm hàng phải lớn hơn 0.
                 if (categoryId.Value <= 0)
                 {
-                    // Trả về HTTP 400 nếu mã nhóm hàng không hợp lệ.
                     return BadRequest(new
                     {
                         message = "Mã nhóm hàng không hợp lệ!"
                     });
                 }
 
-                // Chỉ lấy những sản phẩm thuộc nhóm hàng được chọn.
-                query = query.Where(p =>
-                    p.CategoryId == categoryId.Value);
+                query = query.Where(p => p.CategoryId == categoryId.Value);
             }
 
-            // Thực thi truy vấn và lấy danh sách sản phẩm phù hợp.
-            var products = await query.ToListAsync();
+            var products = await query
+                .OrderBy(p => p.ProductId)
+                .Select(ToDto)
+                .ToListAsync();
 
-            // Trả về HTTP 200 cùng danh sách sản phẩm tìm được.
-            // Nếu không có sản phẩm phù hợp, trả về danh sách rỗng.
             return Ok(products);
         }
 
-        // =========================================================================
         // [BUỔI 6] GET: api/Products/paged?keyword=sua&categoryId=2&pageNumber=1&pageSize=5
         // Phân trang phía máy chủ bằng LINQ .Skip() / .Take() + tìm kiếm gần đúng .Contains()
-        // + lọc theo nhóm hàng (Bài tập 6.2). Trả về PagedResult<ProductItemDto> (DTO, không trả Entity)
-        // =========================================================================
+        // + lọc theo nhóm hàng. Trả về PagedResult<ProductItemDto> (DTO, không trả Entity)
         [HttpGet("paged")]
         public async Task<IActionResult> GetPagedProducts(
             [FromQuery] string? keyword,
@@ -164,17 +149,14 @@ namespace MiniSupermarket.API.Controllers
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 5)
         {
-            // 1. Kiểm tra tham số trang đầu vào hợp lệ
             if (pageNumber < 1) pageNumber = 1;
             if (pageSize < 1 || pageSize > 50) pageSize = 5; // Mặc định 5 dòng, tối đa 50 dòng
 
-            // 2. IQueryable + Eager Loading (.Include) + AsNoTracking (truy vấn chỉ đọc)
             var query = _context.Products
                 .Include(p => p.Category)
                 .AsNoTracking()
                 .AsQueryable();
 
-            // 3. Tìm kiếm gần đúng theo tên hoặc mã vạch
             if (!string.IsNullOrWhiteSpace(keyword))
             {
                 string search = keyword.Trim().ToLower();
@@ -182,34 +164,22 @@ namespace MiniSupermarket.API.Controllers
                                       || p.Barcode.Contains(search));
             }
 
-            // 4. Lọc theo nhóm hàng (nếu có chọn)
             if (categoryId.HasValue && categoryId.Value > 0)
             {
                 query = query.Where(p => p.CategoryId == categoryId.Value);
             }
 
-            // 5. Đếm tổng số bản ghi và tính tổng số trang
             int totalItems = await query.CountAsync();
             int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
 
-            // 6. Skip + Take -> EF Core dịch thành OFFSET ... FETCH NEXT ... trên SQL Server
+            // Skip + Take -> EF Core dịch thành OFFSET ... FETCH NEXT ... trên SQL Server
             var items = await query
                 .OrderBy(p => p.ProductId) // Bắt buộc phải OrderBy trước khi Skip/Take
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .Select(p => new ProductItemDto
-                {
-                    ProductId = p.ProductId,
-                    Barcode = p.Barcode,
-                    ProductName = p.ProductName,
-                    Price = p.Price,
-                    StockQuantity = p.StockQuantity,
-                    CategoryId = p.CategoryId,
-                    CategoryName = p.Category != null ? p.Category.CategoryName : string.Empty
-                })
+                .Select(ToDto)
                 .ToListAsync();
 
-            // 7. Đóng gói kết quả trả về cho Client
             return Ok(new PagedResult<ProductItemDto>
             {
                 CurrentPage = pageNumber,
@@ -220,13 +190,9 @@ namespace MiniSupermarket.API.Controllers
             });
         }
 
-        // =========================================================================
-        // [PHỤ LỤC - Bài tập 1] GET: api/Products/with-category
-        // Danh sách sản phẩm kèm tên nhóm hàng (Eager Loading)
-        //  - Include(p => p.Category): nạp kèm nhóm hàng bằng 1 câu JOIN, tránh truy vấn N+1
-        //  - AsNoTracking(): chỉ đọc, không cần EF theo dõi thay đổi nên nhanh hơn
-        //  - Select(...): chỉ lấy các trường cần thiết, không trả dữ liệu dư thừa
-        // =========================================================================
+        // GET: api/Products/with-category
+        // Danh sách sản phẩm kèm tên nhóm hàng (Eager Loading) - dùng cho xuất báo cáo tồn kho.
+        // IsLowStock lấy theo ngưỡng chung Product.LowStockThreshold (tồn kho <= 10)
         [HttpGet("with-category")]
         public async Task<IActionResult> GetWithCategory()
         {
@@ -234,18 +200,7 @@ namespace MiniSupermarket.API.Controllers
                 .Include(p => p.Category)
                 .AsNoTracking()
                 .OrderBy(p => p.ProductId)
-                .Select(p => new
-                {
-                    p.ProductId,
-                    p.Barcode,
-                    p.ProductName,
-                    p.Price,
-                    p.StockQuantity,
-                    // Trong Select phải viết lại điều kiện: EF không dịch được thuộc tính [NotMapped] sang SQL
-                    IsLowStock = p.StockQuantity <= 20,
-                    p.CategoryId,
-                    CategoryName = p.Category != null ? p.Category.CategoryName : string.Empty
-                })
+                .Select(ToDto)
                 .ToListAsync();
 
             return Ok(products);
@@ -313,212 +268,147 @@ namespace MiniSupermarket.API.Controllers
         }
 
         // POST: api/Products
-        // Thêm sản phẩm mới
+        // Thêm sản phẩm mới - nhận ProductRequestDto (không nhận thẳng Entity)
         // Chỉ tài khoản có vai trò Admin được thực hiện
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create(
-            [FromBody] Product newProduct)
+        public async Task<IActionResult> Create([FromBody] ProductRequestDto dto)
         {
-            // Kiểm tra dữ liệu gửi lên có hợp lệ theo Model hay không
+            // Kiểm tra dữ liệu theo DataAnnotations của DTO
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            // Kiểm tra mã vạch không được để trống
-            if (string.IsNullOrWhiteSpace(newProduct.Barcode))
+            string barcode = dto.Barcode.Trim();
+            string productName = dto.ProductName.Trim();
+
+            if (barcode.Length == 0)
             {
-                return BadRequest(new
-                {
-                    message = "Mã vạch không được để trống!"
-                });
+                return BadRequest(new { message = "Mã vạch không được để trống!" });
             }
 
-            // Kiểm tra tên sản phẩm không được để trống
-            if (string.IsNullOrWhiteSpace(newProduct.ProductName))
+            if (productName.Length == 0)
             {
-                return BadRequest(new
-                {
-                    message = "Tên sản phẩm không được để trống!"
-                });
+                return BadRequest(new { message = "Tên sản phẩm không được để trống!" });
             }
 
-            // Kiểm tra giá bán không được âm
-            if (newProduct.Price < 0)
+            if (dto.Price <= 0)
             {
-                return BadRequest(new
-                {
-                    message = "Đơn giá không được nhỏ hơn 0!"
-                });
+                return BadRequest(new { message = "Đơn giá phải lớn hơn 0!" });
             }
 
-            // Kiểm tra số lượng tồn kho không được âm
-            if (newProduct.StockQuantity < 0)
+            if (dto.StockQuantity < 0)
             {
-                return BadRequest(new
-                {
-                    message = "Số lượng tồn kho không được nhỏ hơn 0!"
-                });
+                return BadRequest(new { message = "Số lượng tồn kho không được nhỏ hơn 0!" });
             }
 
-            // Kiểm tra nhóm hàng có tồn tại trong Database hay không
-            var categoryExists = await _context.Categories
-                .AnyAsync(c => c.CategoryId == newProduct.CategoryId);
+            // Kiểm tra nhóm hàng có tồn tại hay không (đồng thời lấy tên nhóm để trả về)
+            var category = await _context.Categories
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.CategoryId == dto.CategoryId);
 
-            if (!categoryExists)
+            if (category == null)
             {
-                return BadRequest(new
-                {
-                    message = "Nhóm hàng không tồn tại!"
-                });
+                return BadRequest(new { message = "Nhóm hàng không tồn tại!" });
             }
 
-            // Kiểm tra mã vạch đã được sử dụng hay chưa
-            var barcodeExists = await _context.Products
-                .AnyAsync(p => p.Barcode == newProduct.Barcode);
-
-            if (barcodeExists)
+            if (await _context.Products.AnyAsync(p => p.Barcode == barcode))
             {
-                return Conflict(new
-                {
-                    message = "Mã vạch đã tồn tại!"
-                });
+                return Conflict(new { message = "Mã vạch đã tồn tại!" });
             }
 
-            // Không nhận ProductId do client gửi lên
-            // Database sẽ tự động sinh khóa chính
-            newProduct.ProductId = 0;
+            // Map DTO -> Entity (ProductId do CSDL tự sinh)
+            var newProduct = new Product
+            {
+                Barcode = barcode,
+                ProductName = productName,
+                Price = dto.Price,
+                StockQuantity = dto.StockQuantity,
+                CategoryId = dto.CategoryId
+            };
 
-            // Không gán đối tượng Category từ dữ liệu client gửi lên
-            // Chỉ sử dụng CategoryId để liên kết với nhóm hàng trong Database
-            newProduct.Category = null;
-
-            // Thêm sản phẩm vào DbContext
             _context.Products.Add(newProduct);
-
-            // Lưu sản phẩm vào Database
             await _context.SaveChangesAsync();
 
-            // Trả về HTTP 201 Created
-            // Đồng thời cung cấp đường dẫn lấy thông tin sản phẩm vừa tạo
+            // Trả về HTTP 201 Created cùng DTO của sản phẩm vừa tạo
             return CreatedAtAction(
                 nameof(GetById),
                 new { id = newProduct.ProductId },
-                newProduct
-            );
+                new ProductItemDto
+                {
+                    ProductId = newProduct.ProductId,
+                    Barcode = newProduct.Barcode,
+                    ProductName = newProduct.ProductName,
+                    Price = newProduct.Price,
+                    StockQuantity = newProduct.StockQuantity,
+                    CategoryId = newProduct.CategoryId,
+                    CategoryName = category.CategoryName
+                });
         }
 
         // PUT: api/Products/1
-        // Cập nhật thông tin sản phẩm theo ID
+        // Cập nhật sản phẩm theo ID - nhận ProductRequestDto
         // Chỉ tài khoản có vai trò Admin được thực hiện
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Update(
-            int id,
-            [FromBody] Product updateProduct)
+        public async Task<IActionResult> Update(int id, [FromBody] ProductRequestDto dto)
         {
-            // Kiểm tra dữ liệu gửi lên có hợp lệ theo Model hay không
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            // Tìm sản phẩm cần cập nhật trong Database
             var product = await _context.Products
                 .FirstOrDefaultAsync(p => p.ProductId == id);
 
-            // Kiểm tra sản phẩm có tồn tại hay không
             if (product == null)
             {
-                return NotFound(new
-                {
-                    message = "Không tìm thấy sản phẩm cần sửa!"
-                });
+                return NotFound(new { message = "Không tìm thấy sản phẩm cần sửa!" });
             }
 
-            // Kiểm tra mã vạch không được để trống
-            if (string.IsNullOrWhiteSpace(updateProduct.Barcode))
+            string barcode = dto.Barcode.Trim();
+            string productName = dto.ProductName.Trim();
+
+            if (barcode.Length == 0)
             {
-                return BadRequest(new
-                {
-                    message = "Mã vạch không được để trống!"
-                });
+                return BadRequest(new { message = "Mã vạch không được để trống!" });
             }
 
-            // Kiểm tra tên sản phẩm không được để trống
-            if (string.IsNullOrWhiteSpace(updateProduct.ProductName))
+            if (productName.Length == 0)
             {
-                return BadRequest(new
-                {
-                    message = "Tên sản phẩm không được để trống!"
-                });
+                return BadRequest(new { message = "Tên sản phẩm không được để trống!" });
             }
 
-            // Kiểm tra giá bán không được âm
-            if (updateProduct.Price < 0)
+            if (dto.Price <= 0)
             {
-                return BadRequest(new
-                {
-                    message = "Đơn giá không được nhỏ hơn 0!"
-                });
+                return BadRequest(new { message = "Đơn giá phải lớn hơn 0!" });
             }
 
-            // Kiểm tra số lượng tồn kho không được âm
-            if (updateProduct.StockQuantity < 0)
+            if (dto.StockQuantity < 0)
             {
-                return BadRequest(new
-                {
-                    message = "Số lượng tồn kho không được nhỏ hơn 0!"
-                });
+                return BadRequest(new { message = "Số lượng tồn kho không được nhỏ hơn 0!" });
             }
 
-            // Kiểm tra nhóm hàng được chọn có tồn tại hay không
-            var categoryExists = await _context.Categories
-                .AnyAsync(c => c.CategoryId == updateProduct.CategoryId);
-
-            if (!categoryExists)
+            if (!await _context.Categories.AnyAsync(c => c.CategoryId == dto.CategoryId))
             {
-                return BadRequest(new
-                {
-                    message = "Nhóm hàng không tồn tại!"
-                });
+                return BadRequest(new { message = "Nhóm hàng không tồn tại!" });
             }
 
-            // Kiểm tra mã vạch có bị trùng với sản phẩm khác hay không
-            // Loại trừ sản phẩm đang được cập nhật
-            var barcodeExists = await _context.Products
-                .AnyAsync(p =>
-                    p.Barcode == updateProduct.Barcode &&
-                    p.ProductId != id);
-
-            if (barcodeExists)
+            // Mã vạch không được trùng với sản phẩm khác
+            if (await _context.Products.AnyAsync(p => p.Barcode == barcode && p.ProductId != id))
             {
-                return Conflict(new
-                {
-                    message = "Mã vạch đã được sử dụng bởi sản phẩm khác!"
-                });
+                return Conflict(new { message = "Mã vạch đã được sử dụng bởi sản phẩm khác!" });
             }
 
-            // Cập nhật mã vạch sản phẩm
-            product.Barcode = updateProduct.Barcode.Trim();
+            product.Barcode = barcode;
+            product.ProductName = productName;
+            product.Price = dto.Price;
+            product.StockQuantity = dto.StockQuantity;
+            product.CategoryId = dto.CategoryId;
 
-            // Cập nhật tên sản phẩm
-            product.ProductName = updateProduct.ProductName.Trim();
-
-            // Cập nhật giá bán
-            product.Price = updateProduct.Price;
-
-            // Cập nhật số lượng tồn kho
-            product.StockQuantity = updateProduct.StockQuantity;
-
-            // Cập nhật nhóm hàng của sản phẩm
-            product.CategoryId = updateProduct.CategoryId;
-
-            // Lưu các thay đổi vào Database
             await _context.SaveChangesAsync();
 
-            // Trả về HTTP 200 OK khi cập nhật thành công
             return Ok(new
             {
                 success = true,

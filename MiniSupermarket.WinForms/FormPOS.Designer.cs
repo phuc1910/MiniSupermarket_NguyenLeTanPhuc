@@ -38,6 +38,9 @@
             txtBarcode = new TextBox();
             groupBox2 = new GroupBox();
             lblCustomerName = new Label();
+            lblCustomerPoints = new Label();
+            chkUsePoints = new CheckBox();
+            lblDiscountInfo = new Label();
             txtCustomerPhone = new TextBox();
             label3 = new Label();
             groupBox3 = new GroupBox();
@@ -137,6 +140,8 @@
             // groupBox2
             // 
             groupBox2.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            groupBox2.Controls.Add(chkUsePoints);
+            groupBox2.Controls.Add(lblCustomerPoints);
             groupBox2.Controls.Add(lblCustomerName);
             groupBox2.Controls.Add(txtCustomerPhone);
             groupBox2.Controls.Add(label3);
@@ -144,7 +149,7 @@
             groupBox2.Margin = new Padding(3, 4, 3, 4);
             groupBox2.Name = "groupBox2";
             groupBox2.Padding = new Padding(3, 4, 3, 4);
-            groupBox2.Size = new Size(297, 160);
+            groupBox2.Size = new Size(297, 192);
             groupBox2.TabIndex = 3;
             groupBox2.TabStop = false;
             groupBox2.Text = "Thông tin khách hàng";
@@ -159,6 +164,27 @@
             lblCustomerName.Size = new Size(167, 20);
             lblCustomerName.TabIndex = 2;
             lblCustomerName.Text = "Chưa chọn khách hàng";
+            // 
+            // lblCustomerPoints
+            // [TC 47] Hiện số điểm tích lũy của khách sau khi nhập SĐT
+            // 
+            lblCustomerPoints.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            lblCustomerPoints.ForeColor = Color.DarkOrange;
+            lblCustomerPoints.Location = new Point(11, 131);
+            lblCustomerPoints.Name = "lblCustomerPoints";
+            lblCustomerPoints.Size = new Size(274, 20);
+            lblCustomerPoints.TabIndex = 4;
+            // 
+            // chkUsePoints
+            // [TC 47] Chỉ bật khi khách đủ 50 điểm và hóa đơn từ 50.000 đ
+            // 
+            chkUsePoints.Enabled = false;
+            chkUsePoints.Location = new Point(11, 156);
+            chkUsePoints.Name = "chkUsePoints";
+            chkUsePoints.Size = new Size(274, 27);
+            chkUsePoints.TabIndex = 3;
+            chkUsePoints.Text = "Dùng 50 điểm trừ 50.000 đ";
+            chkUsePoints.UseVisualStyleBackColor = true;
             // 
             // txtCustomerPhone
             // 
@@ -182,17 +208,18 @@
             // groupBox3
             // 
             groupBox3.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            groupBox3.Controls.Add(lblDiscountInfo);
             groupBox3.Controls.Add(lblChange);
             groupBox3.Controls.Add(label6);
             groupBox3.Controls.Add(txtCashReceived);
             groupBox3.Controls.Add(label5);
             groupBox3.Controls.Add(lblTotalAmount);
             groupBox3.Controls.Add(label4);
-            groupBox3.Location = new Point(603, 189);
+            groupBox3.Location = new Point(603, 215);
             groupBox3.Margin = new Padding(3, 4, 3, 4);
             groupBox3.Name = "groupBox3";
             groupBox3.Padding = new Padding(3, 4, 3, 4);
-            groupBox3.Size = new Size(297, 253);
+            groupBox3.Size = new Size(297, 236);
             groupBox3.TabIndex = 4;
             groupBox3.TabStop = false;
             groupBox3.Text = "Thông tin thanh toán";
@@ -247,6 +274,17 @@
             lblTotalAmount.TabIndex = 1;
             lblTotalAmount.Text = "0 đ";
             lblTotalAmount.TextAlign = ContentAlignment.MiddleRight;
+            // 
+            // lblDiscountInfo
+            // [TC 47] Dòng báo số tiền đã được trừ nhờ dùng điểm
+            // 
+            lblDiscountInfo.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+            lblDiscountInfo.ForeColor = Color.ForestGreen;
+            lblDiscountInfo.Location = new Point(100, 38);
+            lblDiscountInfo.Name = "lblDiscountInfo";
+            lblDiscountInfo.Size = new Size(186, 20);
+            lblDiscountInfo.TabIndex = 6;
+            lblDiscountInfo.TextAlign = ContentAlignment.MiddleRight;
             // 
             // label4
             // 
@@ -328,6 +366,9 @@
         private Label label3;
         private TextBox txtCustomerPhone;
         private Label lblCustomerName;
+        private Label lblCustomerPoints;
+        private CheckBox chkUsePoints;
+        private Label lblDiscountInfo;
 
         private GroupBox groupBox3;
         private Label label4;

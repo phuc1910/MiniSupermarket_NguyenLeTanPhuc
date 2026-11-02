@@ -19,13 +19,27 @@ namespace MiniSupermarket.API.Controllers
             _context = context;
         }
 
+        // Phép chiếu Entity -> DTO: không trả nguyên Entity CSDL ra ngoài
+        private static CategoryItemDto ToDto(Category c) => new CategoryItemDto
+        {
+            CategoryId = c.CategoryId,
+            CategoryName = c.CategoryName,
+            Description = c.Description
+        };
+
         // GET: api/Categories
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            // Lấy danh sách Category từ SQL Server
             var list = await _context.Categories
                 .AsNoTracking()
+                .OrderBy(c => c.CategoryId)
+                .Select(c => new CategoryItemDto
+                {
+                    CategoryId = c.CategoryId,
+                    CategoryName = c.CategoryName,
+                    Description = c.Description
+                })
                 .ToListAsync();
 
             return Ok(list);
@@ -35,8 +49,9 @@ namespace MiniSupermarket.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            // Tìm Category theo ID
-            var cat = await _context.Categories.FindAsync(id);
+            var cat = await _context.Categories
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.CategoryId == id);
 
             if (cat == null)
             {
@@ -46,7 +61,7 @@ namespace MiniSupermarket.API.Controllers
                 });
             }
 
-            return Ok(cat);
+            return Ok(ToDto(cat));
         }
 
         // [BUỔI 6] GET: api/Categories/paged?keyword=tra&pageNumber=1&pageSize=5
@@ -105,46 +120,75 @@ namespace MiniSupermarket.API.Controllers
                 });
             }
 
+            string search = keyword.Trim();
+
             // Tìm kiếm trực tiếp trên SQL Server
             var result = await _context.Categories
-                .Where(c => c.CategoryName.Contains(keyword))
+                .AsNoTracking()
+                .Where(c => c.CategoryName.Contains(search))
+                .OrderBy(c => c.CategoryId)
+                .Select(c => new CategoryItemDto
+                {
+                    CategoryId = c.CategoryId,
+                    CategoryName = c.CategoryName,
+                    Description = c.Description
+                })
                 .ToListAsync();
 
             return Ok(result);
         }
 
         // POST: api/Categories
-        // Chỉ Admin được thêm
+        // Chỉ Admin được thêm - nhận CategoryRequestDto (không nhận thẳng Entity)
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create([FromBody] Category newCat)
+        public async Task<IActionResult> Create([FromBody] CategoryRequestDto dto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            // Thêm Category vào Database
-            _context.Categories.Add(newCat);
+            string name = dto.CategoryName.Trim();
 
-            // Lưu thay đổi
+            if (name.Length == 0)
+            {
+                return BadRequest(new { message = "Tên nhóm hàng không được để trống!" });
+            }
+
+            // CategoryName có Unique Index: kiểm tra trước để trả 409 thay vì lỗi 500
+            if (await _context.Categories.AnyAsync(c => c.CategoryName == name))
+            {
+                return Conflict(new { message = "Tên nhóm hàng đã tồn tại!" });
+            }
+
+            var newCat = new Category
+            {
+                CategoryName = name,
+                Description = dto.Description
+            };
+
+            _context.Categories.Add(newCat);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(
                 nameof(GetById),
                 new { id = newCat.CategoryId },
-                newCat
+                ToDto(newCat)
             );
         }
 
         // PUT: api/Categories/1
-        // Chỉ Admin được sửa
+        // Chỉ Admin được sửa - nhận CategoryRequestDto
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Update(
-            int id,
-            [FromBody] Category updateCat)
+        public async Task<IActionResult> Update(int id, [FromBody] CategoryRequestDto dto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var cat = await _context.Categories.FindAsync(id);
 
             if (cat == null)
@@ -155,8 +199,20 @@ namespace MiniSupermarket.API.Controllers
                 });
             }
 
-            cat.CategoryName = updateCat.CategoryName;
-            cat.Description = updateCat.Description;
+            string name = dto.CategoryName.Trim();
+
+            if (name.Length == 0)
+            {
+                return BadRequest(new { message = "Tên nhóm hàng không được để trống!" });
+            }
+
+            if (await _context.Categories.AnyAsync(c => c.CategoryName == name && c.CategoryId != id))
+            {
+                return Conflict(new { message = "Tên nhóm hàng đã được sử dụng!" });
+            }
+
+            cat.CategoryName = name;
+            cat.Description = dto.Description;
 
             await _context.SaveChangesAsync();
 
@@ -183,10 +239,21 @@ namespace MiniSupermarket.API.Controllers
                 });
             }
 
-            // Xóa Category
-            _context.Categories.Remove(cat);
+            // Khóa ngoại Product -> Category đang cấu hình Cascade, nếu xóa thẳng thì
+            // toàn bộ sản phẩm (và chi tiết hóa đơn liên quan) của nhóm sẽ bị xóa theo.
+            // Vì vậy chặn xóa khi nhóm hàng vẫn còn sản phẩm.
+            int productCount = await _context.Products.CountAsync(p => p.CategoryId == id);
 
-            // Lưu thay đổi vào Database
+            if (productCount > 0)
+            {
+                return Conflict(new
+                {
+                    message = $"Không thể xóa nhóm hàng đang có {productCount} sản phẩm! " +
+                              "Hãy chuyển hoặc xóa các sản phẩm trước."
+                });
+            }
+
+            _context.Categories.Remove(cat);
             await _context.SaveChangesAsync();
 
             return Ok(new

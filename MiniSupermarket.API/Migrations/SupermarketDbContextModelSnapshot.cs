@@ -181,6 +181,9 @@ namespace MiniSupermarket.API.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("CustomerName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -211,6 +214,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             CustomerId = 1,
                             Address = "123 Đường Nguyễn Trãi, Phường 2, Quận 5, Thành phố Hồ Chí Minh",
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CustomerName = "Nguyễn Thị Hoa",
                             MembershipRank = "Vàng",
                             PhoneNumber = "0901122334",
@@ -220,6 +224,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             CustomerId = 2,
                             Address = "45 Đường Lê Văn Việt, Phường Hiệp Phú, Thành phố Thủ Đức, Thành phố Hồ Chí Minh",
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CustomerName = "Trần Thị Mai",
                             MembershipRank = "Bạc",
                             PhoneNumber = "0982233445",
@@ -229,6 +234,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             CustomerId = 3,
                             Address = "88 Đường Đồng Khởi, Phường Bến Nghé, Quận 1, Thành phố Hồ Chí Minh",
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CustomerName = "Lê Hoàng Yến",
                             MembershipRank = "Kim cương",
                             PhoneNumber = "0913344556",
@@ -238,6 +244,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             CustomerId = 4,
                             Address = "12 Đường Cách Mạng Tháng Tám, Phường 7, Quận Tân Bình, Thành phố Hồ Chí Minh",
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CustomerName = "Phạm Quỳnh Anh",
                             MembershipRank = "Thành viên mới",
                             PhoneNumber = "0394455667",
@@ -247,6 +254,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             CustomerId = 5,
                             Address = "56 Đường Võ Văn Ngân, Phường Linh Chiểu, Thành phố Thủ Đức, Thành phố Hồ Chí Minh",
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CustomerName = "Hoàng Thu Thảo",
                             MembershipRank = "Vàng",
                             PhoneNumber = "0975566778",
@@ -256,6 +264,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             CustomerId = 6,
                             Address = "99 Đường Phan Xích Long, Phường 2, Quận Phú Nhuận, Thành phố Hồ Chí Minh",
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CustomerName = "Vũ Minh Thư",
                             MembershipRank = "Bạc",
                             PhoneNumber = "0936677889",
@@ -265,6 +274,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             CustomerId = 7,
                             Address = "234 Đường Hai Bà Trưng, Phường Võ Thị Sáu, Quận 3, Thành phố Hồ Chí Minh",
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CustomerName = "Đặng Ngọc Hân",
                             MembershipRank = "Kim cương",
                             PhoneNumber = "0927788990",
@@ -274,6 +284,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             CustomerId = 8,
                             Address = "15 Đường Nguyễn Kiệm, Phường 3, Quận Gò Vấp, Thành phố Hồ Chí Minh",
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CustomerName = "Bùi Thanh Trúc",
                             MembershipRank = "Thành viên mới",
                             PhoneNumber = "0868899001",
@@ -283,6 +294,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             CustomerId = 9,
                             Address = "78 Đường Lê Duẩn, Phường Bến Nghé, Quận 1, Thành phố Hồ Chí Minh",
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CustomerName = "Đỗ Mỹ Linh",
                             MembershipRank = "Vàng",
                             PhoneNumber = "0949900112",
@@ -292,6 +304,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             CustomerId = 10,
                             Address = "300 Đường Nguyễn Thị Minh Khai, Phường 5, Quận 3, Thành phố Hồ Chí Minh",
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CustomerName = "Hồ Ngọc Hà",
                             MembershipRank = "Kim cương",
                             PhoneNumber = "0901011223",
@@ -301,6 +314,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             CustomerId = 11,
                             Address = "11 Đường Tôn Đức Thắng, Phường Bến Nghé, Quận 1, Thành phố Hồ Chí Minh",
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CustomerName = "Ngô Thanh Vân",
                             MembershipRank = "Bạc",
                             PhoneNumber = "0982122334",
@@ -310,6 +324,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             CustomerId = 12,
                             Address = "50 Đường Hoàng Văn Thụ, Phường 15, Quận Phú Nhuận, Thành phố Hồ Chí Minh",
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CustomerName = "Dương Cẩm Lynh",
                             MembershipRank = "Thành viên mới",
                             PhoneNumber = "0913233445",
@@ -319,6 +334,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             CustomerId = 13,
                             Address = "77 Đường Thảo Điền, Phường Thảo Điền, Thành phố Thủ Đức, Thành phố Hồ Chí Minh",
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CustomerName = "Lý Nhã Kỳ",
                             MembershipRank = "Vàng",
                             PhoneNumber = "0394344556",
@@ -328,6 +344,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             CustomerId = 14,
                             Address = "102 Đường Pasteur, Phường Bến Nghé, Quận 1, Thành phố Hồ Chí Minh",
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CustomerName = "Trương Ngọc Ánh",
                             MembershipRank = "Kim cương",
                             PhoneNumber = "0975455667",
@@ -337,6 +354,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             CustomerId = 15,
                             Address = "45 Đường Thành Thái, Phường 14, Quận 10, Thành phố Hồ Chí Minh",
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CustomerName = "Phan Như Thảo",
                             MembershipRank = "Bạc",
                             PhoneNumber = "0936566778",
@@ -346,6 +364,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             CustomerId = 16,
                             Address = "89 Đường Lũy Bán Bích, Phường Tân Thới Hòa, Quận Tân Phú, Thành phố Hồ Chí Minh",
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CustomerName = "Vương Linh Chi",
                             MembershipRank = "Thành viên mới",
                             PhoneNumber = "0927677889",
@@ -355,6 +374,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             CustomerId = 17,
                             Address = "210 Đường Điện Biên Phủ, Phường 17, Quận Bình Thạnh, Thành phố Hồ Chí Minh",
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CustomerName = "Đinh Ngọc Diệp",
                             MembershipRank = "Vàng",
                             PhoneNumber = "0868788990",
@@ -364,6 +384,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             CustomerId = 18,
                             Address = "66 Đường Quang Trung, Phường 10, Quận Gò Vấp, Thành phố Hồ Chí Minh",
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CustomerName = "Cao Thái Sơn",
                             MembershipRank = "Bạc",
                             PhoneNumber = "0948900112",
@@ -373,6 +394,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             CustomerId = 19,
                             Address = "33 Đường Sư Vạn Hạnh, Phường 12, Quận 10, Thành phố Hồ Chí Minh",
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CustomerName = "Trịnh Thăng Bình",
                             MembershipRank = "Thành viên mới",
                             PhoneNumber = "0909011223",
@@ -382,6 +404,7 @@ namespace MiniSupermarket.API.Migrations
                         {
                             CustomerId = 20,
                             Address = "1 Công Trường Lam Sơn, Phường Bến Nghé, Quận 1, Thành phố Hồ Chí Minh",
+                            CreatedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CustomerName = "Sơn Tùng M-TP",
                             MembershipRank = "Kim cương",
                             PhoneNumber = "0989122334",
