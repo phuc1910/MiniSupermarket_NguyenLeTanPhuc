@@ -7,6 +7,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using MiniSupermarket.API.Data;
 using MiniSupermarket.API.Models;
 
 namespace MiniSupermarket.API.Controllers
@@ -17,15 +19,133 @@ namespace MiniSupermarket.API.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly IConfiguration _configuration;
+        private readonly SupermarketDbContext _context;
 
         // [TC 47] Quy tắc đổi điểm: dùng 50 điểm -> trừ 50.000 đ (tức 1 điểm = 1.000 đ)
         private const int PointsPerRedemption = 50;
         private const decimal RedeemValue = 50000m;
 
-        // Tiêm IConfiguration để đọc chuỗi kết nối từ appsettings.json
-        public OrdersController(IConfiguration configuration)
+        // ADO.NET xử lý giao dịch; EF Core phục vụ các truy vấn báo cáo chỉ đọc.
+        public OrdersController(IConfiguration configuration, SupermarketDbContext context)
         {
             _configuration = configuration;
+            _context = context;
+        }
+
+        // GET: api/orders?fromDate=2026-10-01&toDate=2026-10-31&pageNumber=1&pageSize=20
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetOrders(
+            [FromQuery] DateTime? fromDate,
+            [FromQuery] DateTime? toDate,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 20)
+        {
+            DateTime? fromDay = fromDate?.Date;
+            DateTime? toDay = toDate?.Date;
+
+            if (fromDay.HasValue && toDay.HasValue && fromDay.Value > toDay.Value)
+            {
+                return BadRequest(new { message = "Từ ngày không được lớn hơn đến ngày!" });
+            }
+            if (toDay == DateTime.MaxValue.Date)
+            {
+                return BadRequest(new { message = "Đến ngày phải nhỏ hơn ngày 31/12/9999!" });
+            }
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1 || pageSize > 100) pageSize = 20;
+            long skip = ((long)pageNumber - 1) * pageSize;
+            if (skip > int.MaxValue)
+            {
+                return BadRequest(new { message = "Số trang vượt quá giới hạn cho phép!" });
+            }
+
+            var query = _context.Orders.AsNoTracking().AsQueryable();
+            if (fromDay.HasValue)
+            {
+                DateTime fromValue = fromDay.Value;
+                query = query.Where(o => o.CreatedDate >= fromValue);
+            }
+            if (toDay.HasValue)
+            {
+                // Mốc cuối loại trừ để lấy cả phần giây lẻ của ngày được chọn.
+                DateTime toExclusive = toDay.Value.AddDays(1);
+                query = query.Where(o => o.CreatedDate < toExclusive);
+            }
+
+            int totalItems = await query.CountAsync();
+            decimal totalRevenue = await query.SumAsync(o => (decimal?)o.FinalAmount) ?? 0m;
+            var items = await query
+                .OrderByDescending(o => o.CreatedDate)
+                .ThenByDescending(o => o.OrderId)
+                .Skip((int)skip)
+                .Take(pageSize)
+                .Select(o => new OrderReportItemDto
+                {
+                    OrderId = o.OrderId,
+                    OrderCode = o.OrderCode,
+                    CreatedDate = o.CreatedDate,
+                    CashierUsername = o.CashierUsername,
+                    CustomerName = o.Customer != null ? o.Customer.CustomerName : "Khách vãng lai",
+                    CustomerPhone = o.Customer != null ? o.Customer.PhoneNumber : string.Empty,
+                    TotalItems = o.TotalItems,
+                    FinalAmount = o.FinalAmount,
+                    RewardPoints = o.RewardPoints
+                })
+                .ToListAsync();
+
+            return Ok(new PagedOrderReportDto
+            {
+                CurrentPage = pageNumber,
+                PageSize = pageSize,
+                TotalItems = totalItems,
+                TotalPages = (int)Math.Ceiling((double)totalItems / pageSize),
+                TotalRevenue = totalRevenue,
+                Items = items
+            });
+        }
+
+        // GET: api/orders/1 - phép chiếu cả header và các dòng hàng, không truy vấn từng sản phẩm.
+        [HttpGet("{id:int}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetOrderById(int id)
+        {
+            var order = await _context.Orders
+                .AsNoTracking()
+                .Where(o => o.OrderId == id)
+                .Select(o => new OrderDetailReportDto
+                {
+                    OrderId = o.OrderId,
+                    OrderCode = o.OrderCode,
+                    CreatedDate = o.CreatedDate,
+                    CashierUsername = o.CashierUsername,
+                    CustomerName = o.Customer != null ? o.Customer.CustomerName : "Khách vãng lai",
+                    CustomerPhone = o.Customer != null ? o.Customer.PhoneNumber : string.Empty,
+                    TotalItems = o.TotalItems,
+                    FinalAmount = o.FinalAmount,
+                    RewardPoints = o.RewardPoints,
+                    Items = o.OrderDetails
+                        .OrderBy(d => d.OrderDetailId)
+                        .Select(d => new OrderLineReportDto
+                        {
+                            ProductId = d.ProductId,
+                            Barcode = d.Product != null ? d.Product.Barcode : string.Empty,
+                            ProductName = d.Product != null ? d.Product.ProductName : "(Đã xóa)",
+                            Quantity = d.Quantity,
+                            UnitPrice = d.UnitPrice,
+                            LineTotal = d.LineTotal
+                        })
+                        .ToList()
+                })
+                .FirstOrDefaultAsync();
+
+            if (order == null)
+            {
+                return NotFound(new { message = "Không tìm thấy hóa đơn!" });
+            }
+
+            return Ok(order);
         }
 
         // =========================================================================

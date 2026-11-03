@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -24,43 +24,43 @@ namespace MiniSupermarket.WinForms
     //   GET api/Reports/best-sellers                                         -> [TC 46] Top 5 sản phẩm bán chạy
     public partial class FormQuickReport : Form
     {
+        private readonly CancellationTokenSource _reportLifetime = new();
+        private readonly HashSet<string> _activeReportLoads = new();
+        private static readonly JsonSerializerOptions ReportJson = new(JsonSerializerDefaults.Web);
+        private bool _loadingOverview;
+        private bool _bindingOrders;
+        private bool _reloadOrders;
+        private int _orderPage = 1;
+        private int _orderTotalPages;
+        private CancellationTokenSource? _detailRequest;
+        private bool _initializingReportFilters = true;
+
         public FormQuickReport()
         {
             InitializeComponent();
 
-            // [BUỔI 5] Hiển thị ngày dạng ngắn (dd/MM/yyyy theo cấu hình máy)
-            dtpFromDate.Format = DateTimePickerFormat.Short;
-            dtpToDate.Format = DateTimePickerFormat.Short;
-
-            // [DASHBOARD] Mặc định xem 7 ngày gần nhất để biểu đồ cột có nhiều cột (muốn xem riêng hôm nay: chọn cùng một ngày cho cả hai ô)
-            dtpToDate.Value = DateTime.Today;
+            // Giữ bộ lọc tùy chọn cũ khi mở form; các kỳ mới chỉ chuyển thành khoảng ngày.
             dtpFromDate.Value = DateTime.Today.AddDays(-6);
+            dtpToDate.Value = DateTime.Today;
+            dtpOverviewAnchor.Value = DateTime.Today;
+            dtpOrdersFrom.Value = DateTime.Today.AddDays(-6);
+            dtpOrdersTo.Value = DateTime.Today;
+            dtpDaily.Value = DateTime.Today;
+            dtpCashierFrom.Value = DateTime.Today.AddDays(-6);
+            dtpCashierTo.Value = DateTime.Today;
+            dtpCashierAnchor.Value = DateTime.Today;
+            cmbOverviewPeriod.SelectedIndex = 4;
+            cmbDailyPeriod.SelectedIndex = 0;
+            cmbCashierPeriod.SelectedIndex = 4;
+            _initializingReportFilters = false;
+            ApplyOverviewPeriod();
+            ApplyDailyPeriod();
+            ApplyCashierPeriod();
+            UpdateOrderButtons();
 
-            // Giữ cho khoảng ngày luôn hợp lệ: chọn "Từ ngày" lớn hơn "Đến ngày" thì đẩy "Đến ngày" theo,
-            // và ngược lại. Nhờ vậy người dùng không bao giờ gặp trường hợp từ ngày > đến ngày.
-            dtpFromDate.ValueChanged += (s, e) =>
-            {
-                if (dtpFromDate.Value.Date > dtpToDate.Value.Date)
-                    dtpToDate.Value = dtpFromDate.Value;
-            };
-            dtpToDate.ValueChanged += (s, e) =>
-            {
-                if (dtpToDate.Value.Date < dtpFromDate.Value.Date)
-                    dtpFromDate.Value = dtpToDate.Value;
-            };
-
-            // [TC 45] Cấu hình hiển thị biểu đồ cột
-            var area = chartRevenue.ChartAreas[0];
-            area.AxisY.LabelStyle.Format = "#,##0";
-            area.AxisX.MajorGrid.Enabled = false;
+            chartRevenue.ChartAreas[0].AxisY.LabelStyle.Format = "#,##0";
+            chartRevenue.ChartAreas[0].AxisX.MajorGrid.Enabled = false;
             chartRevenue.Legends.Clear();
-
-            // [BUỔI 5] Gắn sự kiện (File Designer chưa gắn).
-            // Nếu bạn đã gắn Click/Load trong Designer thì XÓA 2 dòng dưới để tránh chạy hai lần.
-            btnRunReport.Click += btnRunReport_Click;
-            btnExportProducts.Click += btnExportProducts_Click;
-            btnExportRevenue.Click += btnExportRevenue_Click;
-            Load += FormQuickReport_Load;
         }
 
         // Mở form là xem luôn báo cáo của khoảng ngày đang chọn (mặc định là 7 ngày gần nhất)
@@ -78,8 +78,10 @@ namespace MiniSupermarket.WinForms
         // để không hiện nhiều hộp thoại lỗi liên tiếp.
         private async Task LoadAllAsync()
         {
+            if (_loadingOverview) return;
+            _loadingOverview = true;
             // Khóa nút trong lúc chờ máy chủ để tránh bấm liên tục
-            btnRunReport.Enabled = false;
+            groupBox2.Enabled = false;
             try
             {
                 if (!await LoadReportAsync()) return;      // 3 thẻ theo khoảng ngày
@@ -89,7 +91,12 @@ namespace MiniSupermarket.WinForms
             }
             finally
             {
-                btnRunReport.Enabled = true;
+                _loadingOverview = false;
+                if (!IsDisposed)
+                {
+                    groupBox2.Enabled = true;
+                    ApplyOverviewPeriod();
+                }
             }
         }
 
@@ -332,7 +339,7 @@ namespace MiniSupermarket.WinForms
                             p.GetProperty("categoryName").GetString() ?? string.Empty,
                             Math.Round(p.GetProperty("price").GetDecimal()).ToString(CultureInfo.InvariantCulture),
                             stock.ToString(),
-                            stock <= 10 ? "Sắp hết hàng" : "Còn hàng"
+                            p.GetProperty("stockStatus").GetString() ?? string.Empty
                         });
                     }
                 }
@@ -512,5 +519,464 @@ namespace MiniSupermarket.WinForms
 
             return $"Máy chủ trả về lỗi {(int)response.StatusCode}.";
         }
+
+        // ================== SỰ KIỆN CÁC TAB BÁO CÁO ==================
+
+        private async void tabReports_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            if (_initializingReportFilters) return;
+            if (tabReports.SelectedTab == tabOrders) await LoadOrdersAsync();
+            else if (tabReports.SelectedTab == tabDaily) await LoadDailyAsync();
+            else if (tabReports.SelectedTab == tabCashiers) await LoadCashiersAsync();
+        }
+
+        private void FormQuickReport_FormClosed(object? sender, FormClosedEventArgs e)
+        {
+            _detailRequest?.Cancel();
+            _reportLifetime.Cancel();
+        }
+
+        private async void btnLoadOrders_Click(object? sender, EventArgs e)
+        {
+            _orderPage = 1;
+            await LoadOrdersAsync();
+        }
+
+        private async void btnOrderPrevious_Click(object? sender, EventArgs e)
+        {
+            if (_orderPage <= 1) return;
+            _orderPage--;
+            await LoadOrdersAsync();
+        }
+
+        private async void btnOrderNext_Click(object? sender, EventArgs e)
+        {
+            if (_orderPage >= _orderTotalPages) return;
+            _orderPage++;
+            await LoadOrdersAsync();
+        }
+
+        private async void btnOrderDetail_Click(object? sender, EventArgs e)
+        {
+            await LoadSelectedOrderAsync();
+        }
+
+        private async void dgvOrders_SelectionChanged(object? sender, EventArgs e)
+        {
+            if (!_bindingOrders) await LoadSelectedOrderAsync();
+        }
+
+        private async void dgvOrders_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0) await LoadSelectedOrderAsync();
+        }
+
+        private async void btnLoadDaily_Click(object? sender, EventArgs e)
+        {
+            await LoadDailyAsync();
+        }
+
+        private async void btnDailyOrders_Click(object? sender, EventArgs e)
+        {
+            var period = GetRevenuePeriod(cmbDailyPeriod.SelectedIndex, dtpDaily.Value);
+            dtpOrdersFrom.Value = period.From;
+            dtpOrdersTo.Value = period.To;
+            _orderPage = 1;
+            if (tabReports.SelectedTab == tabOrders) await LoadOrdersAsync();
+            else tabReports.SelectedTab = tabOrders;
+        }
+
+        private async void btnLoadCashiers_Click(object? sender, EventArgs e)
+        {
+            await LoadCashiersAsync();
+        }
+
+        private void chkAllCashierHistory_CheckedChanged(object? sender, EventArgs e)
+        {
+            if (!_initializingReportFilters) ApplyCashierPeriod();
+        }
+
+        private void dtpFromDate_ValueChanged(object? sender, EventArgs e)
+        {
+            if (!_initializingReportFilters && dtpFromDate.Value.Date > dtpToDate.Value.Date)
+                dtpToDate.Value = dtpFromDate.Value;
+        }
+
+        private void dtpToDate_ValueChanged(object? sender, EventArgs e)
+        {
+            if (!_initializingReportFilters && dtpToDate.Value.Date < dtpFromDate.Value.Date)
+                dtpFromDate.Value = dtpToDate.Value;
+        }
+
+        // ================== BỘ LỌC NGÀY / TUẦN / THÁNG / NĂM ==================
+
+        private void cmbOverviewPeriod_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            if (!_initializingReportFilters) ApplyOverviewPeriod();
+        }
+
+        private void dtpOverviewAnchor_ValueChanged(object? sender, EventArgs e)
+        {
+            if (!_initializingReportFilters) ApplyOverviewPeriod();
+        }
+
+        private void cmbDailyPeriod_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            if (!_initializingReportFilters) ApplyDailyPeriod();
+        }
+
+        private void dtpDaily_ValueChanged(object? sender, EventArgs e)
+        {
+            if (!_initializingReportFilters) ApplyDailyPeriod();
+        }
+
+        private void cmbCashierPeriod_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            if (!_initializingReportFilters) ApplyCashierPeriod();
+        }
+
+        private void dtpCashierAnchor_ValueChanged(object? sender, EventArgs e)
+        {
+            if (!_initializingReportFilters) ApplyCashierPeriod();
+        }
+
+        private void ApplyOverviewPeriod()
+        {
+            ApplyPeriodFilter(cmbOverviewPeriod, dtpOverviewAnchor, dtpFromDate, dtpToDate, false);
+        }
+
+        private void ApplyCashierPeriod()
+        {
+            bool allHistory = chkAllCashierHistory.Checked;
+            cmbCashierPeriod.Enabled = !allHistory;
+            ApplyPeriodFilter(cmbCashierPeriod, dtpCashierAnchor, dtpCashierFrom, dtpCashierTo, allHistory);
+        }
+
+        private void ApplyDailyPeriod()
+        {
+            FormatPeriodPicker(dtpDaily, cmbDailyPeriod.SelectedIndex);
+        }
+
+        private static void ApplyPeriodFilter(ComboBox mode, DateTimePicker anchor,
+            DateTimePicker from, DateTimePicker to, bool allHistory)
+        {
+            bool custom = mode.SelectedIndex == 4;
+            anchor.Enabled = !custom && !allHistory;
+            from.Enabled = to.Enabled = custom && !allHistory;
+            FormatPeriodPicker(anchor, mode.SelectedIndex);
+            if (!custom && !allHistory)
+            {
+                var period = GetRevenuePeriod(mode.SelectedIndex, anchor.Value);
+                from.Value = period.From;
+                to.Value = period.To;
+            }
+        }
+
+        private static void FormatPeriodPicker(DateTimePicker picker, int mode)
+        {
+            picker.Format = DateTimePickerFormat.Custom;
+            picker.CustomFormat = mode == 2 ? "MM/yyyy" : mode == 3 ? "yyyy" : "dd/MM/yyyy";
+            picker.ShowUpDown = mode == 2 || mode == 3;
+        }
+
+        // Chỉ xác định khoảng ngày gửi API; doanh thu, điểm và tồn kho vẫn do server tính.
+        private static (DateTime From, DateTime To) GetRevenuePeriod(int mode, DateTime referenceDate)
+        {
+            DateTime anchor = referenceDate.Date;
+            DateTime from;
+            DateTime to;
+            switch (mode)
+            {
+                case 1:
+                    int daysFromMonday = ((int)anchor.DayOfWeek + 6) % 7;
+                    from = anchor.AddDays(-daysFromMonday);
+                    to = from.AddDays(6);
+                    break;
+                case 2:
+                    from = new DateTime(anchor.Year, anchor.Month, 1);
+                    to = from.AddMonths(1).AddDays(-1);
+                    break;
+                case 3:
+                    from = new DateTime(anchor.Year, 1, 1);
+                    to = new DateTime(anchor.Year, 12, 31);
+                    break;
+                default:
+                    from = anchor;
+                    to = anchor;
+                    break;
+            }
+            return (from, to);
+        }
+
+        private async Task LoadOrdersAsync()
+        {
+            if (_activeReportLoads.Contains("orders"))
+            {
+                _reloadOrders = true;
+                return;
+            }
+            await RunReportActionAsync("orders", new Control[] { dtpOrdersFrom, dtpOrdersTo, btnLoadOrders,
+                btnOrderPrevious, btnOrderNext, btnOrderDetail, dgvOrders }, async token =>
+            {
+                DateTime from = dtpOrdersFrom.Value.Date, to = dtpOrdersTo.Value.Date;
+                ValidateDates(from, to);
+                _detailRequest?.Cancel();
+                _bindingOrders = true;
+                dgvOrders.DataSource = null;
+                _bindingOrders = false;
+                dgvOrderDetails.DataSource = null;
+                lblOrderDetail.Text = "Chọn một đơn hàng để xem chi tiết.";
+                lblOrderPaging.Text = "Đang tải đơn hàng...";
+                _orderTotalPages = 0;
+                string url = $"orders?fromDate={from:yyyy-MM-dd}&toDate={to:yyyy-MM-dd}&pageNumber={_orderPage}&pageSize=20";
+                var page = await GetReportDataAsync<OrderReportPage>(url, token);
+                if (page.TotalPages > 0 && page.CurrentPage > page.TotalPages)
+                {
+                    _orderPage = page.TotalPages;
+                    page = await GetReportDataAsync<OrderReportPage>(
+                        $"orders?fromDate={from:yyyy-MM-dd}&toDate={to:yyyy-MM-dd}&pageNumber={_orderPage}&pageSize=20", token);
+                }
+                if (IsDisposed) return;
+                if (from != dtpOrdersFrom.Value.Date || to != dtpOrdersTo.Value.Date)
+                {
+                    _reloadOrders = true;
+                    return;
+                }
+                _orderPage = page.CurrentPage;
+                _orderTotalPages = page.TotalPages;
+                _bindingOrders = true;
+                try { dgvOrders.DataSource = page.Items; }
+                finally { _bindingOrders = false; }
+                lblOrderPaging.Text = $"Trang {(page.TotalPages == 0 ? 0 : page.CurrentPage)}/{page.TotalPages} | " +
+                    $"{page.TotalItems:N0} đơn | Thực thu toàn bộ kết quả: {page.TotalRevenue:N0} đ";
+                if (page.Items.Count == 0) lblOrderDetail.Text = "Không có đơn hàng trong khoảng ngày này.";
+                else await LoadSelectedOrderAsync();
+            });
+            UpdateOrderButtons();
+            if (_reloadOrders && !IsDisposed)
+            {
+                _reloadOrders = false;
+                _orderPage = 1;
+                await LoadOrdersAsync();
+            }
+        }
+
+        private async Task LoadSelectedOrderAsync()
+        {
+            if (IsDisposed || _bindingOrders || dgvOrders.CurrentRow?.DataBoundItem is not OrderReportItem selected) return;
+            _detailRequest?.Cancel();
+            _detailRequest?.Dispose();
+            var request = CancellationTokenSource.CreateLinkedTokenSource(_reportLifetime.Token);
+            _detailRequest = request;
+            int orderId = selected.OrderId;
+            dgvOrderDetails.DataSource = null;
+            lblOrderDetail.Text = $"Đang tải chi tiết đơn {selected.OrderCode}...";
+            try
+            {
+                var detail = await GetReportDataAsync<OrderReportDetail>($"orders/{orderId}", request.Token);
+                if (request.IsCancellationRequested || IsDisposed ||
+                    dgvOrders.CurrentRow?.DataBoundItem is not OrderReportItem current || current.OrderId != orderId) return;
+                lblOrderDetail.Text = $"Đơn {detail.OrderCode} | {detail.CreatedDate:dd/MM/yyyy HH:mm} | Thu ngân: {detail.CashierUsername}\n" +
+                    $"Khách: {detail.CustomerName}" + (string.IsNullOrWhiteSpace(detail.CustomerPhone) ? "" : $" — {detail.CustomerPhone}") +
+                    $" | Thực thu: {detail.FinalAmount:N0} đ | Điểm thưởng: {detail.RewardPoints:N0}" +
+                    (detail.Items.Count == 0 ? "\nĐơn này chưa có dòng chi tiết." : "");
+                dgvOrderDetails.DataSource = detail.Items;
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception ex)
+            {
+                if (!IsDisposed && !request.IsCancellationRequested)
+                {
+                    lblOrderDetail.Text = "Không tải được chi tiết đơn hàng.";
+                    MessageBox.Show(this, ex.Message, "Chi tiết đơn hàng", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            UpdateOrderButtons();
+        }
+
+        private async Task LoadDailyAsync()
+        {
+            await RunReportActionAsync("daily", new Control[] { cmbDailyPeriod, dtpDaily, btnLoadDaily, btnDailyOrders }, async token =>
+            {
+                var period = GetRevenuePeriod(cmbDailyPeriod.SelectedIndex, dtpDaily.Value);
+                DateTime from = period.From;
+                DateTime to = period.To;
+                lblDailyRevenue.Text = lblDailyOrders.Text = "—";
+                lblDailyBestSeller.Text = "—";
+                dgvDailyCashiers.DataSource = null;
+                lblDailySummary.Text = "Đang tải doanh thu trong kỳ...";
+                var report = await GetReportDataAsync<QuickReportResponse>(
+                    $"reports/quick-report?fromDate={from:yyyy-MM-dd}&toDate={to:yyyy-MM-dd}", token);
+                var cashiers = await GetReportDataAsync<CashierReportResponse>(
+                    $"reports/revenue-by-cashier?fromDate={from:yyyy-MM-dd}&toDate={to:yyyy-MM-dd}", token);
+                if (IsDisposed) return;
+                lblDailyRevenue.Text = $"{report.TotalRevenue:N0} đ";
+                lblDailyOrders.Text = report.TotalOrders.ToString("N0");
+                lblDailyBestSeller.Text = report.BestSeller == null ? "Chưa có dữ liệu" :
+                    $"{report.BestSeller.ProductName}\n(đã bán {report.BestSeller.TotalSold:N0})";
+                dgvDailyCashiers.DataSource = cashiers.Data;
+                string periodText = from == to ? $"Ngày {from:dd/MM/yyyy}" : $"{from:dd/MM/yyyy} – {to:dd/MM/yyyy}";
+                lblDailySummary.Text = $"{periodText}: {cashiers.TotalCashiers:N0} thu ngân có đơn" +
+                    (report.TotalOrders == 0 ? " — Không phát sinh doanh thu." : " — Chi tiết doanh thu theo thu ngân:");
+            });
+        }
+
+        private async Task LoadCashiersAsync()
+        {
+            await RunReportActionAsync("cashiers", new Control[] { cmbCashierPeriod, dtpCashierAnchor, dtpCashierFrom, dtpCashierTo,
+                chkAllCashierHistory, btnLoadCashiers }, async token =>
+            {
+                DateTime from = dtpCashierFrom.Value.Date, to = dtpCashierTo.Value.Date;
+                bool all = chkAllCashierHistory.Checked;
+                if (!all) ValidateDates(from, to);
+                dgvCashiers.DataSource = null;
+                lblCashierSummary.Text = "Đang tải doanh thu theo thu ngân...";
+                string url = "reports/revenue-by-cashier" + (all ? "" : $"?fromDate={from:yyyy-MM-dd}&toDate={to:yyyy-MM-dd}");
+                var report = await GetReportDataAsync<CashierReportResponse>(url, token);
+                if (IsDisposed) return;
+                dgvCashiers.DataSource = report.Data;
+                string period = all ? "Toàn bộ lịch sử" : $"{from:dd/MM/yyyy} – {to:dd/MM/yyyy}";
+                lblCashierSummary.Text = $"{period} | {report.TotalCashiers:N0} thu ngân | Tổng thực thu: {report.GrandTotalRevenue:N0} đ";
+                if (report.Data.Count == 0) lblCashierSummary.Text += " | Không có đơn hàng.";
+            });
+            if (!IsDisposed) ApplyCashierPeriod();
+        }
+
+        private async Task<T> GetReportDataAsync<T>(string url, CancellationToken token)
+        {
+            using var response = await ApiClientService.Client.GetAsync(url, token);
+            if (!response.IsSuccessStatusCode) throw new InvalidOperationException(await ReadErrorMessageAsync(response));
+            return await response.Content.ReadFromJsonAsync<T>(ReportJson, token)
+                ?? throw new InvalidOperationException("Máy chủ không trả về dữ liệu báo cáo hợp lệ.");
+        }
+
+        private async Task RunReportActionAsync(string key, Control[] controls, Func<CancellationToken, Task> action)
+        {
+            if (IsDisposed || !_activeReportLoads.Add(key)) return;
+            foreach (var control in controls) control.Enabled = false;
+            try { await action(_reportLifetime.Token); }
+            catch (OperationCanceledException) { }
+            catch (Exception ex)
+            {
+                if (!IsDisposed)
+                {
+                    ClearFailedReport(key);
+                    MessageBox.Show(this, ex.Message, "Báo cáo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            finally
+            {
+                _activeReportLoads.Remove(key);
+                if (!IsDisposed) foreach (var control in controls) control.Enabled = true;
+            }
+        }
+
+        private void ClearFailedReport(string key)
+        {
+            const string message = "Không tải được dữ liệu. Kiểm tra điều kiện lọc và nhấn Xem để thử lại.";
+            if (key == "orders")
+            {
+                _bindingOrders = true;
+                try { dgvOrders.DataSource = null; }
+                finally { _bindingOrders = false; }
+                dgvOrderDetails.DataSource = null;
+                _orderTotalPages = 0;
+                lblOrderPaging.Text = message;
+                lblOrderDetail.Text = "Chọn một đơn hàng để xem chi tiết.";
+            }
+            else if (key == "daily")
+            {
+                lblDailyRevenue.Text = lblDailyOrders.Text = lblDailyBestSeller.Text = "—";
+                dgvDailyCashiers.DataSource = null;
+                lblDailySummary.Text = message;
+            }
+            else if (key == "cashiers")
+            {
+                dgvCashiers.DataSource = null;
+                lblCashierSummary.Text = message;
+            }
+        }
+
+        private void UpdateOrderButtons()
+        {
+            if (IsDisposed) return;
+            bool idle = !_activeReportLoads.Contains("orders");
+            btnOrderPrevious.Enabled = idle && _orderPage > 1 && _orderTotalPages > 0;
+            btnOrderNext.Enabled = idle && _orderPage < _orderTotalPages;
+            btnOrderDetail.Enabled = idle && dgvOrders.CurrentRow?.DataBoundItem is OrderReportItem;
+        }
+
+        private static void ValidateDates(DateTime from, DateTime to)
+        {
+            if (from > to) throw new InvalidOperationException("Từ ngày không được lớn hơn đến ngày.");
+        }
+
+    }
+
+    // DTO phản hồi báo cáo đặt cùng màn hình, không tách thêm tệp.
+    public class OrderReportItem
+    {
+        public int OrderId { get; set; }
+        public string OrderCode { get; set; } = string.Empty;
+        public DateTime CreatedDate { get; set; }
+        public string CashierUsername { get; set; } = string.Empty;
+        public string CustomerName { get; set; } = string.Empty;
+        public string CustomerPhone { get; set; } = string.Empty;
+        public int TotalItems { get; set; }
+        public decimal FinalAmount { get; set; }
+        public int RewardPoints { get; set; }
+    }
+
+    public class OrderReportPage
+    {
+        public int CurrentPage { get; set; }
+        public int PageSize { get; set; }
+        public int TotalItems { get; set; }
+        public int TotalPages { get; set; }
+        public decimal TotalRevenue { get; set; }
+        public List<OrderReportItem> Items { get; set; } = new();
+    }
+
+    public class OrderReportDetail : OrderReportItem
+    {
+        public List<OrderReportLine> Items { get; set; } = new();
+    }
+
+    public class OrderReportLine
+    {
+        public int ProductId { get; set; }
+        public string Barcode { get; set; } = string.Empty;
+        public string ProductName { get; set; } = string.Empty;
+        public int Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
+        public decimal LineTotal { get; set; }
+    }
+
+    public class CashierReportItem
+    {
+        public string CashierUsername { get; set; } = string.Empty;
+        public int TotalOrders { get; set; }
+        public decimal TotalRevenue { get; set; }
+        public int TotalPointsAwarded { get; set; }
+    }
+
+    public class CashierReportResponse
+    {
+        public int TotalCashiers { get; set; }
+        public decimal GrandTotalRevenue { get; set; }
+        public List<CashierReportItem> Data { get; set; } = new();
+    }
+
+    public class QuickReportResponse
+    {
+        public int TotalOrders { get; set; }
+        public decimal TotalRevenue { get; set; }
+        public QuickReportBestSeller? BestSeller { get; set; }
+    }
+
+    public class QuickReportBestSeller
+    {
+        public string ProductName { get; set; } = string.Empty;
+        public int TotalSold { get; set; }
     }
 }

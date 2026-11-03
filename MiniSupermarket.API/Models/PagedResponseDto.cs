@@ -15,7 +15,9 @@ namespace MiniSupermarket.API.Models
         public int StockQuantity { get; set; }
         public int CategoryId { get; set; }
         public string CategoryName { get; set; } = string.Empty; // Lấy từ bảng Categories qua Eager Loading
-        public bool IsLowStock => StockQuantity <= Product.LowStockThreshold; // Tồn kho <= 10
+        public bool IsLowStock => Product.IsLowStockQuantity(StockQuantity);
+        public string StockStatus => Product.GetStockStatus(StockQuantity);
+        public int LowStockThreshold => Product.LowStockThreshold;
     }
 
     // DTO khách hàng trả về cho API phân trang (Bài tập 6.1)
@@ -46,5 +48,13 @@ namespace MiniSupermarket.API.Models
         public int TotalItems { get; set; }         // Tổng số bản ghi thỏa mãn điều kiện
         public int TotalPages { get; set; }         // Tổng số trang = Ceiling(TotalItems / PageSize)
         public List<T> Items { get; set; } = new(); // Danh sách dữ liệu của trang hiện hành
+    }
+
+    // Metadata cảnh báo dành riêng cho sản phẩm, không ảnh hưởng các API phân trang khác.
+    public class ProductPagedResult : PagedResult<ProductItemDto>
+    {
+        // Đếm tất cả sản phẩm khớp bộ lọc, trước khi lấy trang hiện hành.
+        public int TotalLowStockItems { get; set; }
+        public int LowStockThreshold => Product.LowStockThreshold;
     }
 }

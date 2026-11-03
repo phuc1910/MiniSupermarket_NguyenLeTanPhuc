@@ -21,10 +21,30 @@ namespace MiniSupermarket.WinForms
         public PagingBar()
         {
             Dock = DockStyle.Bottom;
-            Height = 40;
-            _btnPrev.Location = new Point(3, 5);
-            _lbl.Location = new Point(139, 5);
-            _btnNext.Location = new Point(405, 5);
+            Height = 48;
+            Font = new Font("Segoe UI", 10F);
+            BackColor = Color.FromArgb(247, 250, 254);
+            Padding = new Padding(8, 6, 8, 6);
+            _btnPrev.Text = "Trang trước";
+            _btnNext.Text = "Trang sau";
+            _btnPrev.Size = new Size(110, 36);
+            _btnNext.Size = new Size(110, 36);
+            _btnPrev.Location = new Point(8, 6);
+            _lbl.Location = new Point(124, 6);
+            _lbl.Size = new Size(230, 36);
+            _lbl.ForeColor = Color.FromArgb(30, 58, 95);
+            _lbl.Font = new Font("Segoe UI", 9F);
+            _btnNext.Location = new Point(360, 6);
+            _btnPrev.FlatStyle = FlatStyle.Flat;
+            _btnNext.FlatStyle = FlatStyle.Flat;
+            _btnPrev.FlatAppearance.BorderSize = 0;
+            _btnNext.FlatAppearance.BorderSize = 0;
+            _btnPrev.BackColor = Color.FromArgb(232, 239, 250);
+            _btnNext.BackColor = Color.FromArgb(37, 99, 235);
+            _btnPrev.ForeColor = Color.FromArgb(30, 58, 95);
+            _btnNext.ForeColor = Color.White;
+            _btnPrev.Cursor = Cursors.Hand;
+            _btnNext.Cursor = Cursors.Hand;
             _btnPrev.Click += (s, e) => PrevClicked?.Invoke(this, e);
             _btnNext.Click += (s, e) => NextClicked?.Invoke(this, e);
             Controls.AddRange(new Control[] { _btnPrev, _lbl, _btnNext });

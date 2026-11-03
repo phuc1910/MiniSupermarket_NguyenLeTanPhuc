@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Ho ten sinh vien: Nguyen Le Tan Phuc
  * Ma sinh vien: 2124110108
  * Mo ta: Cac lop DTO phuc vu nghiep vu thanh toan gio hang POS
@@ -29,5 +29,47 @@ namespace MiniSupermarket.API.Models
 
         // Danh sách mặt hàng cần thanh toán
         public List<CartItemCheckoutDto> Items { get; set; } = new();
+    }
+
+    // DTO đọc danh sách và chi tiết hóa đơn.
+    // Thông tin hóa đơn dùng chung cho danh sách và phần đầu của báo cáo chi tiết.
+    public class OrderReportItemDto
+    {
+        public int OrderId { get; set; }
+        public string OrderCode { get; set; } = string.Empty;
+        public DateTime CreatedDate { get; set; }
+        public string CashierUsername { get; set; } = string.Empty;
+        public string CustomerName { get; set; } = string.Empty;
+        public string CustomerPhone { get; set; } = string.Empty;
+        public int TotalItems { get; set; }
+        public decimal FinalAmount { get; set; }
+        public int RewardPoints { get; set; }
+    }
+
+    public class PagedOrderReportDto
+    {
+        public int CurrentPage { get; set; }
+        public int PageSize { get; set; }
+        public int TotalItems { get; set; }
+        public int TotalPages { get; set; }
+
+        // Tổng tiền của toàn bộ kết quả sau lọc, không chỉ của trang đang xem.
+        public decimal TotalRevenue { get; set; }
+        public List<OrderReportItemDto> Items { get; set; } = new();
+    }
+
+    public class OrderDetailReportDto : OrderReportItemDto
+    {
+        public List<OrderLineReportDto> Items { get; set; } = new();
+    }
+
+    public class OrderLineReportDto
+    {
+        public int ProductId { get; set; }
+        public string Barcode { get; set; } = string.Empty;
+        public string ProductName { get; set; } = string.Empty;
+        public int Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
+        public decimal LineTotal { get; set; }
     }
 }

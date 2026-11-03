@@ -196,10 +196,61 @@ namespace MiniSupermarket.API.Controllers
         }
 
         // GET: api/Reports/revenue-by-cashier
-        // Gọi Stored Procedure sp_GetRevenueByCashier bằng SqlDataReader
+        // Không truyền ngày: giữ báo cáo toàn lịch sử qua Stored Procedure.
+        // Có bộ lọc ngày: tổng hợp tại SQL Server bằng EF Core, lấy trọn ngày cuối.
         [HttpGet("revenue-by-cashier")]
-        public async Task<IActionResult> GetRevenueByCashier()
+        public async Task<IActionResult> GetRevenueByCashier(
+            [FromQuery] DateTime? fromDate,
+            [FromQuery] DateTime? toDate)
         {
+            DateTime? fromDay = fromDate?.Date;
+            DateTime? toDay = toDate?.Date;
+            if (fromDay.HasValue && toDay.HasValue && fromDay.Value > toDay.Value)
+            {
+                return BadRequest(new { success = false, message = "Từ ngày không được lớn hơn đến ngày!" });
+            }
+            if (toDay == DateTime.MaxValue.Date)
+            {
+                return BadRequest(new { success = false, message = "Đến ngày phải nhỏ hơn ngày 31/12/9999!" });
+            }
+
+            if (fromDay.HasValue || toDay.HasValue)
+            {
+                var query = _context.Orders.AsNoTracking().AsQueryable();
+                if (fromDay.HasValue)
+                {
+                    DateTime fromValue = fromDay.Value;
+                    query = query.Where(o => o.CreatedDate >= fromValue);
+                }
+                if (toDay.HasValue)
+                {
+                    DateTime toExclusive = toDay.Value.AddDays(1);
+                    query = query.Where(o => o.CreatedDate < toExclusive);
+                }
+
+                var filteredReport = await query
+                    .GroupBy(o => o.CashierUsername)
+                    .Select(g => new CashierRevenueDto
+                    {
+                        CashierUsername = g.Key,
+                        TotalOrders = g.Count(),
+                        TotalRevenue = g.Sum(o => o.FinalAmount),
+                        TotalPointsAwarded = g.Sum(o => o.RewardPoints)
+                    })
+                    .OrderByDescending(r => r.TotalRevenue)
+                    .ThenBy(r => r.CashierUsername)
+                    .ToListAsync();
+
+                return Ok(new
+                {
+                    success = true,
+                    generatedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    totalCashiers = filteredReport.Count,
+                    grandTotalRevenue = filteredReport.Sum(r => r.TotalRevenue),
+                    data = filteredReport
+                });
+            }
+
             var reportList = new List<CashierRevenueDto>();
             string connectionString = _configuration.GetConnectionString("DefaultConnection")!;
 

@@ -1,16 +1,9 @@
-﻿namespace MiniSupermarket.WinForms
+namespace MiniSupermarket.WinForms
 {
     partial class FormQuickReport
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -30,32 +23,56 @@
         {
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle4 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle5 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle6 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle7 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle8 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle9 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle10 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle11 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle12 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle13 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle14 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle15 = new DataGridViewCellStyle();
+            tabReports = new TabControl();
+            tabOverview = new TabPage();
+            tabOrders = new TabPage();
+            tabDaily = new TabPage();
+            tabCashiers = new TabPage();
             groupBox1 = new GroupBox();
+            groupBox2 = new GroupBox();
+            labelOverviewPeriod = new Label();
+            cmbOverviewPeriod = new ComboBox();
+            labelOverviewAnchor = new Label();
+            dtpOverviewAnchor = new DateTimePicker();
             label1 = new Label();
             dtpFromDate = new DateTimePicker();
             label3 = new Label();
             dtpToDate = new DateTimePicker();
-            groupBox2 = new GroupBox();
             btnRunReport = new Button();
             btnExportProducts = new Button();
             btnExportRevenue = new Button();
             groupBox3 = new GroupBox();
-            tableLayoutPanelSummary = new TableLayoutPanel();
+            tableLayoutPanelSummary = new FlowLayoutPanel();
             panel1 = new Panel();
-            panel2 = new Panel();
-            panel3 = new Panel();
-            panel4 = new Panel();
-            panel5 = new Panel();
             label2 = new Label();
             lblTotalOrders = new Label();
             lblOrdersToday = new Label();
+            panel2 = new Panel();
             label4 = new Label();
             lblTotalRevenue = new Label();
             lblRevenueToday = new Label();
+            panel3 = new Panel();
             label6 = new Label();
             lblBestSeller = new Label();
+            panel4 = new Panel();
             label7 = new Label();
             lblNewCustomers = new Label();
+            panel5 = new Panel();
             label8 = new Label();
             lblLowStock = new Label();
             lblLowStockSub = new Label();
@@ -67,6 +84,79 @@
             colRank = new DataGridViewTextBoxColumn();
             colProductName = new DataGridViewTextBoxColumn();
             colTotalSold = new DataGridViewTextBoxColumn();
+            layoutOrders = new TableLayoutPanel();
+            groupOrdersFilter = new GroupBox();
+            labelOrdersFrom = new Label();
+            dtpOrdersFrom = new DateTimePicker();
+            labelOrdersTo = new Label();
+            dtpOrdersTo = new DateTimePicker();
+            btnLoadOrders = new Button();
+            btnOrderDetail = new Button();
+            dgvOrders = new DataGridView();
+            colOrderCode = new DataGridViewTextBoxColumn();
+            colOrderCreatedDate = new DataGridViewTextBoxColumn();
+            colOrderCashier = new DataGridViewTextBoxColumn();
+            colOrderCustomer = new DataGridViewTextBoxColumn();
+            colOrderItems = new DataGridViewTextBoxColumn();
+            colOrderAmount = new DataGridViewTextBoxColumn();
+            panelOrderPaging = new Panel();
+            btnOrderPrevious = new Button();
+            btnOrderNext = new Button();
+            lblOrderPaging = new Label();
+            lblOrderDetail = new Label();
+            dgvOrderDetails = new DataGridView();
+            colDetailBarcode = new DataGridViewTextBoxColumn();
+            colDetailProductName = new DataGridViewTextBoxColumn();
+            colDetailQuantity = new DataGridViewTextBoxColumn();
+            colDetailUnitPrice = new DataGridViewTextBoxColumn();
+            colDetailLineTotal = new DataGridViewTextBoxColumn();
+            layoutDaily = new TableLayoutPanel();
+            groupDailyFilter = new GroupBox();
+            labelDailyPeriod = new Label();
+            cmbDailyPeriod = new ComboBox();
+            labelDailyAnchor = new Label();
+            dtpDaily = new DateTimePicker();
+            btnLoadDaily = new Button();
+            btnDailyOrders = new Button();
+            layoutDailyCards = new TableLayoutPanel();
+            panelDailyRevenue = new Panel();
+            labelDailyRevenue = new Label();
+            lblDailyRevenue = new Label();
+            panelDailyOrders = new Panel();
+            labelDailyOrders = new Label();
+            lblDailyOrders = new Label();
+            panelDailyBestSeller = new Panel();
+            labelDailyBestSeller = new Label();
+            lblDailyBestSeller = new Label();
+            lblDailySummary = new Label();
+            dgvDailyCashiers = new DataGridView();
+            colDailyCashier = new DataGridViewTextBoxColumn();
+            colDailyOrders = new DataGridViewTextBoxColumn();
+            colDailyRevenue = new DataGridViewTextBoxColumn();
+            colDailyPoints = new DataGridViewTextBoxColumn();
+            layoutCashiers = new TableLayoutPanel();
+            groupCashierFilter = new GroupBox();
+            labelCashierPeriod = new Label();
+            cmbCashierPeriod = new ComboBox();
+            labelCashierAnchor = new Label();
+            dtpCashierAnchor = new DateTimePicker();
+            labelCashierFrom = new Label();
+            dtpCashierFrom = new DateTimePicker();
+            labelCashierTo = new Label();
+            dtpCashierTo = new DateTimePicker();
+            btnLoadCashiers = new Button();
+            chkAllCashierHistory = new CheckBox();
+            lblCashierSummary = new Label();
+            dgvCashiers = new DataGridView();
+            colCashierUsername = new DataGridViewTextBoxColumn();
+            colCashierOrders = new DataGridViewTextBoxColumn();
+            colCashierRevenue = new DataGridViewTextBoxColumn();
+            colCashierPoints = new DataGridViewTextBoxColumn();
+            tabReports.SuspendLayout();
+            tabOverview.SuspendLayout();
+            tabOrders.SuspendLayout();
+            tabDaily.SuspendLayout();
+            tabCashiers.SuspendLayout();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             groupBox3.SuspendLayout();
@@ -78,468 +168,1766 @@
             panel5.SuspendLayout();
             tableLayoutPanelBottom.SuspendLayout();
             groupBoxChart.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)chartRevenue).BeginInit();
             groupBoxTop5.SuspendLayout();
+            layoutOrders.SuspendLayout();
+            groupOrdersFilter.SuspendLayout();
+            panelOrderPaging.SuspendLayout();
+            layoutDaily.SuspendLayout();
+            groupDailyFilter.SuspendLayout();
+            layoutDailyCards.SuspendLayout();
+            panelDailyRevenue.SuspendLayout();
+            panelDailyOrders.SuspendLayout();
+            panelDailyBestSeller.SuspendLayout();
+            layoutCashiers.SuspendLayout();
+            groupCashierFilter.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvTopProducts).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dgvOrders).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dgvOrderDetails).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dgvDailyCashiers).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dgvCashiers).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)chartRevenue).BeginInit();
             SuspendLayout();
-            // 
+            //
+            // tabReports
+            //
+            tabReports.Location = new Point(12, 12);
+            tabReports.Name = "tabReports";
+            tabReports.Size = new Size(1006, 589);
+            tabReports.Dock = DockStyle.Fill;
+            tabReports.TabIndex = 0;
+            tabReports.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
+            tabReports.ItemSize = new Size(180, 38);
+            tabReports.Padding = new Point(16, 10);
+            tabReports.SelectedIndex = 0;
+            tabReports.Controls.Add(tabOverview);
+            //
+            // tabOverview
+            //
+            tabOverview.Location = new Point(4, 42);
+            tabOverview.Name = "tabOverview";
+            tabOverview.Size = new Size(998, 543);
+            tabOverview.Text = "Tổng quan";
+            tabOverview.TabIndex = 1;
+            tabOverview.BackColor = Color.FromArgb(242, 245, 250);
+            tabOverview.Padding = new Padding(12);
+            tabReports.Controls.Add(tabOrders);
+            //
+            // tabOrders
+            //
+            tabOrders.Location = new Point(4, 42);
+            tabOrders.Name = "tabOrders";
+            tabOrders.Size = new Size(998, 543);
+            tabOrders.Text = "Đơn hàng & chi tiết";
+            tabOrders.TabIndex = 2;
+            tabOrders.BackColor = Color.FromArgb(242, 245, 250);
+            tabOrders.Padding = new Padding(12);
+            tabReports.Controls.Add(tabDaily);
+            //
+            // tabDaily
+            //
+            tabDaily.Location = new Point(4, 42);
+            tabDaily.Name = "tabDaily";
+            tabDaily.Size = new Size(998, 543);
+            tabDaily.Text = "Doanh thu theo kỳ";
+            tabDaily.TabIndex = 3;
+            tabDaily.BackColor = Color.FromArgb(242, 245, 250);
+            tabDaily.Padding = new Padding(12);
+            tabReports.Controls.Add(tabCashiers);
+            //
+            // tabCashiers
+            //
+            tabCashiers.Location = new Point(4, 42);
+            tabCashiers.Name = "tabCashiers";
+            tabCashiers.Size = new Size(998, 543);
+            tabCashiers.Text = "Doanh thu thu ngân";
+            tabCashiers.TabIndex = 4;
+            tabCashiers.BackColor = Color.FromArgb(242, 245, 250);
+            tabCashiers.Padding = new Padding(12);
+            tabOverview.AutoScroll = true;
+            tabOverview.AutoScrollMargin = new Size(12, 12);
+            tabOverview.Controls.Add(groupBox1);
+            //
             // groupBox1
-            // 
-            // [RESPONSIVE] Bao toàn bộ Form -> dãn theo cả 4 chiều khi resize
-            groupBox1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            groupBox1.Controls.Add(tableLayoutPanelBottom);
-            groupBox1.Controls.Add(groupBox3);
-            groupBox1.Controls.Add(groupBox2);
+            //
             groupBox1.Location = new Point(12, 12);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(1006, 589);
-            groupBox1.TabIndex = 0;
-            groupBox1.TabStop = false;
+            groupBox1.Size = new Size(954, 920);
             groupBox1.Text = "Báo cáo doanh thu & Dashboard";
-            // 
-            // label1
-            // 
-            label1.AutoSize = true;
-            label1.Location = new Point(10, 38);
-            label1.Name = "label1";
-            label1.Size = new Size(68, 20);
-            label1.TabIndex = 0;
-            label1.Text = "Từ ngày:";
-            // 
-            // dtpFromDate
-            // 
-            dtpFromDate.Location = new Point(84, 33);
-            dtpFromDate.Name = "dtpFromDate";
-            dtpFromDate.Size = new Size(140, 27);
-            dtpFromDate.TabIndex = 1;
-            // 
-            // label3
-            // 
-            label3.AutoSize = true;
-            label3.Location = new Point(240, 38);
-            label3.Name = "label3";
-            label3.Size = new Size(76, 20);
-            label3.TabIndex = 3;
-            label3.Text = "Đến ngày:";
-            // 
-            // dtpToDate
-            // 
-            dtpToDate.Location = new Point(322, 33);
-            dtpToDate.Name = "dtpToDate";
-            dtpToDate.Size = new Size(140, 27);
-            dtpToDate.TabIndex = 4;
-            // 
+            groupBox1.TabIndex = 5;
+            groupBox1.BackColor = Color.White;
+            groupBox1.ForeColor = Color.FromArgb(22, 54, 90);
+            groupBox1.Padding = new Padding(12);
+            groupBox1.TabStop = false;
+            groupBox1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox1.BackColor = Color.FromArgb(242, 245, 250);
+            groupBox1.Controls.Add(groupBox2);
+            groupBox1.Controls.Add(groupBox3);
+            groupBox1.Controls.Add(tableLayoutPanelBottom);
+            //
             // groupBox2
-            // 
-            // [RESPONSIVE] Thanh bộ lọc dãn theo chiều rộng, giữ nguyên ở trên
+            //
+            groupBox2.Location = new Point(16, 34);
+            groupBox2.Name = "groupBox2";
+            groupBox2.Size = new Size(922, 158);
+            groupBox2.Text = "Bộ lọc báo cáo";
+            groupBox2.TabIndex = 6;
+            groupBox2.BackColor = Color.White;
+            groupBox2.ForeColor = Color.FromArgb(22, 54, 90);
+            groupBox2.Padding = new Padding(12);
+            groupBox2.TabStop = false;
             groupBox2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            groupBox2.Controls.Add(btnExportRevenue);
-            groupBox2.Controls.Add(btnExportProducts);
-            groupBox2.Controls.Add(btnRunReport);
+            //
+            // labelOverviewPeriod
+            //
+            labelOverviewPeriod.Location = new Point(16, 29);
+            labelOverviewPeriod.Name = "labelOverviewPeriod";
+            labelOverviewPeriod.Size = new Size(82, 28);
+            labelOverviewPeriod.Text = "Kỳ:";
+            labelOverviewPeriod.TabIndex = 7;
+            labelOverviewPeriod.AutoSize = false;
+            labelOverviewPeriod.ForeColor = Color.FromArgb(22, 54, 90);
+            labelOverviewPeriod.TextAlign = ContentAlignment.MiddleLeft;
+            //
+            // cmbOverviewPeriod
+            //
+            cmbOverviewPeriod.Location = new Point(104, 29);
+            cmbOverviewPeriod.Name = "cmbOverviewPeriod";
+            cmbOverviewPeriod.Size = new Size(140, 28);
+            cmbOverviewPeriod.TabIndex = 8;
+            cmbOverviewPeriod.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbOverviewPeriod.FormattingEnabled = true;
+            cmbOverviewPeriod.Items.AddRange(new object[] { "Ngày", "Tuần", "Tháng", "Năm", "Tùy chọn" });
+            //
+            // labelOverviewAnchor
+            //
+            labelOverviewAnchor.Location = new Point(258, 29);
+            labelOverviewAnchor.Name = "labelOverviewAnchor";
+            labelOverviewAnchor.Size = new Size(126, 28);
+            labelOverviewAnchor.Text = "Mốc ngày:";
+            labelOverviewAnchor.TabIndex = 9;
+            labelOverviewAnchor.AutoSize = false;
+            labelOverviewAnchor.ForeColor = Color.FromArgb(22, 54, 90);
+            labelOverviewAnchor.TextAlign = ContentAlignment.MiddleLeft;
+            //
+            // dtpOverviewAnchor
+            //
+            dtpOverviewAnchor.Location = new Point(394, 29);
+            dtpOverviewAnchor.Name = "dtpOverviewAnchor";
+            dtpOverviewAnchor.Size = new Size(140, 28);
+            dtpOverviewAnchor.TabIndex = 10;
+            dtpOverviewAnchor.Format = DateTimePickerFormat.Custom;
+            dtpOverviewAnchor.CustomFormat = "dd/MM/yyyy";
+            dtpOverviewAnchor.CalendarForeColor = Color.FromArgb(22, 54, 90);
+            dtpOverviewAnchor.CalendarTitleBackColor = Color.FromArgb(232, 239, 250);
+            //
+            // label1
+            //
+            label1.Location = new Point(16, 69);
+            label1.Name = "label1";
+            label1.Size = new Size(74, 28);
+            label1.Text = "Từ:";
+            label1.TabIndex = 11;
+            label1.AutoSize = false;
+            label1.ForeColor = Color.FromArgb(22, 54, 90);
+            label1.TextAlign = ContentAlignment.MiddleLeft;
+            //
+            // dtpFromDate
+            //
+            dtpFromDate.Location = new Point(98, 69);
+            dtpFromDate.Name = "dtpFromDate";
+            dtpFromDate.Size = new Size(140, 28);
+            dtpFromDate.TabIndex = 12;
+            dtpFromDate.Format = DateTimePickerFormat.Custom;
+            dtpFromDate.CustomFormat = "dd/MM/yyyy";
+            dtpFromDate.CalendarForeColor = Color.FromArgb(22, 54, 90);
+            dtpFromDate.CalendarTitleBackColor = Color.FromArgb(232, 239, 250);
+            //
+            // label3
+            //
+            label3.Location = new Point(258, 69);
+            label3.Name = "label3";
+            label3.Size = new Size(126, 28);
+            label3.Text = "Đến:";
+            label3.TabIndex = 13;
+            label3.AutoSize = false;
+            label3.ForeColor = Color.FromArgb(22, 54, 90);
+            label3.TextAlign = ContentAlignment.MiddleLeft;
+            //
+            // dtpToDate
+            //
+            dtpToDate.Location = new Point(394, 69);
+            dtpToDate.Name = "dtpToDate";
+            dtpToDate.Size = new Size(140, 28);
+            dtpToDate.TabIndex = 14;
+            dtpToDate.Format = DateTimePickerFormat.Custom;
+            dtpToDate.CustomFormat = "dd/MM/yyyy";
+            dtpToDate.CalendarForeColor = Color.FromArgb(22, 54, 90);
+            dtpToDate.CalendarTitleBackColor = Color.FromArgb(232, 239, 250);
+            //
+            // btnRunReport
+            //
+            btnRunReport.Location = new Point(16, 108);
+            btnRunReport.Name = "btnRunReport";
+            btnRunReport.Size = new Size(148, 36);
+            btnRunReport.Text = "Xem báo cáo";
+            btnRunReport.TabIndex = 15;
+            btnRunReport.BackColor = Color.FromArgb(37, 99, 235);
+            btnRunReport.ForeColor = Color.White;
+            btnRunReport.FlatStyle = FlatStyle.Flat;
+            btnRunReport.FlatAppearance.BorderSize = 0;
+            btnRunReport.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
+            btnRunReport.UseVisualStyleBackColor = false;
+            btnRunReport.Cursor = Cursors.Hand;
+            //
+            // btnExportProducts
+            //
+            btnExportProducts.Location = new Point(180, 108);
+            btnExportProducts.Name = "btnExportProducts";
+            btnExportProducts.Size = new Size(200, 36);
+            btnExportProducts.Text = "Xuất tồn kho";
+            btnExportProducts.TabIndex = 16;
+            btnExportProducts.BackColor = Color.FromArgb(37, 99, 235);
+            btnExportProducts.ForeColor = Color.White;
+            btnExportProducts.FlatStyle = FlatStyle.Flat;
+            btnExportProducts.FlatAppearance.BorderSize = 0;
+            btnExportProducts.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
+            btnExportProducts.UseVisualStyleBackColor = false;
+            btnExportProducts.Cursor = Cursors.Hand;
+            //
+            // btnExportRevenue
+            //
+            btnExportRevenue.Location = new Point(396, 108);
+            btnExportRevenue.Name = "btnExportRevenue";
+            btnExportRevenue.Size = new Size(220, 36);
+            btnExportRevenue.Text = "Xuất doanh thu";
+            btnExportRevenue.TabIndex = 17;
+            btnExportRevenue.BackColor = Color.FromArgb(37, 99, 235);
+            btnExportRevenue.ForeColor = Color.White;
+            btnExportRevenue.FlatStyle = FlatStyle.Flat;
+            btnExportRevenue.FlatAppearance.BorderSize = 0;
+            btnExportRevenue.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
+            btnExportRevenue.UseVisualStyleBackColor = false;
+            btnExportRevenue.Cursor = Cursors.Hand;
+            groupBox2.Controls.Add(labelOverviewPeriod);
+            groupBox2.Controls.Add(cmbOverviewPeriod);
+            groupBox2.Controls.Add(labelOverviewAnchor);
+            groupBox2.Controls.Add(dtpOverviewAnchor);
             groupBox2.Controls.Add(label1);
             groupBox2.Controls.Add(dtpFromDate);
             groupBox2.Controls.Add(label3);
             groupBox2.Controls.Add(dtpToDate);
-            groupBox2.Location = new Point(6, 39);
-            groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(994, 84);
-            groupBox2.TabIndex = 2;
-            groupBox2.TabStop = false;
-            groupBox2.Text = "Bộ lọc báo cáo";
-            // 
-            // btnRunReport
-            // 
-            btnRunReport.Location = new Point(482, 31);
-            btnRunReport.Name = "btnRunReport";
-            btnRunReport.Size = new Size(112, 29);
-            btnRunReport.TabIndex = 2;
-            btnRunReport.Text = "Xem báo cáo";
-            btnRunReport.UseVisualStyleBackColor = true;
-            // 
-            // btnExportProducts
-            // [TC 48] Xuất danh sách toàn bộ mặt hàng kèm tồn kho ra CSV (mở được bằng Excel)
-            // 
-            btnExportProducts.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnExportProducts.Location = new Point(590, 31);
-            btnExportProducts.Name = "btnExportProducts";
-            btnExportProducts.Size = new Size(190, 29);
-            btnExportProducts.TabIndex = 5;
-            btnExportProducts.Text = "📥 Xuất tồn kho (Excel)";
-            btnExportProducts.UseVisualStyleBackColor = true;
-            // 
-            // btnExportRevenue
-            // [TC 48] Xuất doanh thu từng ngày trong khoảng đang chọn ra CSV
-            // 
-            btnExportRevenue.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnExportRevenue.Location = new Point(790, 31);
-            btnExportRevenue.Name = "btnExportRevenue";
-            btnExportRevenue.Size = new Size(195, 29);
-            btnExportRevenue.TabIndex = 6;
-            btnExportRevenue.Text = "📥 Xuất doanh thu (Excel)";
-            btnExportRevenue.UseVisualStyleBackColor = true;
-            // 
+            groupBox2.Controls.Add(btnRunReport);
+            groupBox2.Controls.Add(btnExportProducts);
+            groupBox2.Controls.Add(btnExportRevenue);
+            //
             // groupBox3
-            // 
-            // [DASHBOARD] Khung các thẻ tổng quan: dãn theo chiều ngang, chiều cao cố định
-            groupBox3.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            groupBox3.Controls.Add(tableLayoutPanelSummary);
-            groupBox3.Location = new Point(6, 129);
+            //
+            groupBox3.Location = new Point(16, 206);
             groupBox3.Name = "groupBox3";
-            groupBox3.Size = new Size(994, 172);
-            groupBox3.TabIndex = 3;
-            groupBox3.TabStop = false;
+            groupBox3.Size = new Size(922, 354);
             groupBox3.Text = "Tổng quan doanh thu";
-            // 
+            groupBox3.TabIndex = 18;
+            groupBox3.BackColor = Color.White;
+            groupBox3.ForeColor = Color.FromArgb(22, 54, 90);
+            groupBox3.Padding = new Padding(12);
+            groupBox3.TabStop = false;
+            groupBox3.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox3.Padding = new Padding(10, 28, 10, 10);
+            //
             // tableLayoutPanelSummary
-            // 
-            // [RESPONSIVE] TableLayoutPanel 5 cột tỉ lệ bằng nhau (20% mỗi cột):
-            // 3 thẻ báo cáo theo khoảng ngày + 2 thẻ Dashboard (khách mới, sắp hết hàng).
-            tableLayoutPanelSummary.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            tableLayoutPanelSummary.ColumnCount = 5;
-            tableLayoutPanelSummary.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
-            tableLayoutPanelSummary.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
-            tableLayoutPanelSummary.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
-            tableLayoutPanelSummary.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
-            tableLayoutPanelSummary.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
-            tableLayoutPanelSummary.RowCount = 1;
-            tableLayoutPanelSummary.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tableLayoutPanelSummary.Controls.Add(panel1, 0, 0);
-            tableLayoutPanelSummary.Controls.Add(panel2, 1, 0);
-            tableLayoutPanelSummary.Controls.Add(panel3, 2, 0);
-            tableLayoutPanelSummary.Controls.Add(panel4, 3, 0);
-            tableLayoutPanelSummary.Controls.Add(panel5, 4, 0);
-            tableLayoutPanelSummary.Location = new Point(15, 29);
+            //
             tableLayoutPanelSummary.Name = "tableLayoutPanelSummary";
-            tableLayoutPanelSummary.Padding = new Padding(0, 4, 0, 4);
-            tableLayoutPanelSummary.Size = new Size(964, 133);
-            tableLayoutPanelSummary.TabIndex = 3;
-            // 
+            tableLayoutPanelSummary.Dock = DockStyle.Fill;
+            tableLayoutPanelSummary.TabIndex = 19;
+            tableLayoutPanelSummary.AutoScroll = true;
+            tableLayoutPanelSummary.WrapContents = true;
+            tableLayoutPanelSummary.FlowDirection = FlowDirection.LeftToRight;
+            tableLayoutPanelSummary.BackColor = Color.White;
+            groupBox3.Controls.Add(tableLayoutPanelSummary);
+            //
             // panel1
-            // 
-            // [DASHBOARD] Dock Fill trong ô TableLayoutPanel -> thẻ tự co giãn; nhãn dùng Dock nên luôn căn giữa
-            panel1.BorderStyle = BorderStyle.FixedSingle;
-            panel1.Controls.Add(lblTotalOrders);
-            panel1.Controls.Add(lblOrdersToday);
-            panel1.Controls.Add(label2);
-            panel1.Dock = DockStyle.Fill;
-            panel1.Margin = new Padding(6, 0, 6, 0);
+            //
             panel1.Name = "panel1";
-            panel1.TabIndex = 0;
-            // 
+            panel1.Size = new Size(230, 140);
+            panel1.TabIndex = 20;
+            panel1.BackColor = Color.White;
+            panel1.BorderStyle = BorderStyle.FixedSingle;
+            panel1.Margin = new Padding(6);
+            panel1.Padding = new Padding(10);
+            //
             // label2
-            // 
-            label2.Dock = DockStyle.Top;
-            label2.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            //
+            label2.Location = new Point(10, 10);
             label2.Name = "label2";
-            label2.Size = new Size(150, 32);
-            label2.TabIndex = 0;
+            label2.Size = new Size(208, 34);
             label2.Text = "TỔNG SỐ HÓA ĐƠN";
-            label2.TextAlign = ContentAlignment.MiddleCenter;
-            // 
+            label2.TabIndex = 21;
+            label2.AutoSize = false;
+            label2.ForeColor = Color.FromArgb(22, 54, 90);
+            label2.TextAlign = ContentAlignment.MiddleLeft;
+            label2.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            //
             // lblTotalOrders
-            // 
-            lblTotalOrders.Dock = DockStyle.Fill;
-            lblTotalOrders.Font = new Font("Segoe UI", 20F, FontStyle.Bold, GraphicsUnit.Point);
+            //
+            lblTotalOrders.Location = new Point(10, 46);
             lblTotalOrders.Name = "lblTotalOrders";
-            lblTotalOrders.TabIndex = 1;
+            lblTotalOrders.Size = new Size(208, 50);
             lblTotalOrders.Text = "0";
+            lblTotalOrders.TabIndex = 22;
+            lblTotalOrders.AutoSize = false;
+            lblTotalOrders.ForeColor = Color.FromArgb(22, 54, 90);
+            lblTotalOrders.TextAlign = ContentAlignment.MiddleLeft;
+            lblTotalOrders.Font = new Font("Segoe UI", 20F, FontStyle.Bold, GraphicsUnit.Point);
             lblTotalOrders.TextAlign = ContentAlignment.MiddleCenter;
-            // 
+            panel1.Controls.Add(label2);
+            panel1.Controls.Add(lblTotalOrders);
+            //
             // lblOrdersToday
-            // 
-            lblOrdersToday.Dock = DockStyle.Bottom;
-            lblOrdersToday.ForeColor = Color.DimGray;
+            //
+            lblOrdersToday.Location = new Point(10, 104);
             lblOrdersToday.Name = "lblOrdersToday";
-            lblOrdersToday.Size = new Size(150, 26);
-            lblOrdersToday.TabIndex = 2;
-            lblOrdersToday.Text = "Hôm nay: 0 hóa đơn";
+            lblOrdersToday.Size = new Size(208, 26);
+            lblOrdersToday.Text = "Hôm nay: 0";
+            lblOrdersToday.TabIndex = 23;
+            lblOrdersToday.AutoSize = false;
+            lblOrdersToday.ForeColor = Color.FromArgb(22, 54, 90);
+            lblOrdersToday.TextAlign = ContentAlignment.MiddleLeft;
+            lblOrdersToday.ForeColor = Color.FromArgb(100, 116, 139);
             lblOrdersToday.TextAlign = ContentAlignment.MiddleCenter;
-            // 
+            panel1.Controls.Add(lblOrdersToday);
+            lblOrdersToday.Text = "Hôm nay: 0 hóa đơn";
+            //
             // panel2
-            // 
-            // [DASHBOARD] Dock Fill trong ô TableLayoutPanel -> thẻ tự co giãn; nhãn dùng Dock nên luôn căn giữa
-            panel2.BorderStyle = BorderStyle.FixedSingle;
-            panel2.Controls.Add(lblTotalRevenue);
-            panel2.Controls.Add(lblRevenueToday);
-            panel2.Controls.Add(label4);
-            panel2.Dock = DockStyle.Fill;
-            panel2.Margin = new Padding(6, 0, 6, 0);
+            //
             panel2.Name = "panel2";
-            panel2.TabIndex = 1;
-            // 
+            panel2.Size = new Size(230, 140);
+            panel2.TabIndex = 24;
+            panel2.BackColor = Color.White;
+            panel2.BorderStyle = BorderStyle.FixedSingle;
+            panel2.Margin = new Padding(6);
+            panel2.Padding = new Padding(10);
+            //
             // label4
-            // 
-            label4.Dock = DockStyle.Top;
-            label4.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            //
+            label4.Location = new Point(10, 10);
             label4.Name = "label4";
-            label4.Size = new Size(150, 32);
-            label4.TabIndex = 0;
+            label4.Size = new Size(208, 34);
             label4.Text = "TỔNG DOANH THU";
-            label4.TextAlign = ContentAlignment.MiddleCenter;
-            // 
+            label4.TabIndex = 25;
+            label4.AutoSize = false;
+            label4.ForeColor = Color.FromArgb(22, 54, 90);
+            label4.TextAlign = ContentAlignment.MiddleLeft;
+            label4.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            //
             // lblTotalRevenue
-            // 
-            lblTotalRevenue.Dock = DockStyle.Fill;
-            lblTotalRevenue.Font = new Font("Segoe UI", 16F, FontStyle.Bold, GraphicsUnit.Point);
-            lblTotalRevenue.ForeColor = Color.ForestGreen;
+            //
+            lblTotalRevenue.Location = new Point(10, 46);
             lblTotalRevenue.Name = "lblTotalRevenue";
-            lblTotalRevenue.TabIndex = 1;
+            lblTotalRevenue.Size = new Size(208, 50);
             lblTotalRevenue.Text = "0";
+            lblTotalRevenue.TabIndex = 26;
+            lblTotalRevenue.AutoSize = false;
+            lblTotalRevenue.ForeColor = Color.FromArgb(22, 54, 90);
+            lblTotalRevenue.TextAlign = ContentAlignment.MiddleLeft;
+            lblTotalRevenue.Font = new Font("Segoe UI", 17F, FontStyle.Bold, GraphicsUnit.Point);
             lblTotalRevenue.TextAlign = ContentAlignment.MiddleCenter;
-            // 
+            panel2.Controls.Add(label4);
+            panel2.Controls.Add(lblTotalRevenue);
+            //
             // lblRevenueToday
-            // 
-            lblRevenueToday.Dock = DockStyle.Bottom;
-            lblRevenueToday.ForeColor = Color.DimGray;
+            //
+            lblRevenueToday.Location = new Point(10, 104);
             lblRevenueToday.Name = "lblRevenueToday";
-            lblRevenueToday.Size = new Size(150, 26);
-            lblRevenueToday.TabIndex = 2;
-            lblRevenueToday.Text = "Hôm nay: 0 đ";
+            lblRevenueToday.Size = new Size(208, 26);
+            lblRevenueToday.Text = "Hôm nay: 0";
+            lblRevenueToday.TabIndex = 27;
+            lblRevenueToday.AutoSize = false;
+            lblRevenueToday.ForeColor = Color.FromArgb(22, 54, 90);
+            lblRevenueToday.TextAlign = ContentAlignment.MiddleLeft;
+            lblRevenueToday.ForeColor = Color.FromArgb(100, 116, 139);
             lblRevenueToday.TextAlign = ContentAlignment.MiddleCenter;
-            // 
+            panel2.Controls.Add(lblRevenueToday);
+            lblTotalRevenue.Text = "0 đ";
+            lblRevenueToday.Text = "Hôm nay: 0 đ";
+            //
             // panel3
-            // 
-            // [DASHBOARD] Dock Fill trong ô TableLayoutPanel -> thẻ tự co giãn; nhãn dùng Dock nên luôn căn giữa
-            panel3.BorderStyle = BorderStyle.FixedSingle;
-            panel3.Controls.Add(lblBestSeller);
-            panel3.Controls.Add(label6);
-            panel3.Dock = DockStyle.Fill;
-            panel3.Margin = new Padding(6, 0, 6, 0);
+            //
             panel3.Name = "panel3";
-            panel3.TabIndex = 2;
-            // 
+            panel3.Size = new Size(230, 140);
+            panel3.TabIndex = 28;
+            panel3.BackColor = Color.White;
+            panel3.BorderStyle = BorderStyle.FixedSingle;
+            panel3.Margin = new Padding(6);
+            panel3.Padding = new Padding(10);
+            //
             // label6
-            // 
-            label6.Dock = DockStyle.Top;
-            label6.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            //
+            label6.Location = new Point(10, 10);
             label6.Name = "label6";
-            label6.Size = new Size(150, 32);
-            label6.TabIndex = 0;
+            label6.Size = new Size(208, 34);
             label6.Text = "BÁN CHẠY NHẤT";
-            label6.TextAlign = ContentAlignment.MiddleCenter;
-            // 
+            label6.TabIndex = 29;
+            label6.AutoSize = false;
+            label6.ForeColor = Color.FromArgb(22, 54, 90);
+            label6.TextAlign = ContentAlignment.MiddleLeft;
+            label6.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            //
             // lblBestSeller
-            // 
-            lblBestSeller.Dock = DockStyle.Fill;
-            lblBestSeller.Font = new Font("Segoe UI", 11F, FontStyle.Bold, GraphicsUnit.Point);
+            //
+            lblBestSeller.Location = new Point(10, 46);
             lblBestSeller.Name = "lblBestSeller";
-            lblBestSeller.TabIndex = 1;
+            lblBestSeller.Size = new Size(208, 50);
             lblBestSeller.Text = "0";
+            lblBestSeller.TabIndex = 30;
+            lblBestSeller.AutoSize = false;
+            lblBestSeller.ForeColor = Color.FromArgb(22, 54, 90);
+            lblBestSeller.TextAlign = ContentAlignment.MiddleLeft;
+            lblBestSeller.Font = new Font("Segoe UI", 11F, FontStyle.Bold, GraphicsUnit.Point);
             lblBestSeller.TextAlign = ContentAlignment.MiddleCenter;
-            // 
+            panel3.Controls.Add(label6);
+            panel3.Controls.Add(lblBestSeller);
+            lblBestSeller.Size = new Size(208, 80);
+            lblBestSeller.Text = "Chưa có dữ liệu";
+            //
             // panel4
-            // 
-            // [DASHBOARD] Dock Fill trong ô TableLayoutPanel -> thẻ tự co giãn; nhãn dùng Dock nên luôn căn giữa
-            panel4.BorderStyle = BorderStyle.FixedSingle;
-            panel4.Controls.Add(lblNewCustomers);
-            panel4.Controls.Add(label7);
-            panel4.Dock = DockStyle.Fill;
-            panel4.Margin = new Padding(6, 0, 6, 0);
+            //
             panel4.Name = "panel4";
-            panel4.TabIndex = 3;
-            // 
+            panel4.Size = new Size(230, 140);
+            panel4.TabIndex = 31;
+            panel4.BackColor = Color.White;
+            panel4.BorderStyle = BorderStyle.FixedSingle;
+            panel4.Margin = new Padding(6);
+            panel4.Padding = new Padding(10);
+            //
             // label7
-            // 
-            label7.Dock = DockStyle.Top;
-            label7.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            //
+            label7.Location = new Point(10, 10);
             label7.Name = "label7";
-            label7.Size = new Size(150, 32);
-            label7.TabIndex = 0;
-            label7.Text = "KHÁCH HÀNG MỚI HÔM NAY";
-            label7.TextAlign = ContentAlignment.MiddleCenter;
-            // 
+            label7.Size = new Size(208, 34);
+            label7.Text = "KHÁCH MỚI HÔM NAY";
+            label7.TabIndex = 32;
+            label7.AutoSize = false;
+            label7.ForeColor = Color.FromArgb(22, 54, 90);
+            label7.TextAlign = ContentAlignment.MiddleLeft;
+            label7.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            //
             // lblNewCustomers
-            // 
-            lblNewCustomers.Dock = DockStyle.Fill;
-            lblNewCustomers.Font = new Font("Segoe UI", 20F, FontStyle.Bold, GraphicsUnit.Point);
-            lblNewCustomers.ForeColor = Color.DarkOrchid;
+            //
+            lblNewCustomers.Location = new Point(10, 46);
             lblNewCustomers.Name = "lblNewCustomers";
-            lblNewCustomers.TabIndex = 1;
+            lblNewCustomers.Size = new Size(208, 50);
             lblNewCustomers.Text = "0";
+            lblNewCustomers.TabIndex = 33;
+            lblNewCustomers.AutoSize = false;
+            lblNewCustomers.ForeColor = Color.FromArgb(22, 54, 90);
+            lblNewCustomers.TextAlign = ContentAlignment.MiddleLeft;
+            lblNewCustomers.Font = new Font("Segoe UI", 20F, FontStyle.Bold, GraphicsUnit.Point);
             lblNewCustomers.TextAlign = ContentAlignment.MiddleCenter;
-            // 
+            panel4.Controls.Add(label7);
+            panel4.Controls.Add(lblNewCustomers);
+            lblNewCustomers.Size = new Size(208, 80);
+            //
             // panel5
-            // 
-            // [DASHBOARD] Dock Fill trong ô TableLayoutPanel -> thẻ tự co giãn; nhãn dùng Dock nên luôn căn giữa
-            panel5.BorderStyle = BorderStyle.FixedSingle;
-            panel5.Controls.Add(lblLowStock);
-            panel5.Controls.Add(lblLowStockSub);
-            panel5.Controls.Add(label8);
-            panel5.Dock = DockStyle.Fill;
-            panel5.Margin = new Padding(6, 0, 6, 0);
+            //
             panel5.Name = "panel5";
-            panel5.TabIndex = 4;
-            // 
+            panel5.Size = new Size(230, 140);
+            panel5.TabIndex = 34;
+            panel5.BackColor = Color.White;
+            panel5.BorderStyle = BorderStyle.FixedSingle;
+            panel5.Margin = new Padding(6);
+            panel5.Padding = new Padding(10);
+            //
             // label8
-            // 
-            label8.Dock = DockStyle.Top;
-            label8.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            //
+            label8.Location = new Point(10, 10);
             label8.Name = "label8";
-            label8.Size = new Size(150, 32);
-            label8.TabIndex = 0;
+            label8.Size = new Size(208, 34);
             label8.Text = "SẮP HẾT HÀNG";
-            label8.TextAlign = ContentAlignment.MiddleCenter;
-            // 
+            label8.TabIndex = 35;
+            label8.AutoSize = false;
+            label8.ForeColor = Color.FromArgb(22, 54, 90);
+            label8.TextAlign = ContentAlignment.MiddleLeft;
+            label8.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            //
             // lblLowStock
-            // 
-            lblLowStock.Dock = DockStyle.Fill;
-            lblLowStock.Font = new Font("Segoe UI", 20F, FontStyle.Bold, GraphicsUnit.Point);
-            lblLowStock.ForeColor = Color.Firebrick;
+            //
+            lblLowStock.Location = new Point(10, 46);
             lblLowStock.Name = "lblLowStock";
-            lblLowStock.TabIndex = 1;
+            lblLowStock.Size = new Size(208, 50);
             lblLowStock.Text = "0";
+            lblLowStock.TabIndex = 36;
+            lblLowStock.AutoSize = false;
+            lblLowStock.ForeColor = Color.FromArgb(22, 54, 90);
+            lblLowStock.TextAlign = ContentAlignment.MiddleLeft;
+            lblLowStock.Font = new Font("Segoe UI", 20F, FontStyle.Bold, GraphicsUnit.Point);
             lblLowStock.TextAlign = ContentAlignment.MiddleCenter;
-            // 
+            panel5.Controls.Add(label8);
+            panel5.Controls.Add(lblLowStock);
+            //
             // lblLowStockSub
-            // 
-            lblLowStockSub.Dock = DockStyle.Bottom;
-            lblLowStockSub.ForeColor = Color.DimGray;
+            //
+            lblLowStockSub.Location = new Point(10, 104);
             lblLowStockSub.Name = "lblLowStockSub";
-            lblLowStockSub.Size = new Size(150, 26);
-            lblLowStockSub.TabIndex = 2;
-            lblLowStockSub.Text = "Tồn kho <= 10";
+            lblLowStockSub.Size = new Size(208, 26);
+            lblLowStockSub.Text = "Hôm nay: 0";
+            lblLowStockSub.TabIndex = 37;
+            lblLowStockSub.AutoSize = false;
+            lblLowStockSub.ForeColor = Color.FromArgb(22, 54, 90);
+            lblLowStockSub.TextAlign = ContentAlignment.MiddleLeft;
+            lblLowStockSub.ForeColor = Color.FromArgb(100, 116, 139);
             lblLowStockSub.TextAlign = ContentAlignment.MiddleCenter;
-            // 
+            panel5.Controls.Add(lblLowStockSub);
+            lblLowStockSub.Text = "Tồn kho <= 10";
+            tableLayoutPanelSummary.Controls.Add(panel1);
+            tableLayoutPanelSummary.Controls.Add(panel2);
+            tableLayoutPanelSummary.Controls.Add(panel3);
+            tableLayoutPanelSummary.Controls.Add(panel4);
+            tableLayoutPanelSummary.Controls.Add(panel5);
+            //
             // tableLayoutPanelBottom
-            // 
-            // [DASHBOARD] Hàng dưới: biểu đồ cột (64%) + Top 5 bán chạy (36%), dãn theo cả 2 chiều
-            tableLayoutPanelBottom.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            tableLayoutPanelBottom.ColumnCount = 2;
-            tableLayoutPanelBottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 64F));
-            tableLayoutPanelBottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 36F));
-            tableLayoutPanelBottom.Controls.Add(groupBoxChart, 0, 0);
-            tableLayoutPanelBottom.Controls.Add(groupBoxTop5, 1, 0);
-            tableLayoutPanelBottom.Location = new Point(6, 307);
+            //
+            tableLayoutPanelBottom.Location = new Point(16, 574);
             tableLayoutPanelBottom.Name = "tableLayoutPanelBottom";
+            tableLayoutPanelBottom.Size = new Size(922, 330);
+            tableLayoutPanelBottom.TabIndex = 38;
+            tableLayoutPanelBottom.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            tableLayoutPanelBottom.ColumnCount = 2;
+            tableLayoutPanelBottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 58F));
+            tableLayoutPanelBottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 42F));
             tableLayoutPanelBottom.RowCount = 1;
             tableLayoutPanelBottom.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tableLayoutPanelBottom.Size = new Size(994, 276);
-            tableLayoutPanelBottom.TabIndex = 4;
-            // 
+            tableLayoutPanelBottom.Controls.Add(groupBoxChart, 0, 0);
+            tableLayoutPanelBottom.Controls.Add(groupBoxTop5, 1, 0);
+            //
             // groupBoxChart
-            // 
-            groupBoxChart.Controls.Add(chartRevenue);
-            groupBoxChart.Dock = DockStyle.Fill;
+            //
+            groupBoxChart.Location = new Point(0, 0);
             groupBoxChart.Name = "groupBoxChart";
-            groupBoxChart.TabIndex = 0;
-            groupBoxChart.TabStop = false;
+            groupBoxChart.Size = new Size(530, 330);
             groupBoxChart.Text = "Doanh thu theo ngày (VNĐ)";
-            // 
+            groupBoxChart.TabIndex = 39;
+            groupBoxChart.BackColor = Color.White;
+            groupBoxChart.ForeColor = Color.FromArgb(22, 54, 90);
+            groupBoxChart.Padding = new Padding(12);
+            groupBoxChart.TabStop = false;
+            groupBoxChart.Dock = DockStyle.Fill;
+            groupBoxChart.Margin = new Padding(0, 0, 8, 0);
+            groupBoxChart.Controls.Add(chartRevenue);
+            //
             // chartRevenue
-            // 
-            chartArea1.Name = "ChartArea1";
-            chartRevenue.ChartAreas.Add(chartArea1);
-            chartRevenue.Dock = DockStyle.Fill;
+            //
             chartRevenue.Name = "chartRevenue";
+            chartRevenue.Dock = DockStyle.Fill;
+            chartRevenue.TabIndex = 40;
+            chartRevenue.BackColor = Color.White;
+            chartRevenue.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.BrightPastel;
+            chartArea1.Name = "ChartArea1";
+            chartArea1.BackColor = Color.White;
+            chartArea1.AxisX.LabelStyle.Font = new Font("Segoe UI", 9F);
+            chartArea1.AxisX.LabelStyle.ForeColor = Color.FromArgb(22, 54, 90);
+            chartArea1.AxisY.LabelStyle.Font = new Font("Segoe UI", 9F);
+            chartArea1.AxisY.LabelStyle.ForeColor = Color.FromArgb(22, 54, 90);
+            chartArea1.AxisY.MajorGrid.LineColor = Color.FromArgb(232, 239, 250);
+            chartRevenue.ChartAreas.Add(chartArea1);
             series1.ChartArea = "ChartArea1";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Column;
             series1.Name = "Doanh thu";
+            series1.Color = Color.FromArgb(37, 99, 235);
             chartRevenue.Series.Add(series1);
-            chartRevenue.TabIndex = 0;
-            chartRevenue.Text = "chartRevenue";
-            // 
+            //
             // groupBoxTop5
-            // 
-            groupBoxTop5.Controls.Add(dgvTopProducts);
-            groupBoxTop5.Dock = DockStyle.Fill;
+            //
+            groupBoxTop5.Location = new Point(0, 0);
             groupBoxTop5.Name = "groupBoxTop5";
-            groupBoxTop5.TabIndex = 1;
-            groupBoxTop5.TabStop = false;
+            groupBoxTop5.Size = new Size(386, 330);
             groupBoxTop5.Text = "Top 5 sản phẩm bán chạy";
-            // 
+            groupBoxTop5.TabIndex = 41;
+            groupBoxTop5.BackColor = Color.White;
+            groupBoxTop5.ForeColor = Color.FromArgb(22, 54, 90);
+            groupBoxTop5.Padding = new Padding(12);
+            groupBoxTop5.TabStop = false;
+            groupBoxTop5.Dock = DockStyle.Fill;
+            groupBoxTop5.Margin = new Padding(8, 0, 0, 0);
+            groupBoxTop5.Controls.Add(dgvTopProducts);
+            tabOrders.Controls.Add(layoutOrders);
+            //
+            // layoutOrders
+            //
+            layoutOrders.Name = "layoutOrders";
+            layoutOrders.Dock = DockStyle.Fill;
+            layoutOrders.TabIndex = 46;
+            layoutOrders.BackColor = Color.FromArgb(242, 245, 250);
+            layoutOrders.Margin = new Padding(0);
+            layoutOrders.ColumnCount = 1;
+            layoutOrders.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            layoutOrders.RowCount = 5;
+            layoutOrders.RowStyles.Add(new RowStyle(SizeType.Absolute, 92F));
+            layoutOrders.RowStyles.Add(new RowStyle(SizeType.Percent, 52F));
+            layoutOrders.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
+            layoutOrders.RowStyles.Add(new RowStyle(SizeType.Absolute, 64F));
+            layoutOrders.RowStyles.Add(new RowStyle(SizeType.Percent, 48F));
+            layoutOrders.Controls.Add(groupOrdersFilter, 0, 0);
+            layoutOrders.Controls.Add(dgvOrders, 0, 1);
+            layoutOrders.Controls.Add(panelOrderPaging, 0, 2);
+            layoutOrders.Controls.Add(lblOrderDetail, 0, 3);
+            layoutOrders.Controls.Add(dgvOrderDetails, 0, 4);
+            //
+            // groupOrdersFilter
+            //
+            groupOrdersFilter.Location = new Point(0, 0);
+            groupOrdersFilter.Name = "groupOrdersFilter";
+            groupOrdersFilter.Size = new Size(950, 86);
+            groupOrdersFilter.Text = "Tra cứu đơn hàng";
+            groupOrdersFilter.TabIndex = 47;
+            groupOrdersFilter.BackColor = Color.White;
+            groupOrdersFilter.ForeColor = Color.FromArgb(22, 54, 90);
+            groupOrdersFilter.Padding = new Padding(12);
+            groupOrdersFilter.TabStop = false;
+            groupOrdersFilter.Dock = DockStyle.Fill;
+            groupOrdersFilter.Margin = new Padding(0, 0, 0, 12);
+            //
+            // labelOrdersFrom
+            //
+            labelOrdersFrom.Location = new Point(16, 32);
+            labelOrdersFrom.Name = "labelOrdersFrom";
+            labelOrdersFrom.Size = new Size(68, 28);
+            labelOrdersFrom.Text = "Từ:";
+            labelOrdersFrom.TabIndex = 48;
+            labelOrdersFrom.AutoSize = false;
+            labelOrdersFrom.ForeColor = Color.FromArgb(22, 54, 90);
+            labelOrdersFrom.TextAlign = ContentAlignment.MiddleLeft;
+            //
+            // dtpOrdersFrom
+            //
+            dtpOrdersFrom.Location = new Point(86, 32);
+            dtpOrdersFrom.Name = "dtpOrdersFrom";
+            dtpOrdersFrom.Size = new Size(140, 28);
+            dtpOrdersFrom.TabIndex = 49;
+            dtpOrdersFrom.Format = DateTimePickerFormat.Custom;
+            dtpOrdersFrom.CustomFormat = "dd/MM/yyyy";
+            dtpOrdersFrom.CalendarForeColor = Color.FromArgb(22, 54, 90);
+            dtpOrdersFrom.CalendarTitleBackColor = Color.FromArgb(232, 239, 250);
+            //
+            // labelOrdersTo
+            //
+            labelOrdersTo.Location = new Point(242, 32);
+            labelOrdersTo.Name = "labelOrdersTo";
+            labelOrdersTo.Size = new Size(80, 28);
+            labelOrdersTo.Text = "Đến:";
+            labelOrdersTo.TabIndex = 50;
+            labelOrdersTo.AutoSize = false;
+            labelOrdersTo.ForeColor = Color.FromArgb(22, 54, 90);
+            labelOrdersTo.TextAlign = ContentAlignment.MiddleLeft;
+            //
+            // dtpOrdersTo
+            //
+            dtpOrdersTo.Location = new Point(324, 32);
+            dtpOrdersTo.Name = "dtpOrdersTo";
+            dtpOrdersTo.Size = new Size(140, 28);
+            dtpOrdersTo.TabIndex = 51;
+            dtpOrdersTo.Format = DateTimePickerFormat.Custom;
+            dtpOrdersTo.CustomFormat = "dd/MM/yyyy";
+            dtpOrdersTo.CalendarForeColor = Color.FromArgb(22, 54, 90);
+            dtpOrdersTo.CalendarTitleBackColor = Color.FromArgb(232, 239, 250);
+            //
+            // btnLoadOrders
+            //
+            btnLoadOrders.Location = new Point(484, 28);
+            btnLoadOrders.Name = "btnLoadOrders";
+            btnLoadOrders.Size = new Size(144, 36);
+            btnLoadOrders.Text = "Tải đơn hàng";
+            btnLoadOrders.TabIndex = 52;
+            btnLoadOrders.BackColor = Color.FromArgb(37, 99, 235);
+            btnLoadOrders.ForeColor = Color.White;
+            btnLoadOrders.FlatStyle = FlatStyle.Flat;
+            btnLoadOrders.FlatAppearance.BorderSize = 0;
+            btnLoadOrders.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
+            btnLoadOrders.UseVisualStyleBackColor = false;
+            btnLoadOrders.Cursor = Cursors.Hand;
+            //
+            // btnOrderDetail
+            //
+            btnOrderDetail.Location = new Point(644, 28);
+            btnOrderDetail.Name = "btnOrderDetail";
+            btnOrderDetail.Size = new Size(154, 36);
+            btnOrderDetail.Text = "Xem chi tiết";
+            btnOrderDetail.TabIndex = 53;
+            btnOrderDetail.BackColor = Color.FromArgb(37, 99, 235);
+            btnOrderDetail.ForeColor = Color.White;
+            btnOrderDetail.FlatStyle = FlatStyle.Flat;
+            btnOrderDetail.FlatAppearance.BorderSize = 0;
+            btnOrderDetail.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
+            btnOrderDetail.UseVisualStyleBackColor = false;
+            btnOrderDetail.Cursor = Cursors.Hand;
+            groupOrdersFilter.Controls.Add(labelOrdersFrom);
+            groupOrdersFilter.Controls.Add(dtpOrdersFrom);
+            groupOrdersFilter.Controls.Add(labelOrdersTo);
+            groupOrdersFilter.Controls.Add(dtpOrdersTo);
+            groupOrdersFilter.Controls.Add(btnLoadOrders);
+            groupOrdersFilter.Controls.Add(btnOrderDetail);
+            //
+            // panelOrderPaging
+            //
+            panelOrderPaging.Name = "panelOrderPaging";
+            panelOrderPaging.Dock = DockStyle.Fill;
+            panelOrderPaging.TabIndex = 61;
+            panelOrderPaging.Margin = new Padding(0, 4, 0, 4);
+            panelOrderPaging.BackColor = Color.FromArgb(242, 245, 250);
+            //
+            // btnOrderPrevious
+            //
+            btnOrderPrevious.Location = new Point(0, 0);
+            btnOrderPrevious.Name = "btnOrderPrevious";
+            btnOrderPrevious.Size = new Size(116, 36);
+            btnOrderPrevious.Text = "Trang trước";
+            btnOrderPrevious.TabIndex = 62;
+            btnOrderPrevious.BackColor = Color.FromArgb(37, 99, 235);
+            btnOrderPrevious.ForeColor = Color.White;
+            btnOrderPrevious.FlatStyle = FlatStyle.Flat;
+            btnOrderPrevious.FlatAppearance.BorderSize = 0;
+            btnOrderPrevious.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
+            btnOrderPrevious.UseVisualStyleBackColor = false;
+            btnOrderPrevious.Cursor = Cursors.Hand;
+            //
+            // btnOrderNext
+            //
+            btnOrderNext.Location = new Point(128, 0);
+            btnOrderNext.Name = "btnOrderNext";
+            btnOrderNext.Size = new Size(116, 36);
+            btnOrderNext.Text = "Trang sau";
+            btnOrderNext.TabIndex = 63;
+            btnOrderNext.BackColor = Color.FromArgb(37, 99, 235);
+            btnOrderNext.ForeColor = Color.White;
+            btnOrderNext.FlatStyle = FlatStyle.Flat;
+            btnOrderNext.FlatAppearance.BorderSize = 0;
+            btnOrderNext.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
+            btnOrderNext.UseVisualStyleBackColor = false;
+            btnOrderNext.Cursor = Cursors.Hand;
+            //
+            // lblOrderPaging
+            //
+            lblOrderPaging.Location = new Point(264, 0);
+            lblOrderPaging.Name = "lblOrderPaging";
+            lblOrderPaging.Size = new Size(680, 36);
+            lblOrderPaging.Text = "Chưa tải danh sách đơn hàng.";
+            lblOrderPaging.TabIndex = 64;
+            lblOrderPaging.AutoSize = false;
+            lblOrderPaging.ForeColor = Color.FromArgb(22, 54, 90);
+            lblOrderPaging.TextAlign = ContentAlignment.MiddleLeft;
+            lblOrderPaging.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            panelOrderPaging.Controls.Add(btnOrderPrevious);
+            panelOrderPaging.Controls.Add(btnOrderNext);
+            panelOrderPaging.Controls.Add(lblOrderPaging);
+            //
+            // lblOrderDetail
+            //
+            lblOrderDetail.Location = new Point(0, 0);
+            lblOrderDetail.Name = "lblOrderDetail";
+            lblOrderDetail.Size = new Size(940, 60);
+            lblOrderDetail.Text = "Chọn một đơn hàng để xem chi tiết.";
+            lblOrderDetail.TabIndex = 65;
+            lblOrderDetail.AutoSize = false;
+            lblOrderDetail.ForeColor = Color.FromArgb(22, 54, 90);
+            lblOrderDetail.TextAlign = ContentAlignment.MiddleLeft;
+            lblOrderDetail.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
+            lblOrderDetail.Dock = DockStyle.Fill;
+            lblOrderDetail.AutoEllipsis = true;
+            lblOrderDetail.Margin = new Padding(0);
+            tabDaily.Controls.Add(layoutDaily);
+            //
+            // layoutDaily
+            //
+            layoutDaily.Name = "layoutDaily";
+            layoutDaily.Dock = DockStyle.Fill;
+            layoutDaily.TabIndex = 72;
+            layoutDaily.BackColor = Color.FromArgb(242, 245, 250);
+            layoutDaily.Margin = new Padding(0);
+            layoutDaily.ColumnCount = 1;
+            layoutDaily.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            layoutDaily.RowCount = 4;
+            layoutDaily.RowStyles.Add(new RowStyle(SizeType.Absolute, 92F));
+            layoutDaily.RowStyles.Add(new RowStyle(SizeType.Absolute, 136F));
+            layoutDaily.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
+            layoutDaily.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            layoutDaily.Controls.Add(groupDailyFilter, 0, 0);
+            layoutDaily.Controls.Add(layoutDailyCards, 0, 1);
+            layoutDaily.Controls.Add(lblDailySummary, 0, 2);
+            layoutDaily.Controls.Add(dgvDailyCashiers, 0, 3);
+            //
+            // groupDailyFilter
+            //
+            groupDailyFilter.Location = new Point(0, 0);
+            groupDailyFilter.Name = "groupDailyFilter";
+            groupDailyFilter.Size = new Size(950, 80);
+            groupDailyFilter.Text = "Chọn kỳ doanh thu";
+            groupDailyFilter.TabIndex = 73;
+            groupDailyFilter.BackColor = Color.White;
+            groupDailyFilter.ForeColor = Color.FromArgb(22, 54, 90);
+            groupDailyFilter.Padding = new Padding(12);
+            groupDailyFilter.TabStop = false;
+            groupDailyFilter.Dock = DockStyle.Fill;
+            groupDailyFilter.Margin = new Padding(0, 0, 0, 12);
+            //
+            // labelDailyPeriod
+            //
+            labelDailyPeriod.Location = new Point(16, 32);
+            labelDailyPeriod.Name = "labelDailyPeriod";
+            labelDailyPeriod.Size = new Size(82, 28);
+            labelDailyPeriod.Text = "Kỳ:";
+            labelDailyPeriod.TabIndex = 74;
+            labelDailyPeriod.AutoSize = false;
+            labelDailyPeriod.ForeColor = Color.FromArgb(22, 54, 90);
+            labelDailyPeriod.TextAlign = ContentAlignment.MiddleLeft;
+            //
+            // cmbDailyPeriod
+            //
+            cmbDailyPeriod.Location = new Point(104, 32);
+            cmbDailyPeriod.Name = "cmbDailyPeriod";
+            cmbDailyPeriod.Size = new Size(140, 28);
+            cmbDailyPeriod.TabIndex = 75;
+            cmbDailyPeriod.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbDailyPeriod.FormattingEnabled = true;
+            cmbDailyPeriod.Items.AddRange(new object[] { "Ngày", "Tuần", "Tháng", "Năm" });
+            //
+            // labelDailyAnchor
+            //
+            labelDailyAnchor.Location = new Point(254, 32);
+            labelDailyAnchor.Name = "labelDailyAnchor";
+            labelDailyAnchor.Size = new Size(126, 28);
+            labelDailyAnchor.Text = "Mốc ngày:";
+            labelDailyAnchor.TabIndex = 76;
+            labelDailyAnchor.AutoSize = false;
+            labelDailyAnchor.ForeColor = Color.FromArgb(22, 54, 90);
+            labelDailyAnchor.TextAlign = ContentAlignment.MiddleLeft;
+            //
+            // dtpDaily
+            //
+            dtpDaily.Location = new Point(390, 32);
+            dtpDaily.Name = "dtpDaily";
+            dtpDaily.Size = new Size(140, 28);
+            dtpDaily.TabIndex = 77;
+            dtpDaily.Format = DateTimePickerFormat.Custom;
+            dtpDaily.CustomFormat = "dd/MM/yyyy";
+            dtpDaily.CalendarForeColor = Color.FromArgb(22, 54, 90);
+            dtpDaily.CalendarTitleBackColor = Color.FromArgb(232, 239, 250);
+            //
+            // btnLoadDaily
+            //
+            btnLoadDaily.Location = new Point(542, 28);
+            btnLoadDaily.Name = "btnLoadDaily";
+            btnLoadDaily.Size = new Size(130, 36);
+            btnLoadDaily.Text = "Xem báo cáo";
+            btnLoadDaily.TabIndex = 78;
+            btnLoadDaily.BackColor = Color.FromArgb(37, 99, 235);
+            btnLoadDaily.ForeColor = Color.White;
+            btnLoadDaily.FlatStyle = FlatStyle.Flat;
+            btnLoadDaily.FlatAppearance.BorderSize = 0;
+            btnLoadDaily.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
+            btnLoadDaily.UseVisualStyleBackColor = false;
+            btnLoadDaily.Cursor = Cursors.Hand;
+            //
+            // btnDailyOrders
+            //
+            btnDailyOrders.Location = new Point(684, 28);
+            btnDailyOrders.Name = "btnDailyOrders";
+            btnDailyOrders.Size = new Size(140, 36);
+            btnDailyOrders.Text = "Xem đơn hàng";
+            btnDailyOrders.TabIndex = 79;
+            btnDailyOrders.BackColor = Color.FromArgb(37, 99, 235);
+            btnDailyOrders.ForeColor = Color.White;
+            btnDailyOrders.FlatStyle = FlatStyle.Flat;
+            btnDailyOrders.FlatAppearance.BorderSize = 0;
+            btnDailyOrders.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
+            btnDailyOrders.UseVisualStyleBackColor = false;
+            btnDailyOrders.Cursor = Cursors.Hand;
+            groupDailyFilter.Controls.Add(labelDailyPeriod);
+            groupDailyFilter.Controls.Add(cmbDailyPeriod);
+            groupDailyFilter.Controls.Add(labelDailyAnchor);
+            groupDailyFilter.Controls.Add(dtpDaily);
+            groupDailyFilter.Controls.Add(btnLoadDaily);
+            groupDailyFilter.Controls.Add(btnDailyOrders);
+            //
+            // layoutDailyCards
+            //
+            layoutDailyCards.Name = "layoutDailyCards";
+            layoutDailyCards.Dock = DockStyle.Fill;
+            layoutDailyCards.TabIndex = 80;
+            layoutDailyCards.BackColor = Color.FromArgb(242, 245, 250);
+            layoutDailyCards.Margin = new Padding(0);
+            layoutDailyCards.ColumnCount = 3;
+            layoutDailyCards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33F));
+            layoutDailyCards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 23F));
+            layoutDailyCards.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 44F));
+            layoutDailyCards.RowCount = 1;
+            layoutDailyCards.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            layoutDailyCards.Controls.Add(panelDailyRevenue, 0, 0);
+            //
+            // panelDailyRevenue
+            //
+            panelDailyRevenue.Name = "panelDailyRevenue";
+            panelDailyRevenue.Dock = DockStyle.Fill;
+            panelDailyRevenue.TabIndex = 81;
+            panelDailyRevenue.BackColor = Color.White;
+            panelDailyRevenue.BorderStyle = BorderStyle.FixedSingle;
+            panelDailyRevenue.Padding = new Padding(12);
+            panelDailyRevenue.Margin = new Padding(0, 0, 12, 0);
+            //
+            // labelDailyRevenue
+            //
+            labelDailyRevenue.Name = "labelDailyRevenue";
+            labelDailyRevenue.Size = new Size(230, 32);
+            labelDailyRevenue.Text = "TỔNG DOANH THU";
+            labelDailyRevenue.Dock = DockStyle.Top;
+            labelDailyRevenue.TabIndex = 82;
+            labelDailyRevenue.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            labelDailyRevenue.ForeColor = Color.FromArgb(22, 54, 90);
+            //
+            // lblDailyRevenue
+            //
+            lblDailyRevenue.Name = "lblDailyRevenue";
+            lblDailyRevenue.Text = "—";
+            lblDailyRevenue.Dock = DockStyle.Fill;
+            lblDailyRevenue.TabIndex = 83;
+            lblDailyRevenue.Font = new Font("Segoe UI", 19F, FontStyle.Bold, GraphicsUnit.Point);
+            lblDailyRevenue.ForeColor = Color.FromArgb(22, 54, 90);
+            lblDailyRevenue.TextAlign = ContentAlignment.MiddleLeft;
+            panelDailyRevenue.Controls.Add(lblDailyRevenue);
+            panelDailyRevenue.Controls.Add(labelDailyRevenue);
+            layoutDailyCards.Controls.Add(panelDailyOrders, 1, 0);
+            //
+            // panelDailyOrders
+            //
+            panelDailyOrders.Name = "panelDailyOrders";
+            panelDailyOrders.Dock = DockStyle.Fill;
+            panelDailyOrders.TabIndex = 84;
+            panelDailyOrders.BackColor = Color.White;
+            panelDailyOrders.BorderStyle = BorderStyle.FixedSingle;
+            panelDailyOrders.Padding = new Padding(12);
+            panelDailyOrders.Margin = new Padding(0, 0, 12, 0);
+            //
+            // labelDailyOrders
+            //
+            labelDailyOrders.Name = "labelDailyOrders";
+            labelDailyOrders.Size = new Size(230, 32);
+            labelDailyOrders.Text = "SỐ HÓA ĐƠN";
+            labelDailyOrders.Dock = DockStyle.Top;
+            labelDailyOrders.TabIndex = 85;
+            labelDailyOrders.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            labelDailyOrders.ForeColor = Color.FromArgb(22, 54, 90);
+            //
+            // lblDailyOrders
+            //
+            lblDailyOrders.Name = "lblDailyOrders";
+            lblDailyOrders.Text = "—";
+            lblDailyOrders.Dock = DockStyle.Fill;
+            lblDailyOrders.TabIndex = 86;
+            lblDailyOrders.Font = new Font("Segoe UI", 21F, FontStyle.Bold, GraphicsUnit.Point);
+            lblDailyOrders.ForeColor = Color.FromArgb(22, 54, 90);
+            lblDailyOrders.TextAlign = ContentAlignment.MiddleLeft;
+            panelDailyOrders.Controls.Add(lblDailyOrders);
+            panelDailyOrders.Controls.Add(labelDailyOrders);
+            layoutDailyCards.Controls.Add(panelDailyBestSeller, 2, 0);
+            //
+            // panelDailyBestSeller
+            //
+            panelDailyBestSeller.Name = "panelDailyBestSeller";
+            panelDailyBestSeller.Dock = DockStyle.Fill;
+            panelDailyBestSeller.TabIndex = 87;
+            panelDailyBestSeller.BackColor = Color.White;
+            panelDailyBestSeller.BorderStyle = BorderStyle.FixedSingle;
+            panelDailyBestSeller.Padding = new Padding(12);
+            panelDailyBestSeller.Margin = new Padding(0);
+            //
+            // labelDailyBestSeller
+            //
+            labelDailyBestSeller.Name = "labelDailyBestSeller";
+            labelDailyBestSeller.Size = new Size(230, 32);
+            labelDailyBestSeller.Text = "SẢN PHẨM BÁN CHẠY";
+            labelDailyBestSeller.Dock = DockStyle.Top;
+            labelDailyBestSeller.TabIndex = 88;
+            labelDailyBestSeller.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            labelDailyBestSeller.ForeColor = Color.FromArgb(22, 54, 90);
+            //
+            // lblDailyBestSeller
+            //
+            lblDailyBestSeller.Name = "lblDailyBestSeller";
+            lblDailyBestSeller.Text = "—";
+            lblDailyBestSeller.Dock = DockStyle.Fill;
+            lblDailyBestSeller.TabIndex = 89;
+            lblDailyBestSeller.Font = new Font("Segoe UI", 11F, FontStyle.Bold, GraphicsUnit.Point);
+            lblDailyBestSeller.ForeColor = Color.FromArgb(22, 54, 90);
+            lblDailyBestSeller.TextAlign = ContentAlignment.MiddleLeft;
+            panelDailyBestSeller.Controls.Add(lblDailyBestSeller);
+            panelDailyBestSeller.Controls.Add(labelDailyBestSeller);
+            //
+            // lblDailySummary
+            //
+            lblDailySummary.Location = new Point(0, 0);
+            lblDailySummary.Name = "lblDailySummary";
+            lblDailySummary.Size = new Size(940, 48);
+            lblDailySummary.Text = "Doanh thu và số đơn theo thu ngân trong kỳ.";
+            lblDailySummary.TabIndex = 90;
+            lblDailySummary.AutoSize = false;
+            lblDailySummary.ForeColor = Color.FromArgb(22, 54, 90);
+            lblDailySummary.TextAlign = ContentAlignment.MiddleLeft;
+            lblDailySummary.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
+            lblDailySummary.Dock = DockStyle.Fill;
+            lblDailySummary.AutoEllipsis = true;
+            lblDailySummary.Margin = new Padding(0, 4, 0, 4);
+            tabCashiers.Controls.Add(layoutCashiers);
+            //
+            // layoutCashiers
+            //
+            layoutCashiers.Name = "layoutCashiers";
+            layoutCashiers.Dock = DockStyle.Fill;
+            layoutCashiers.TabIndex = 96;
+            layoutCashiers.BackColor = Color.FromArgb(242, 245, 250);
+            layoutCashiers.Margin = new Padding(0);
+            layoutCashiers.ColumnCount = 1;
+            layoutCashiers.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            layoutCashiers.RowCount = 3;
+            layoutCashiers.RowStyles.Add(new RowStyle(SizeType.Absolute, 160F));
+            layoutCashiers.RowStyles.Add(new RowStyle(SizeType.Absolute, 52F));
+            layoutCashiers.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            layoutCashiers.Controls.Add(groupCashierFilter, 0, 0);
+            layoutCashiers.Controls.Add(lblCashierSummary, 0, 1);
+            layoutCashiers.Controls.Add(dgvCashiers, 0, 2);
+            //
+            // groupCashierFilter
+            //
+            groupCashierFilter.Location = new Point(0, 0);
+            groupCashierFilter.Name = "groupCashierFilter";
+            groupCashierFilter.Size = new Size(950, 148);
+            groupCashierFilter.Text = "Doanh thu theo thu ngân";
+            groupCashierFilter.TabIndex = 97;
+            groupCashierFilter.BackColor = Color.White;
+            groupCashierFilter.ForeColor = Color.FromArgb(22, 54, 90);
+            groupCashierFilter.Padding = new Padding(12);
+            groupCashierFilter.TabStop = false;
+            groupCashierFilter.Dock = DockStyle.Fill;
+            groupCashierFilter.Margin = new Padding(0, 0, 0, 12);
+            //
+            // labelCashierPeriod
+            //
+            labelCashierPeriod.Location = new Point(16, 28);
+            labelCashierPeriod.Name = "labelCashierPeriod";
+            labelCashierPeriod.Size = new Size(82, 28);
+            labelCashierPeriod.Text = "Kỳ:";
+            labelCashierPeriod.TabIndex = 98;
+            labelCashierPeriod.AutoSize = false;
+            labelCashierPeriod.ForeColor = Color.FromArgb(22, 54, 90);
+            labelCashierPeriod.TextAlign = ContentAlignment.MiddleLeft;
+            //
+            // cmbCashierPeriod
+            //
+            cmbCashierPeriod.Location = new Point(104, 28);
+            cmbCashierPeriod.Name = "cmbCashierPeriod";
+            cmbCashierPeriod.Size = new Size(140, 28);
+            cmbCashierPeriod.TabIndex = 99;
+            cmbCashierPeriod.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbCashierPeriod.FormattingEnabled = true;
+            cmbCashierPeriod.Items.AddRange(new object[] { "Ngày", "Tuần", "Tháng", "Năm", "Tùy chọn" });
+            //
+            // labelCashierAnchor
+            //
+            labelCashierAnchor.Location = new Point(258, 28);
+            labelCashierAnchor.Name = "labelCashierAnchor";
+            labelCashierAnchor.Size = new Size(126, 28);
+            labelCashierAnchor.Text = "Mốc ngày:";
+            labelCashierAnchor.TabIndex = 100;
+            labelCashierAnchor.AutoSize = false;
+            labelCashierAnchor.ForeColor = Color.FromArgb(22, 54, 90);
+            labelCashierAnchor.TextAlign = ContentAlignment.MiddleLeft;
+            //
+            // dtpCashierAnchor
+            //
+            dtpCashierAnchor.Location = new Point(394, 28);
+            dtpCashierAnchor.Name = "dtpCashierAnchor";
+            dtpCashierAnchor.Size = new Size(140, 28);
+            dtpCashierAnchor.TabIndex = 101;
+            dtpCashierAnchor.Format = DateTimePickerFormat.Custom;
+            dtpCashierAnchor.CustomFormat = "dd/MM/yyyy";
+            dtpCashierAnchor.CalendarForeColor = Color.FromArgb(22, 54, 90);
+            dtpCashierAnchor.CalendarTitleBackColor = Color.FromArgb(232, 239, 250);
+            //
+            // btnLoadCashiers
+            //
+            btnLoadCashiers.Location = new Point(554, 24);
+            btnLoadCashiers.Name = "btnLoadCashiers";
+            btnLoadCashiers.Size = new Size(164, 36);
+            btnLoadCashiers.Text = "Xem doanh thu";
+            btnLoadCashiers.TabIndex = 106;
+            btnLoadCashiers.BackColor = Color.FromArgb(37, 99, 235);
+            btnLoadCashiers.ForeColor = Color.White;
+            btnLoadCashiers.FlatStyle = FlatStyle.Flat;
+            btnLoadCashiers.FlatAppearance.BorderSize = 0;
+            btnLoadCashiers.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
+            btnLoadCashiers.UseVisualStyleBackColor = false;
+            btnLoadCashiers.Cursor = Cursors.Hand;
+            //
+            // labelCashierFrom
+            //
+            labelCashierFrom.Location = new Point(16, 67);
+            labelCashierFrom.Name = "labelCashierFrom";
+            labelCashierFrom.Size = new Size(74, 28);
+            labelCashierFrom.Text = "Từ:";
+            labelCashierFrom.TabIndex = 102;
+            labelCashierFrom.AutoSize = false;
+            labelCashierFrom.ForeColor = Color.FromArgb(22, 54, 90);
+            labelCashierFrom.TextAlign = ContentAlignment.MiddleLeft;
+            //
+            // dtpCashierFrom
+            //
+            dtpCashierFrom.Location = new Point(98, 67);
+            dtpCashierFrom.Name = "dtpCashierFrom";
+            dtpCashierFrom.Size = new Size(140, 28);
+            dtpCashierFrom.TabIndex = 103;
+            dtpCashierFrom.Format = DateTimePickerFormat.Custom;
+            dtpCashierFrom.CustomFormat = "dd/MM/yyyy";
+            dtpCashierFrom.CalendarForeColor = Color.FromArgb(22, 54, 90);
+            dtpCashierFrom.CalendarTitleBackColor = Color.FromArgb(232, 239, 250);
+            //
+            // labelCashierTo
+            //
+            labelCashierTo.Location = new Point(258, 67);
+            labelCashierTo.Name = "labelCashierTo";
+            labelCashierTo.Size = new Size(126, 28);
+            labelCashierTo.Text = "Đến:";
+            labelCashierTo.TabIndex = 104;
+            labelCashierTo.AutoSize = false;
+            labelCashierTo.ForeColor = Color.FromArgb(22, 54, 90);
+            labelCashierTo.TextAlign = ContentAlignment.MiddleLeft;
+            //
+            // dtpCashierTo
+            //
+            dtpCashierTo.Location = new Point(394, 67);
+            dtpCashierTo.Name = "dtpCashierTo";
+            dtpCashierTo.Size = new Size(140, 28);
+            dtpCashierTo.TabIndex = 105;
+            dtpCashierTo.Format = DateTimePickerFormat.Custom;
+            dtpCashierTo.CustomFormat = "dd/MM/yyyy";
+            dtpCashierTo.CalendarForeColor = Color.FromArgb(22, 54, 90);
+            dtpCashierTo.CalendarTitleBackColor = Color.FromArgb(232, 239, 250);
+            //
+            // chkAllCashierHistory
+            //
+            chkAllCashierHistory.Location = new Point(16, 108);
+            chkAllCashierHistory.Name = "chkAllCashierHistory";
+            chkAllCashierHistory.Size = new Size(370, 28);
+            chkAllCashierHistory.Text = "Toàn bộ lịch sử bán hàng";
+            chkAllCashierHistory.TabIndex = 107;
+            chkAllCashierHistory.AutoSize = true;
+            chkAllCashierHistory.UseVisualStyleBackColor = true;
+            groupCashierFilter.Controls.Add(labelCashierPeriod);
+            groupCashierFilter.Controls.Add(cmbCashierPeriod);
+            groupCashierFilter.Controls.Add(labelCashierAnchor);
+            groupCashierFilter.Controls.Add(dtpCashierAnchor);
+            groupCashierFilter.Controls.Add(btnLoadCashiers);
+            groupCashierFilter.Controls.Add(labelCashierFrom);
+            groupCashierFilter.Controls.Add(dtpCashierFrom);
+            groupCashierFilter.Controls.Add(labelCashierTo);
+            groupCashierFilter.Controls.Add(dtpCashierTo);
+            groupCashierFilter.Controls.Add(chkAllCashierHistory);
+            //
+            // lblCashierSummary
+            //
+            lblCashierSummary.Location = new Point(0, 0);
+            lblCashierSummary.Name = "lblCashierSummary";
+            lblCashierSummary.Size = new Size(940, 48);
+            lblCashierSummary.Text = "Chọn khoảng thời gian để xem doanh thu theo thu ngân.";
+            lblCashierSummary.TabIndex = 108;
+            lblCashierSummary.AutoSize = false;
+            lblCashierSummary.ForeColor = Color.FromArgb(22, 54, 90);
+            lblCashierSummary.TextAlign = ContentAlignment.MiddleLeft;
+            lblCashierSummary.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
+            lblCashierSummary.Dock = DockStyle.Fill;
+            lblCashierSummary.AutoEllipsis = true;
+            lblCashierSummary.Margin = new Padding(0, 4, 0, 4);
+            //
             // dgvTopProducts
-            // 
+            //
+            dgvTopProducts.Name = "dgvTopProducts";
+            dgvTopProducts.Dock = DockStyle.Fill;
+            dgvTopProducts.TabIndex = 42;
             dgvTopProducts.AllowUserToAddRows = false;
             dgvTopProducts.AllowUserToDeleteRows = false;
+            dgvTopProducts.AllowUserToResizeRows = false;
+            dgvTopProducts.AutoGenerateColumns = false;
             dgvTopProducts.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvTopProducts.BackgroundColor = SystemColors.Window;
+            dgvTopProducts.BackgroundColor = Color.White;
             dgvTopProducts.BorderStyle = BorderStyle.None;
-            dgvTopProducts.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvTopProducts.Columns.AddRange(new DataGridViewColumn[] { colRank, colProductName, colTotalSold });
-            dgvTopProducts.Dock = DockStyle.Fill;
-            dgvTopProducts.Name = "dgvTopProducts";
+            dgvTopProducts.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dgvTopProducts.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            dgvTopProducts.ColumnHeadersHeight = 40;
+            dgvTopProducts.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgvTopProducts.EnableHeadersVisualStyles = false;
+            dgvTopProducts.GridColor = Color.FromArgb(232, 239, 250);
+            dgvTopProducts.MultiSelect = false;
             dgvTopProducts.ReadOnly = true;
             dgvTopProducts.RowHeadersVisible = false;
+            dgvTopProducts.RowTemplate.Height = 36;
             dgvTopProducts.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvTopProducts.TabIndex = 0;
-            // 
+            dgvTopProducts.Margin = new Padding(0);
+            dataGridViewCellStyle1.ForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle1.SelectionBackColor = Color.FromArgb(220, 234, 254);
+            dataGridViewCellStyle1.SelectionForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle1.Padding = new Padding(8, 0, 8, 0);
+            dataGridViewCellStyle2.ForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle2.SelectionBackColor = Color.FromArgb(220, 234, 254);
+            dataGridViewCellStyle2.SelectionForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle2.Padding = new Padding(8, 0, 8, 0);
+            dataGridViewCellStyle3.ForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle3.SelectionBackColor = Color.FromArgb(220, 234, 254);
+            dataGridViewCellStyle3.SelectionForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle3.Padding = new Padding(8, 0, 8, 0);
+            dataGridViewCellStyle1.BackColor = Color.White;
+            dataGridViewCellStyle1.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
+            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.False;
+            dataGridViewCellStyle2.BackColor = Color.FromArgb(232, 239, 250);
+            dataGridViewCellStyle2.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
+            dataGridViewCellStyle3.BackColor = Color.FromArgb(248, 250, 253);
+            dgvTopProducts.DefaultCellStyle = dataGridViewCellStyle1;
+            dgvTopProducts.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            dgvTopProducts.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle3;
+            dgvTopProducts.Columns.AddRange(new DataGridViewColumn[] { colRank, colProductName, colTotalSold });
+            //
             // colRank
-            // 
-            colRank.FillWeight = 15F;
-            colRank.HeaderText = "Hạng";
+            //
             colRank.Name = "colRank";
+            colRank.HeaderText = "Hạng";
+            colRank.FillWeight = 15F;
+            colRank.MinimumWidth = 55;
             colRank.ReadOnly = true;
-            // 
+            //
             // colProductName
-            // 
-            colProductName.FillWeight = 60F;
-            colProductName.HeaderText = "Tên sản phẩm";
+            //
             colProductName.Name = "colProductName";
+            colProductName.HeaderText = "Tên sản phẩm";
+            colProductName.FillWeight = 60F;
+            colProductName.MinimumWidth = 150;
             colProductName.ReadOnly = true;
-            // 
+            //
             // colTotalSold
-            // 
-            colTotalSold.FillWeight = 25F;
-            colTotalSold.HeaderText = "Đã bán";
+            //
             colTotalSold.Name = "colTotalSold";
+            colTotalSold.HeaderText = "Đã bán";
+            colTotalSold.FillWeight = 25F;
+            colTotalSold.MinimumWidth = 75;
             colTotalSold.ReadOnly = true;
-            // 
+            colTotalSold.DefaultCellStyle.Format = "N0";
+            colTotalSold.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            //
+            // dgvOrders
+            //
+            dgvOrders.Name = "dgvOrders";
+            dgvOrders.Dock = DockStyle.Fill;
+            dgvOrders.TabIndex = 54;
+            dgvOrders.AllowUserToAddRows = false;
+            dgvOrders.AllowUserToDeleteRows = false;
+            dgvOrders.AllowUserToResizeRows = false;
+            dgvOrders.AutoGenerateColumns = false;
+            dgvOrders.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvOrders.BackgroundColor = Color.White;
+            dgvOrders.BorderStyle = BorderStyle.None;
+            dgvOrders.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dgvOrders.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            dgvOrders.ColumnHeadersHeight = 40;
+            dgvOrders.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgvOrders.EnableHeadersVisualStyles = false;
+            dgvOrders.GridColor = Color.FromArgb(232, 239, 250);
+            dgvOrders.MultiSelect = false;
+            dgvOrders.ReadOnly = true;
+            dgvOrders.RowHeadersVisible = false;
+            dgvOrders.RowTemplate.Height = 36;
+            dgvOrders.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvOrders.Margin = new Padding(0);
+            dataGridViewCellStyle4.ForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle4.SelectionBackColor = Color.FromArgb(220, 234, 254);
+            dataGridViewCellStyle4.SelectionForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle4.Padding = new Padding(8, 0, 8, 0);
+            dataGridViewCellStyle5.ForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle5.SelectionBackColor = Color.FromArgb(220, 234, 254);
+            dataGridViewCellStyle5.SelectionForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle5.Padding = new Padding(8, 0, 8, 0);
+            dataGridViewCellStyle6.ForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle6.SelectionBackColor = Color.FromArgb(220, 234, 254);
+            dataGridViewCellStyle6.SelectionForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle6.Padding = new Padding(8, 0, 8, 0);
+            dataGridViewCellStyle4.BackColor = Color.White;
+            dataGridViewCellStyle4.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
+            dataGridViewCellStyle4.WrapMode = DataGridViewTriState.False;
+            dataGridViewCellStyle5.BackColor = Color.FromArgb(232, 239, 250);
+            dataGridViewCellStyle5.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
+            dataGridViewCellStyle5.WrapMode = DataGridViewTriState.False;
+            dataGridViewCellStyle6.BackColor = Color.FromArgb(248, 250, 253);
+            dgvOrders.DefaultCellStyle = dataGridViewCellStyle4;
+            dgvOrders.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
+            dgvOrders.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle6;
+            dgvOrders.Columns.AddRange(new DataGridViewColumn[] { colOrderCode, colOrderCreatedDate, colOrderCashier, colOrderCustomer, colOrderItems, colOrderAmount });
+            //
+            // colOrderCode
+            //
+            colOrderCode.Name = "colOrderCode";
+            colOrderCode.HeaderText = "Mã đơn";
+            colOrderCode.DataPropertyName = "OrderCode";
+            colOrderCode.FillWeight = 18F;
+            colOrderCode.MinimumWidth = 120;
+            colOrderCode.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            colOrderCode.ReadOnly = true;
+            //
+            // colOrderCreatedDate
+            //
+            colOrderCreatedDate.Name = "colOrderCreatedDate";
+            colOrderCreatedDate.HeaderText = "Thời gian";
+            colOrderCreatedDate.DataPropertyName = "CreatedDate";
+            colOrderCreatedDate.FillWeight = 23F;
+            colOrderCreatedDate.MinimumWidth = 155;
+            colOrderCreatedDate.ReadOnly = true;
+            colOrderCreatedDate.DefaultCellStyle.Format = "dd/MM/yyyy HH:mm";
+            colOrderCreatedDate.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            //
+            // colOrderCashier
+            //
+            colOrderCashier.Name = "colOrderCashier";
+            colOrderCashier.HeaderText = "Thu ngân";
+            colOrderCashier.DataPropertyName = "CashierUsername";
+            colOrderCashier.FillWeight = 17F;
+            colOrderCashier.MinimumWidth = 120;
+            colOrderCashier.ReadOnly = true;
+            //
+            // colOrderCustomer
+            //
+            colOrderCustomer.Name = "colOrderCustomer";
+            colOrderCustomer.HeaderText = "Khách hàng";
+            colOrderCustomer.DataPropertyName = "CustomerName";
+            colOrderCustomer.FillWeight = 20F;
+            colOrderCustomer.MinimumWidth = 140;
+            colOrderCustomer.ReadOnly = true;
+            //
+            // colOrderItems
+            //
+            colOrderItems.Name = "colOrderItems";
+            colOrderItems.HeaderText = "SL";
+            colOrderItems.DataPropertyName = "TotalItems";
+            colOrderItems.FillWeight = 11F;
+            colOrderItems.MinimumWidth = 85;
+            colOrderItems.ReadOnly = true;
+            colOrderItems.DefaultCellStyle.Format = "N0";
+            colOrderItems.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            //
+            // colOrderAmount
+            //
+            colOrderAmount.Name = "colOrderAmount";
+            colOrderAmount.HeaderText = "Thực thu";
+            colOrderAmount.DataPropertyName = "FinalAmount";
+            colOrderAmount.FillWeight = 18F;
+            colOrderAmount.MinimumWidth = 120;
+            colOrderAmount.ReadOnly = true;
+            colOrderAmount.DefaultCellStyle.Format = "N0";
+            colOrderAmount.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            //
+            // dgvOrderDetails
+            //
+            dgvOrderDetails.Name = "dgvOrderDetails";
+            dgvOrderDetails.Dock = DockStyle.Fill;
+            dgvOrderDetails.TabIndex = 66;
+            dgvOrderDetails.AllowUserToAddRows = false;
+            dgvOrderDetails.AllowUserToDeleteRows = false;
+            dgvOrderDetails.AllowUserToResizeRows = false;
+            dgvOrderDetails.AutoGenerateColumns = false;
+            dgvOrderDetails.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.DisplayedCells;
+            dgvOrderDetails.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvOrderDetails.BackgroundColor = Color.White;
+            dgvOrderDetails.BorderStyle = BorderStyle.None;
+            dgvOrderDetails.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dgvOrderDetails.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            dgvOrderDetails.ColumnHeadersHeight = 40;
+            dgvOrderDetails.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgvOrderDetails.EnableHeadersVisualStyles = false;
+            dgvOrderDetails.GridColor = Color.FromArgb(232, 239, 250);
+            dgvOrderDetails.MultiSelect = false;
+            dgvOrderDetails.ReadOnly = true;
+            dgvOrderDetails.RowHeadersVisible = false;
+            dgvOrderDetails.RowTemplate.Height = 36;
+            dgvOrderDetails.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvOrderDetails.Margin = new Padding(0);
+            dataGridViewCellStyle7.ForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle7.SelectionBackColor = Color.FromArgb(220, 234, 254);
+            dataGridViewCellStyle7.SelectionForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle7.Padding = new Padding(8, 0, 8, 0);
+            dataGridViewCellStyle8.ForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle8.SelectionBackColor = Color.FromArgb(220, 234, 254);
+            dataGridViewCellStyle8.SelectionForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle8.Padding = new Padding(8, 0, 8, 0);
+            dataGridViewCellStyle9.ForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle9.SelectionBackColor = Color.FromArgb(220, 234, 254);
+            dataGridViewCellStyle9.SelectionForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle9.Padding = new Padding(8, 0, 8, 0);
+            dataGridViewCellStyle7.BackColor = Color.White;
+            dataGridViewCellStyle7.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
+            dataGridViewCellStyle7.WrapMode = DataGridViewTriState.False;
+            dataGridViewCellStyle8.BackColor = Color.FromArgb(232, 239, 250);
+            dataGridViewCellStyle8.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
+            dataGridViewCellStyle8.WrapMode = DataGridViewTriState.False;
+            dataGridViewCellStyle9.BackColor = Color.FromArgb(248, 250, 253);
+            dgvOrderDetails.DefaultCellStyle = dataGridViewCellStyle7;
+            dgvOrderDetails.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle8;
+            dgvOrderDetails.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle9;
+            dgvOrderDetails.Columns.AddRange(new DataGridViewColumn[] { colDetailBarcode, colDetailProductName, colDetailQuantity, colDetailUnitPrice, colDetailLineTotal });
+            //
+            // colDetailBarcode
+            //
+            colDetailBarcode.Name = "colDetailBarcode";
+            colDetailBarcode.HeaderText = "Mã vạch";
+            colDetailBarcode.DataPropertyName = "Barcode";
+            colDetailBarcode.FillWeight = 20F;
+            colDetailBarcode.MinimumWidth = 130;
+            colDetailBarcode.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            colDetailBarcode.ReadOnly = true;
+            //
+            // colDetailProductName
+            //
+            colDetailProductName.Name = "colDetailProductName";
+            colDetailProductName.HeaderText = "Tên sản phẩm";
+            colDetailProductName.DataPropertyName = "ProductName";
+            colDetailProductName.FillWeight = 35F;
+            colDetailProductName.MinimumWidth = 180;
+            colDetailProductName.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            colDetailProductName.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+            colDetailProductName.ReadOnly = true;
+            //
+            // colDetailQuantity
+            //
+            colDetailQuantity.Name = "colDetailQuantity";
+            colDetailQuantity.HeaderText = "Số lượng";
+            colDetailQuantity.DataPropertyName = "Quantity";
+            colDetailQuantity.FillWeight = 12F;
+            colDetailQuantity.MinimumWidth = 95;
+            colDetailQuantity.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            colDetailQuantity.ReadOnly = true;
+            colDetailQuantity.DefaultCellStyle.Format = "N0";
+            colDetailQuantity.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            //
+            // colDetailUnitPrice
+            //
+            colDetailUnitPrice.Name = "colDetailUnitPrice";
+            colDetailUnitPrice.HeaderText = "Đơn giá (đ)";
+            colDetailUnitPrice.DataPropertyName = "UnitPrice";
+            colDetailUnitPrice.FillWeight = 16F;
+            colDetailUnitPrice.MinimumWidth = 125;
+            colDetailUnitPrice.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            colDetailUnitPrice.ReadOnly = true;
+            colDetailUnitPrice.DefaultCellStyle.Format = "N0";
+            colDetailUnitPrice.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            //
+            // colDetailLineTotal
+            //
+            colDetailLineTotal.Name = "colDetailLineTotal";
+            colDetailLineTotal.HeaderText = "Thành tiền (đ)";
+            colDetailLineTotal.DataPropertyName = "LineTotal";
+            colDetailLineTotal.FillWeight = 17F;
+            colDetailLineTotal.MinimumWidth = 140;
+            colDetailLineTotal.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            colDetailLineTotal.ReadOnly = true;
+            colDetailLineTotal.DefaultCellStyle.Format = "N0";
+            colDetailLineTotal.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            //
+            // dgvDailyCashiers
+            //
+            dgvDailyCashiers.Name = "dgvDailyCashiers";
+            dgvDailyCashiers.Dock = DockStyle.Fill;
+            dgvDailyCashiers.TabIndex = 91;
+            dgvDailyCashiers.AllowUserToAddRows = false;
+            dgvDailyCashiers.AllowUserToDeleteRows = false;
+            dgvDailyCashiers.AllowUserToResizeRows = false;
+            dgvDailyCashiers.AutoGenerateColumns = false;
+            dgvDailyCashiers.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvDailyCashiers.BackgroundColor = Color.White;
+            dgvDailyCashiers.BorderStyle = BorderStyle.None;
+            dgvDailyCashiers.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dgvDailyCashiers.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            dgvDailyCashiers.ColumnHeadersHeight = 40;
+            dgvDailyCashiers.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgvDailyCashiers.EnableHeadersVisualStyles = false;
+            dgvDailyCashiers.GridColor = Color.FromArgb(232, 239, 250);
+            dgvDailyCashiers.MultiSelect = false;
+            dgvDailyCashiers.ReadOnly = true;
+            dgvDailyCashiers.RowHeadersVisible = false;
+            dgvDailyCashiers.RowTemplate.Height = 36;
+            dgvDailyCashiers.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvDailyCashiers.Margin = new Padding(0);
+            dataGridViewCellStyle10.ForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle10.SelectionBackColor = Color.FromArgb(220, 234, 254);
+            dataGridViewCellStyle10.SelectionForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle10.Padding = new Padding(8, 0, 8, 0);
+            dataGridViewCellStyle11.ForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle11.SelectionBackColor = Color.FromArgb(220, 234, 254);
+            dataGridViewCellStyle11.SelectionForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle11.Padding = new Padding(8, 0, 8, 0);
+            dataGridViewCellStyle12.ForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle12.SelectionBackColor = Color.FromArgb(220, 234, 254);
+            dataGridViewCellStyle12.SelectionForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle12.Padding = new Padding(8, 0, 8, 0);
+            dataGridViewCellStyle10.BackColor = Color.White;
+            dataGridViewCellStyle10.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
+            dataGridViewCellStyle10.WrapMode = DataGridViewTriState.False;
+            dataGridViewCellStyle11.BackColor = Color.FromArgb(232, 239, 250);
+            dataGridViewCellStyle11.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
+            dataGridViewCellStyle11.WrapMode = DataGridViewTriState.False;
+            dataGridViewCellStyle12.BackColor = Color.FromArgb(248, 250, 253);
+            dgvDailyCashiers.DefaultCellStyle = dataGridViewCellStyle10;
+            dgvDailyCashiers.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle11;
+            dgvDailyCashiers.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle12;
+            dgvDailyCashiers.Columns.AddRange(new DataGridViewColumn[] { colDailyCashier, colDailyOrders, colDailyRevenue, colDailyPoints });
+            //
+            // colDailyCashier
+            //
+            colDailyCashier.Name = "colDailyCashier";
+            colDailyCashier.HeaderText = "Thu ngân";
+            colDailyCashier.DataPropertyName = "CashierUsername";
+            colDailyCashier.FillWeight = 30F;
+            colDailyCashier.MinimumWidth = 170;
+            colDailyCashier.ReadOnly = true;
+            //
+            // colDailyOrders
+            //
+            colDailyOrders.Name = "colDailyOrders";
+            colDailyOrders.HeaderText = "Số hóa đơn";
+            colDailyOrders.DataPropertyName = "TotalOrders";
+            colDailyOrders.FillWeight = 20F;
+            colDailyOrders.MinimumWidth = 120;
+            colDailyOrders.ReadOnly = true;
+            colDailyOrders.DefaultCellStyle.Format = "N0";
+            colDailyOrders.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            //
+            // colDailyRevenue
+            //
+            colDailyRevenue.Name = "colDailyRevenue";
+            colDailyRevenue.HeaderText = "Doanh thu (đ)";
+            colDailyRevenue.DataPropertyName = "TotalRevenue";
+            colDailyRevenue.FillWeight = 30F;
+            colDailyRevenue.MinimumWidth = 170;
+            colDailyRevenue.ReadOnly = true;
+            colDailyRevenue.DefaultCellStyle.Format = "N0";
+            colDailyRevenue.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            //
+            // colDailyPoints
+            //
+            colDailyPoints.Name = "colDailyPoints";
+            colDailyPoints.HeaderText = "Điểm tích lũy";
+            colDailyPoints.DataPropertyName = "TotalPointsAwarded";
+            colDailyPoints.FillWeight = 20F;
+            colDailyPoints.MinimumWidth = 145;
+            colDailyPoints.ReadOnly = true;
+            colDailyPoints.DefaultCellStyle.Format = "N0";
+            colDailyPoints.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            //
+            // dgvCashiers
+            //
+            dgvCashiers.Name = "dgvCashiers";
+            dgvCashiers.Dock = DockStyle.Fill;
+            dgvCashiers.TabIndex = 109;
+            dgvCashiers.AllowUserToAddRows = false;
+            dgvCashiers.AllowUserToDeleteRows = false;
+            dgvCashiers.AllowUserToResizeRows = false;
+            dgvCashiers.AutoGenerateColumns = false;
+            dgvCashiers.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvCashiers.BackgroundColor = Color.White;
+            dgvCashiers.BorderStyle = BorderStyle.None;
+            dgvCashiers.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+            dgvCashiers.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            dgvCashiers.ColumnHeadersHeight = 40;
+            dgvCashiers.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgvCashiers.EnableHeadersVisualStyles = false;
+            dgvCashiers.GridColor = Color.FromArgb(232, 239, 250);
+            dgvCashiers.MultiSelect = false;
+            dgvCashiers.ReadOnly = true;
+            dgvCashiers.RowHeadersVisible = false;
+            dgvCashiers.RowTemplate.Height = 36;
+            dgvCashiers.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvCashiers.Margin = new Padding(0);
+            dataGridViewCellStyle13.ForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle13.SelectionBackColor = Color.FromArgb(220, 234, 254);
+            dataGridViewCellStyle13.SelectionForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle13.Padding = new Padding(8, 0, 8, 0);
+            dataGridViewCellStyle14.ForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle14.SelectionBackColor = Color.FromArgb(220, 234, 254);
+            dataGridViewCellStyle14.SelectionForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle14.Padding = new Padding(8, 0, 8, 0);
+            dataGridViewCellStyle15.ForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle15.SelectionBackColor = Color.FromArgb(220, 234, 254);
+            dataGridViewCellStyle15.SelectionForeColor = Color.FromArgb(22, 54, 90);
+            dataGridViewCellStyle15.Padding = new Padding(8, 0, 8, 0);
+            dataGridViewCellStyle13.BackColor = Color.White;
+            dataGridViewCellStyle13.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
+            dataGridViewCellStyle13.WrapMode = DataGridViewTriState.False;
+            dataGridViewCellStyle14.BackColor = Color.FromArgb(232, 239, 250);
+            dataGridViewCellStyle14.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
+            dataGridViewCellStyle14.WrapMode = DataGridViewTriState.False;
+            dataGridViewCellStyle15.BackColor = Color.FromArgb(248, 250, 253);
+            dgvCashiers.DefaultCellStyle = dataGridViewCellStyle13;
+            dgvCashiers.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle14;
+            dgvCashiers.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle15;
+            dgvCashiers.Columns.AddRange(new DataGridViewColumn[] { colCashierUsername, colCashierOrders, colCashierRevenue, colCashierPoints });
+            //
+            // colCashierUsername
+            //
+            colCashierUsername.Name = "colCashierUsername";
+            colCashierUsername.HeaderText = "Thu ngân";
+            colCashierUsername.DataPropertyName = "CashierUsername";
+            colCashierUsername.FillWeight = 30F;
+            colCashierUsername.MinimumWidth = 170;
+            colCashierUsername.ReadOnly = true;
+            //
+            // colCashierOrders
+            //
+            colCashierOrders.Name = "colCashierOrders";
+            colCashierOrders.HeaderText = "Số hóa đơn";
+            colCashierOrders.DataPropertyName = "TotalOrders";
+            colCashierOrders.FillWeight = 20F;
+            colCashierOrders.MinimumWidth = 120;
+            colCashierOrders.ReadOnly = true;
+            colCashierOrders.DefaultCellStyle.Format = "N0";
+            colCashierOrders.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            //
+            // colCashierRevenue
+            //
+            colCashierRevenue.Name = "colCashierRevenue";
+            colCashierRevenue.HeaderText = "Doanh thu (đ)";
+            colCashierRevenue.DataPropertyName = "TotalRevenue";
+            colCashierRevenue.FillWeight = 30F;
+            colCashierRevenue.MinimumWidth = 170;
+            colCashierRevenue.ReadOnly = true;
+            colCashierRevenue.DefaultCellStyle.Format = "N0";
+            colCashierRevenue.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            //
+            // colCashierPoints
+            //
+            colCashierPoints.Name = "colCashierPoints";
+            colCashierPoints.HeaderText = "Điểm tích lũy";
+            colCashierPoints.DataPropertyName = "TotalPointsAwarded";
+            colCashierPoints.FillWeight = 20F;
+            colCashierPoints.MinimumWidth = 145;
+            colCashierPoints.ReadOnly = true;
+            colCashierPoints.DefaultCellStyle.Format = "N0";
+            colCashierPoints.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            tabReports.SelectedIndexChanged += tabReports_SelectedIndexChanged;
+            btnRunReport.Click += btnRunReport_Click;
+            btnExportProducts.Click += btnExportProducts_Click;
+            btnExportRevenue.Click += btnExportRevenue_Click;
+            btnLoadOrders.Click += btnLoadOrders_Click;
+            btnOrderPrevious.Click += btnOrderPrevious_Click;
+            btnOrderNext.Click += btnOrderNext_Click;
+            btnOrderDetail.Click += btnOrderDetail_Click;
+            dgvOrders.SelectionChanged += dgvOrders_SelectionChanged;
+            dgvOrders.CellDoubleClick += dgvOrders_CellDoubleClick;
+            btnLoadDaily.Click += btnLoadDaily_Click;
+            btnDailyOrders.Click += btnDailyOrders_Click;
+            btnLoadCashiers.Click += btnLoadCashiers_Click;
+            chkAllCashierHistory.CheckedChanged += chkAllCashierHistory_CheckedChanged;
+            cmbOverviewPeriod.SelectedIndexChanged += cmbOverviewPeriod_SelectedIndexChanged;
+            dtpOverviewAnchor.ValueChanged += dtpOverviewAnchor_ValueChanged;
+            cmbDailyPeriod.SelectedIndexChanged += cmbDailyPeriod_SelectedIndexChanged;
+            dtpDaily.ValueChanged += dtpDaily_ValueChanged;
+            cmbCashierPeriod.SelectedIndexChanged += cmbCashierPeriod_SelectedIndexChanged;
+            dtpCashierAnchor.ValueChanged += dtpCashierAnchor_ValueChanged;
+            dtpFromDate.ValueChanged += dtpFromDate_ValueChanged;
+            dtpToDate.ValueChanged += dtpToDate_ValueChanged;
+            //
             // FormQuickReport
-            // 
+            //
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.FromArgb(242, 245, 250);
             ClientSize = new Size(1030, 613);
-            // [RESPONSIVE] Tránh co quá nhỏ khiến các thẻ tổng quan bị đè lên nhau
+            Controls.Add(tabReports);
+            Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            ForeColor = Color.FromArgb(22, 54, 90);
             MinimumSize = new Size(900, 560);
-            Controls.Add(groupBox1);
             Name = "FormQuickReport";
-            Text = "FormQuickReport";
-            groupBox1.ResumeLayout(false);
+            Padding = new Padding(12);
+            Text = "Báo cáo doanh thu";
+            Load += FormQuickReport_Load;
+            FormClosed += FormQuickReport_FormClosed;
+            groupCashierFilter.ResumeLayout(false);
+            groupCashierFilter.PerformLayout();
+            layoutCashiers.ResumeLayout(false);
+            panelDailyBestSeller.ResumeLayout(false);
+            panelDailyOrders.ResumeLayout(false);
+            panelDailyRevenue.ResumeLayout(false);
+            layoutDailyCards.ResumeLayout(false);
+            groupDailyFilter.ResumeLayout(false);
+            groupDailyFilter.PerformLayout();
+            layoutDaily.ResumeLayout(false);
+            panelOrderPaging.ResumeLayout(false);
+            groupOrdersFilter.ResumeLayout(false);
+            groupOrdersFilter.PerformLayout();
+            layoutOrders.ResumeLayout(false);
+            groupBoxTop5.ResumeLayout(false);
+            groupBoxChart.ResumeLayout(false);
+            tableLayoutPanelBottom.ResumeLayout(false);
+            panel5.ResumeLayout(false);
+            panel4.ResumeLayout(false);
+            panel3.ResumeLayout(false);
+            panel2.ResumeLayout(false);
+            panel1.ResumeLayout(false);
+            tableLayoutPanelSummary.ResumeLayout(false);
+            groupBox3.ResumeLayout(false);
             groupBox2.ResumeLayout(false);
             groupBox2.PerformLayout();
-            groupBox3.ResumeLayout(false);
-            tableLayoutPanelSummary.ResumeLayout(false);
-            panel1.ResumeLayout(false);
-            panel2.ResumeLayout(false);
-            panel3.ResumeLayout(false);
-            panel4.ResumeLayout(false);
-            panel5.ResumeLayout(false);
-            tableLayoutPanelBottom.ResumeLayout(false);
-            groupBoxChart.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)chartRevenue).EndInit();
-            groupBoxTop5.ResumeLayout(false);
+            groupBox1.ResumeLayout(false);
+            tabCashiers.ResumeLayout(false);
+            tabDaily.ResumeLayout(false);
+            tabOrders.ResumeLayout(false);
+            tabOverview.ResumeLayout(false);
+            tabReports.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvTopProducts).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dgvOrders).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dgvOrderDetails).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dgvDailyCashiers).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dgvCashiers).EndInit();
+            ((System.ComponentModel.ISupportInitialize)chartRevenue).EndInit();
             ResumeLayout(false);
         }
 
         #endregion
 
+        private TabControl tabReports;
+        private TabPage tabOverview;
+        private TabPage tabOrders;
+        private TabPage tabDaily;
+        private TabPage tabCashiers;
         private GroupBox groupBox1;
         private GroupBox groupBox2;
-        private DateTimePicker dtpFromDate;
-        private DateTimePicker dtpToDate;
+        private Label labelOverviewPeriod;
+        private ComboBox cmbOverviewPeriod;
+        private Label labelOverviewAnchor;
+        private DateTimePicker dtpOverviewAnchor;
         private Label label1;
+        private DateTimePicker dtpFromDate;
         private Label label3;
+        private DateTimePicker dtpToDate;
         private Button btnRunReport;
         private Button btnExportProducts;
         private Button btnExportRevenue;
         private GroupBox groupBox3;
-        private TableLayoutPanel tableLayoutPanelSummary;
+        private FlowLayoutPanel tableLayoutPanelSummary;
         private Panel panel1;
-        private Panel panel2;
-        private Panel panel3;
-        private Panel panel4;
-        private Panel panel5;
         private Label label2;
         private Label lblTotalOrders;
         private Label lblOrdersToday;
+        private Panel panel2;
         private Label label4;
         private Label lblTotalRevenue;
         private Label lblRevenueToday;
+        private Panel panel3;
         private Label label6;
         private Label lblBestSeller;
+        private Panel panel4;
         private Label label7;
         private Label lblNewCustomers;
+        private Panel panel5;
         private Label label8;
         private Label lblLowStock;
         private Label lblLowStockSub;
@@ -551,5 +1939,73 @@
         private DataGridViewTextBoxColumn colRank;
         private DataGridViewTextBoxColumn colProductName;
         private DataGridViewTextBoxColumn colTotalSold;
+        private TableLayoutPanel layoutOrders;
+        private GroupBox groupOrdersFilter;
+        private Label labelOrdersFrom;
+        private DateTimePicker dtpOrdersFrom;
+        private Label labelOrdersTo;
+        private DateTimePicker dtpOrdersTo;
+        private Button btnLoadOrders;
+        private Button btnOrderDetail;
+        private DataGridView dgvOrders;
+        private DataGridViewTextBoxColumn colOrderCode;
+        private DataGridViewTextBoxColumn colOrderCreatedDate;
+        private DataGridViewTextBoxColumn colOrderCashier;
+        private DataGridViewTextBoxColumn colOrderCustomer;
+        private DataGridViewTextBoxColumn colOrderItems;
+        private DataGridViewTextBoxColumn colOrderAmount;
+        private Panel panelOrderPaging;
+        private Button btnOrderPrevious;
+        private Button btnOrderNext;
+        private Label lblOrderPaging;
+        private Label lblOrderDetail;
+        private DataGridView dgvOrderDetails;
+        private DataGridViewTextBoxColumn colDetailBarcode;
+        private DataGridViewTextBoxColumn colDetailProductName;
+        private DataGridViewTextBoxColumn colDetailQuantity;
+        private DataGridViewTextBoxColumn colDetailUnitPrice;
+        private DataGridViewTextBoxColumn colDetailLineTotal;
+        private TableLayoutPanel layoutDaily;
+        private GroupBox groupDailyFilter;
+        private Label labelDailyPeriod;
+        private ComboBox cmbDailyPeriod;
+        private Label labelDailyAnchor;
+        private DateTimePicker dtpDaily;
+        private Button btnLoadDaily;
+        private Button btnDailyOrders;
+        private TableLayoutPanel layoutDailyCards;
+        private Panel panelDailyRevenue;
+        private Label labelDailyRevenue;
+        private Label lblDailyRevenue;
+        private Panel panelDailyOrders;
+        private Label labelDailyOrders;
+        private Label lblDailyOrders;
+        private Panel panelDailyBestSeller;
+        private Label labelDailyBestSeller;
+        private Label lblDailyBestSeller;
+        private Label lblDailySummary;
+        private DataGridView dgvDailyCashiers;
+        private DataGridViewTextBoxColumn colDailyCashier;
+        private DataGridViewTextBoxColumn colDailyOrders;
+        private DataGridViewTextBoxColumn colDailyRevenue;
+        private DataGridViewTextBoxColumn colDailyPoints;
+        private TableLayoutPanel layoutCashiers;
+        private GroupBox groupCashierFilter;
+        private Label labelCashierPeriod;
+        private ComboBox cmbCashierPeriod;
+        private Label labelCashierAnchor;
+        private DateTimePicker dtpCashierAnchor;
+        private Label labelCashierFrom;
+        private DateTimePicker dtpCashierFrom;
+        private Label labelCashierTo;
+        private DateTimePicker dtpCashierTo;
+        private Button btnLoadCashiers;
+        private CheckBox chkAllCashierHistory;
+        private Label lblCashierSummary;
+        private DataGridView dgvCashiers;
+        private DataGridViewTextBoxColumn colCashierUsername;
+        private DataGridViewTextBoxColumn colCashierOrders;
+        private DataGridViewTextBoxColumn colCashierRevenue;
+        private DataGridViewTextBoxColumn colCashierPoints;
     }
 }

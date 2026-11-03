@@ -1,4 +1,4 @@
-﻿namespace MiniSupermarket.WinForms
+namespace MiniSupermarket.WinForms
 {
     partial class Form1
     {
@@ -30,8 +30,12 @@
         {
             this.components = new System.ComponentModel.Container();
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.BackColor = System.Drawing.Color.FromArgb(242, 245, 250);
+            this.ForeColor = System.Drawing.Color.FromArgb(31, 41, 55);
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Text = "Form1";
+
+            this.Text = "MiniSupermarket";
         }
 
         #endregion

@@ -141,7 +141,7 @@ namespace MiniSupermarket.API.Controllers
 
         // [BUỔI 6] GET: api/Products/paged?keyword=sua&categoryId=2&pageNumber=1&pageSize=5
         // Phân trang phía máy chủ bằng LINQ .Skip() / .Take() + tìm kiếm gần đúng .Contains()
-        // + lọc theo nhóm hàng. Trả về PagedResult<ProductItemDto> (DTO, không trả Entity)
+        // + lọc theo nhóm hàng. Trả về ProductPagedResult kèm cảnh báo trên toàn bộ kết quả lọc.
         [HttpGet("paged")]
         public async Task<IActionResult> GetPagedProducts(
             [FromQuery] string? keyword,
@@ -170,6 +170,8 @@ namespace MiniSupermarket.API.Controllers
             }
 
             int totalItems = await query.CountAsync();
+            // Đếm trên máy chủ trước Skip/Take để chuyển trang không làm thay đổi tổng cảnh báo.
+            int totalLowStockItems = await query.CountAsync(p => p.StockQuantity <= Product.LowStockThreshold);
             int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
 
             // Skip + Take -> EF Core dịch thành OFFSET ... FETCH NEXT ... trên SQL Server
@@ -180,12 +182,13 @@ namespace MiniSupermarket.API.Controllers
                 .Select(ToDto)
                 .ToListAsync();
 
-            return Ok(new PagedResult<ProductItemDto>
+            return Ok(new ProductPagedResult
             {
                 CurrentPage = pageNumber,
                 PageSize = pageSize,
                 TotalItems = totalItems,
                 TotalPages = totalPages,
+                TotalLowStockItems = totalLowStockItems,
                 Items = items
             });
         }
@@ -244,11 +247,11 @@ namespace MiniSupermarket.API.Controllers
                         {
                             if (await reader.ReadAsync())
                             {
-                                return Ok(new
+                                return Ok(new ProductItemDto
                                 {
                                     ProductId = Convert.ToInt32(reader["ProductId"]),
-                                    Barcode = reader["Barcode"].ToString(),
-                                    ProductName = reader["ProductName"].ToString(),
+                                    Barcode = reader["Barcode"].ToString() ?? string.Empty,
+                                    ProductName = reader["ProductName"].ToString() ?? string.Empty,
                                     Price = Convert.ToDecimal(reader["Price"]),
                                     StockQuantity = Convert.ToInt32(reader["StockQuantity"]),
                                     CategoryId = Convert.ToInt32(reader["CategoryId"])
