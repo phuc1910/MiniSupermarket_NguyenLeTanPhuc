@@ -27,7 +27,6 @@ namespace MiniSupermarket.WinForms
         public FormPOS()
         {
             InitializeComponent();
-            SetupCartGrid();
 
             // [BUỔI 5] Gắn sự kiện cho các điều khiển của form POS.
             // (File Designer chưa gắn các sự kiện này nên quét mã / bấm THANH TOÁN chưa có tác dụng.)
@@ -47,23 +46,6 @@ namespace MiniSupermarket.WinForms
             // [BUỔI 5] Phím tắt F9 = THANH TOÁN (nút đang ghi "THANH TOÁN (F9)")
             KeyPreview = true;
             KeyDown += FormPOS_KeyDown;
-        }
-
-        private void SetupCartGrid()
-        {
-            dgvCart.AutoGenerateColumns = false;
-
-            // [SỬA] Dùng FillWeight thay cho Width cố định: lưới đang ở chế độ
-            // AutoSizeColumnsMode = Fill (khai báo trong Designer) nên Width tĩnh bị bỏ qua.
-            // FillWeight quyết định tỉ lệ chia không gian: cột ngắn (Mã SP, SL) hẹp,
-            // cột dài (Tên Sản Phẩm) rộng nhất, vẫn lấp đầy hết chiều rộng khung giỏ hàng.
-            dgvCart.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgvCart.Columns.Clear();
-            dgvCart.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "ProductId", HeaderText = "Mã SP", FillWeight = 12 });
-            dgvCart.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "ProductName", HeaderText = "Tên Sản Phẩm", FillWeight = 38 });
-            dgvCart.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "UnitPrice", HeaderText = "Đơn Giá", FillWeight = 20 });
-            dgvCart.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "Quantity", HeaderText = "SL", FillWeight = 10 });
-            dgvCart.Columns.Add(new DataGridViewTextBoxColumn { DataPropertyName = "TotalPrice", HeaderText = "Thành Tiền", FillWeight = 20 });
         }
 
         // Bắt sự kiện quét mã Barcode
@@ -254,7 +236,7 @@ namespace MiniSupermarket.WinForms
             {
                 decimal change = cashReceived - total;
                 lblChange.Text = change >= 0 ? $"{change:N0} đ" : "Chưa đủ tiền!";
-                lblChange.ForeColor = change >= 0 ? Color.Black : Color.Red;
+                lblChange.ForeColor = change >= 0 ? Color.FromArgb(15, 118, 110) : Color.FromArgb(185, 28, 28);
             }
             else
             {

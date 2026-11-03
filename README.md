@@ -7,7 +7,7 @@
 > - **Buổi 3:** Tích hợp SQL Server và Entity Framework Core Code-First
 > - **Buổi 4:** Giao diện Shell hợp nhất, phân quyền 3 cấp (Admin / Cashier / Warehouse), đăng nhập và quản trị tài khoản bằng bảng `Users` thật, quản lý Sản phẩm
 > - **Buổi 5:** ADO.NET nâng cao, Stored Procedure báo cáo doanh thu và thanh toán POS bằng giao dịch `SqlTransaction`
-> - **Buổi 6:** EF Core nâng cao: phân trang LINQ `.Skip()/.Take()`, Eager Loading `.Include()`, `.AsNoTracking()`, `ApiClientService` dùng chung, phân trang và lọc nhóm hàng trên WinForms. **Bổ sung:** Dashboard, biểu đồ doanh thu theo ngày, Top 5 sản phẩm, cảnh báo tồn kho ≤ 10, đổi 50 điểm giảm 50.000 đồng tại POS, xuất tồn kho/doanh thu ra CSV, ngày đăng ký khách hàng. **Điều chỉnh:** tách Request/Response DTO, kiểm tra dữ liệu đầu vào và trùng định danh, chặn xóa nhóm còn sản phẩm, dùng chung kết nối HTTP cho đăng nhập và CRUD.
+> - **Buổi 6:** EF Core nâng cao: phân trang LINQ `.Skip()/.Take()`, Eager Loading `.Include()`, `.AsNoTracking()`, `ApiClientService` dùng chung, phân trang và lọc nhóm hàng trên WinForms. **Bổ sung:** Dashboard, biểu đồ, Top 5, danh sách và chi tiết đơn hàng, lọc doanh thu theo ngày/tuần/tháng/năm và theo thu ngân, đổi điểm POS, xuất CSV, ngày đăng ký khách hàng. **Điều chỉnh:** cảnh báo tồn kho do server quyết định; tách Request/Response DTO, kiểm tra dữ liệu đầu vào, chặn xóa nhóm còn sản phẩm; đồng bộ giao diện WinForms trong các file Designer có sẵn và giữ nguyên kích thước cửa sổ.
 
 ---
 
@@ -43,7 +43,7 @@ MiniSupermarket_NguyenLeTanPhuc/
 │   │   ├── ProductsController.cs        # CRUD, lọc nhóm, phân trang, mã vạch, IsLowStock (Buổi 4, 5, 6)
 │   │   ├── CustomersController.cs       # CRUD, Search, phân trang, CreatedDate (Buổi 3, 6)
 │   │   ├── AdoProductController.cs      # SqlDataReader, SqlDataAdapter, lọc tồn kho (Buổi 5)
-│   │   ├── OrdersController.cs          # Checkout, đổi điểm, hủy đơn bằng SqlTransaction (Buổi 5, 6)
+│   │   ├── OrdersController.cs          # Danh sách/chi tiết đơn, checkout, đổi điểm, hủy đơn (Buổi 5, 6)
 │   │   ├── ReportsController.cs         # Stored Procedure, Dashboard, doanh thu ngày, Top 5 (Buổi 5, 6)
 │   │   └── WeatherForecastController.cs # Controller mẫu, không thuộc nghiệp vụ cửa hàng
 │   ├── Models/
@@ -51,7 +51,7 @@ MiniSupermarket_NguyenLeTanPhuc/
 │   │   ├── Customer.cs                  # Khách hàng, hạng thẻ, điểm, CreatedDate
 │   │   ├── User.cs                      # Username, PasswordHash, Role, IsActive
 │   │   ├── Order.cs, OrderDetail.cs     # Hóa đơn và chi tiết hóa đơn
-│   │   ├── CheckoutDtos.cs              # DTO thanh toán, UsePoints (Buổi 5, 6)
+│   │   ├── CheckoutDtos.cs              # DTO thanh toán, UsePoints và DTO đọc đơn hàng (Buổi 5, 6)
 │   │   ├── RequestDtos.cs               # DTO đầu vào danh mục, sản phẩm, khách hàng (Buổi 6)
 │   │   └── PagedResponseDto.cs, CashierRevenueDto.cs, TopProductDto.cs
 │   ├── Data/SupermarketDbContext.cs      # DbContext, Unique Index và dữ liệu mẫu
@@ -68,9 +68,10 @@ MiniSupermarket_NguyenLeTanPhuc/
     ├── FormProductManagement.cs          # Phân trang, lọc nhóm, tô màu tồn thấp (Buổi 6)
     ├── FormUserManagement.cs             # Quản trị tài khoản, chỉ Admin
     ├── FormPOS.cs                        # Giỏ hàng, tra khách, đổi điểm, checkout (Buổi 5, 6)
-    ├── FormQuickReport.cs                # Dashboard, biểu đồ, Top 5, xuất CSV (Buổi 5, 6)
+    ├── FormQuickReport.cs                # Sự kiện, gọi API, DTO báo cáo và bộ lọc kỳ
+    ├── FormQuickReport.Designer.cs       # Bố cục, khai báo control, bảng, thẻ và các tab báo cáo
     ├── PagingBar.cs                      # Thanh phân trang dùng chung
-    └── Models/ProductDto.cs              # DTO phía máy khách
+    └── Models/ProductDto.cs              # DTO sản phẩm và dữ liệu phân trang phía máy khách
 ```
 
 ---
@@ -89,6 +90,7 @@ Khác với Buổi 2 (tài khoản hard-code trong code), từ Buổi 4 hệ th�
 | `GET /api/users` | Chỉ Admin |
 | `POST /api/users` | Chỉ Admin — tạo tài khoản nhân viên mới |
 | `POST /api/orders/checkout` | Admin, Cashier — thanh toán POS và đổi điểm (Buổi 5, 6) |
+| `GET /api/orders`, `GET /api/orders/{id}` | Chỉ Admin — đọc danh sách và chi tiết đơn hàng |
 | `DELETE /api/orders/cancel/{orderId}` | Chỉ Admin — hủy hóa đơn (Buổi 5) |
 | `GET /api/reports/*` | Chỉ Admin — báo cáo, Dashboard, biểu đồ, Top 5 (Buổi 5, 6) |
 
@@ -121,12 +123,14 @@ Chuỗi kết nối cấu hình tại `appsettings.json`. Chạy `Update-Databas
 
 | Stored Procedure | Chức năng và API |
 |------------------|------------------|
-| `sp_GetRevenueByCashier` | Doanh thu theo thu ngân toàn lịch sử — `/api/reports/revenue-by-cashier` |
+| `sp_GetRevenueByCashier` | Doanh thu theo thu ngân toàn lịch sử — `/api/reports/revenue-by-cashier` khi không truyền ngày |
 | `sp_GetRevenueByDateRange` | Doanh thu theo thu ngân trong khoảng ngày — `/api/reports/revenue-by-date` |
 | `sp_GetTop5SellingProducts` | Top 5 sản phẩm bán chạy — `/api/reports/top-products` |
 | `sp_GetRevenueByDay` | Doanh thu từng ngày cho biểu đồ và CSV — `/api/reports/revenue-by-day` (bổ sung Buổi 6) |
 
 `dashboard-summary`, `quick-report` và `best-sellers` truy vấn dữ liệu trực tiếp trong controller, không gọi bốn thủ tục trên.
+
+API `revenue-by-cashier` nhận thêm `fromDate`/`toDate` tùy chọn. Khi lọc ngày, server dùng LINQ để nhóm theo thu ngân; khi bỏ cả hai tham số, API giữ cách gọi Stored Procedure toàn lịch sử. Ngày cuối của bộ lọc lấy trọn ngày bằng điều kiện nhỏ hơn đầu ngày kế tiếp.
 
 ---
 
@@ -138,6 +142,14 @@ Toàn bộ nghiệp vụ được điều hướng trong **một Form chính (`F
 * **Vùng nội dung chính:** nhúng động Form nghiệp vụ (`TopLevel = false`, `Dock = Fill`).
 * **Bảo vệ 2 lớp:** một số chức năng (Báo cáo Doanh thu, Quản trị Tài khoản) vừa bị ẩn khỏi Sidebar theo vai trò, vừa được kiểm tra lại quyền ngay trong xử lý sự kiện.
 
+### Giao diện thống nhất và giữ nguyên cấu trúc mã nguồn
+
+* Các màn hình Đăng nhập, Shell, POS, Danh mục, Sản phẩm, Khách hàng, Tài khoản và Báo cáo dùng cùng kiểu chữ Segoe UI, nền sáng, nút xanh và bảng dữ liệu có tiêu đề rõ ràng.
+* Giữ nguyên `ClientSize`, kích thước tối thiểu và trạng thái cửa sổ hiện có; bố cục chỉ được sắp xếp lại bên trong bằng các panel/layout của WinForms.
+* Khai báo control, vị trí, màu sắc, kích thước thành phần và gắn sự kiện được viết trong `FormTenManHinh.Designer.cs`. Các hàm xử lý sự kiện và gọi API nằm trong `FormTenManHinh.cs`, theo cách tổ chức cũ.
+* Mã báo cáo được gộp vào `FormQuickReport.cs` và `FormQuickReport.Designer.cs`; không dùng file partial báo cáo bổ sung. DTO đọc hóa đơn đặt trong `CheckoutDtos.cs` có sẵn; DTO phản hồi phía client đặt cùng `FormQuickReport.cs`.
+* Các thay đổi giao diện không đổi quy tắc checkout, đổi điểm, tồn kho, phân quyền, kiểm tra dữ liệu hay cách tính doanh thu ở server.
+
 ### Dashboard và báo cáo trên `FormQuickReport` — bổ sung Buổi 6
 
 * **Thẻ tổng quan:** doanh thu hôm nay, số hóa đơn hôm nay, khách đăng ký mới hôm nay và số sản phẩm tồn thấp trên toàn kho.
@@ -145,8 +157,13 @@ Toàn bộ nghiệp vụ được điều hướng trong **một Form chính (`F
 * **Biểu đồ cột:** doanh thu từng ngày từ API `revenue-by-day`; ngày không có hóa đơn được hiển thị bằng 0 trên biểu đồ.
 * **Top 5 sản phẩm bán chạy:** lấy từ API `best-sellers`, tính trên toàn bộ lịch sử bán hàng.
 * **Xuất dữ liệu:** nút **Xuất tồn kho** xuất toàn bộ sản phẩm; nút **Xuất doanh thu** xuất theo khoảng ngày. CSV có UTF-8 BOM, dấu phân cách theo vùng, xử lý dấu ngoặc kép và dữ liệu có thể bị Excel hiểu là công thức.
+* **Tab Đơn hàng & chi tiết:** chọn khoảng ngày, xem danh sách có phân trang 20 đơn/trang. Chọn một đơn để xem khách hàng, thu ngân, thời điểm lập, tiền thực thu, điểm thưởng và từng dòng sản phẩm với số lượng, đơn giá lịch sử, thành tiền. Tổng thực thu phía dưới tính trên toàn bộ kết quả lọc, không chỉ trang đang xem.
+* **Tab Doanh thu theo kỳ:** chọn **Ngày**, **Tuần**, **Tháng** hoặc **Năm** và mốc thời gian tương ứng; xem số đơn, tiền thực thu, sản phẩm bán chạy nhất và doanh thu từng thu ngân trong kỳ. Nút xem đơn hàng chuyển sang danh sách đơn với cùng khoảng ngày.
+* **Tab Doanh thu thu ngân:** hiển thị tài khoản thu ngân, số đơn, doanh thu thực thu và điểm đã cộng. Lọc theo ngày/tuần/tháng/năm, khoảng ngày tùy chọn hoặc **Toàn bộ lịch sử**.
 
-Bộ lọc ngày áp dụng cho báo cáo theo khoảng, biểu đồ và CSV doanh thu. Các thẻ hôm nay và Top 5 toàn lịch sử có phạm vi riêng. API `revenue-by-cashier` hiện có thể kiểm tra trực tiếp qua Swagger.
+Bộ lọc trên tab Tổng quan có **Ngày**, **Tuần**, **Tháng**, **Năm** và **Tùy chọn**; áp dụng cho báo cáo theo khoảng, biểu đồ và CSV doanh thu. Các thẻ hôm nay và Top 5 toàn lịch sử có phạm vi riêng. Các tab có bộ lọc độc lập. Kỳ không có đơn hiển thị 0 và danh sách rỗng.
+
+Quy ước kỳ báo cáo: ngày được chọn; tuần từ **thứ Hai đến Chủ nhật** chứa ngày mốc; tháng từ ngày đầu đến ngày cuối tháng; năm từ **01/01 đến 31/12**. Client chỉ xác định hai mốc ngày gửi API; việc tổng hợp doanh thu và dữ liệu vẫn được thực hiện ở server.
 
 ### Đổi điểm thưởng tại POS — bổ sung Buổi 6
 
@@ -157,8 +174,9 @@ Bộ lọc ngày áp dụng cho báo cáo theo khoảng, biểu đồ và CSV do
 
 ### Cảnh báo tồn kho và dùng chung kết nối — bổ sung, điều chỉnh Buổi 6
 
-* API có cờ `IsLowStock` theo ngưỡng tồn ≤ 10; Dashboard đếm sản phẩm tồn thấp trên SQL Server.
-* Màn hình sản phẩm tô màu và đếm các dòng sắp hết trong trang đang tải. Hiện WinForms vẫn có phép so sánh ngưỡng 10 riêng trong phần tô màu và xuất CSV.
+* Server quyết định `isLowStock`, `stockStatus` và `lowStockThreshold` từ một quy tắc chung trong `Product`: tồn bằng 0 là **Hết hàng**, tồn từ 1 đến 10 là **Sắp hết hàng**, cao hơn ngưỡng là **Còn hàng**.
+* API sản phẩm phân trang trả thêm `totalLowStockItems`: tổng sản phẩm cảnh báo trong toàn bộ bộ lọc từ khóa/nhóm hàng trước khi chia trang. Dashboard cũng đếm trên SQL Server.
+* WinForms chỉ dùng `isLowStock` để tô màu, dùng tổng và ngưỡng do API trả để hiển thị cảnh báo; CSV dùng `stockStatus` từ server. Không còn phép so sánh ngưỡng tồn thấp hoặc đếm cảnh báo tại WinForms.
 * Đăng nhập và các thao tác CRUD danh mục, khách hàng dùng `ApiClientService` chung, tránh tạo `HttpClient` riêng cho từng thao tác; bổ sung xử lý phản hồi lỗi khi nạp dữ liệu.
 
 ---
@@ -198,7 +216,7 @@ Nếu dùng SQL Express, đổi `Server=localhost` thành `Server=.\\SQLEXPRESS`
 4. Dùng Admin kiểm tra Danh mục, Sản phẩm, Khách hàng: tải danh sách, thêm, sửa, xóa, tìm kiếm và phân trang. Màn hình Sản phẩm có nút **<< Trang trước / Trang sau >>**, lọc nhóm và tô màu tồn thấp (Buổi 6); quyền ghi được kiểm tra tại API.
 5. Với tài khoản Admin, thử tạo tài khoản nhân viên mới trong màn hình Quản trị Tài khoản.
 6. Dùng Cashier mở POS, nhập mã vạch và số điện thoại khách hoặc để trống với khách vãng lai. Kiểm tra đổi 50 điểm, tiền phải trả, tiền thừa và thanh toán bằng nút **THANH TOÁN** hoặc F9. Khi cần kiểm tra server Rollback do thiếu tồn, dùng Swagger trên database thử nghiệm vì WinForms có thể chặn số lượng trước khi gửi.
-7. Dùng Admin mở **Báo cáo Doanh thu**, chọn **Từ ngày – Đến ngày**, bấm **Xem báo cáo** để xem tổng quan và biểu đồ. Kiểm tra các chỉ số hôm nay, Top 5 toàn lịch sử và hai nút **Xuất tồn kho / Xuất doanh thu**. Tài khoản mẫu: `admin01`, `cashier01`, `ware01`; mật khẩu mẫu `123456`.
+7. Dùng Admin mở **Báo cáo Doanh thu** và kiểm tra bốn tab: **Tổng quan**, **Đơn hàng & chi tiết**, **Doanh thu theo kỳ**, **Doanh thu thu ngân**. Kiểm tra đổi trang đơn hàng, chọn đơn để xem các dòng hàng; chuyển bộ lọc ngày/tuần/tháng/năm và khoảng tùy chọn; kiểm tra kỳ có/không có đơn và toàn lịch sử theo thu ngân. Tab Tổng quan vẫn có biểu đồ, Top 5 và hai nút xuất CSV. Tài khoản mẫu: `admin01`, `cashier01`, `ware01`; mật khẩu mẫu `123456`.
 8. Tắt cả hai ứng dụng rồi mở lại — dữ liệu vẫn còn nguyên vì đã lưu trên SQL Server.
 
 ---
@@ -223,15 +241,15 @@ Tạo commit có tiêu đề và nội dung chi tiết về những phần vừa
 
 ```powershell
 $commitMessage = @'
-Buoi 6: Dashboard, đổi điểm POS, cảnh báo tồn kho và chuẩn hóa DTO
+Buoi 6: đồng bộ Designer WinForms, lọc doanh thu theo kỳ và báo cáo đơn hàng
 
-- Báo cáo: thêm dashboard-summary, revenue-by-day, best-sellers và sp_GetRevenueByDay; hiển thị biểu đồ ngày và Top 5 trên WinForms.
-- POS: đổi 50 điểm giảm 50.000 đồng, tính điểm trên tiền thực thu và hoàn điểm đã dùng khi hủy hóa đơn trong transaction.
-- Tồn kho và CSV: tô màu, đếm hàng tồn <= 10; xuất tồn kho/doanh thu CSV UTF-8 BOM và xử lý dữ liệu đặc biệt cho Excel.
-- API: tách Request/Item DTO, kiểm tra trùng dữ liệu, giá và tồn kho; chặn xóa danh mục còn sản phẩm.
-- Client: dùng chung ApiClientService cho đăng nhập và CRUD, bổ sung xử lý lỗi khi nạp báo cáo.
-- CSDL: thêm Customers.CreatedDate, migration AddCreatedDate/Check và cập nhật snapshot.
-- README: bổ sung nội dung Buổi 6, sửa hướng dẫn Stored Procedure và thêm cách lưu bài theo nhánh GitHub.
+- API đơn hàng: thêm danh sách phân trang, lọc ngày, tổng thực thu toàn bộ kết quả và chi tiết từng đơn; chỉ Admin được đọc.
+- Báo cáo: revenue-by-cashier hỗ trợ lọc ngày, giữ báo cáo toàn lịch sử khi bỏ tham số ngày.
+- WinForms: tab Đơn hàng & chi tiết, Doanh thu theo kỳ và Doanh thu thu ngân; lọc ngày/tuần/tháng/năm, giữ Dashboard và xuất CSV.
+- Tồn kho: server trả cờ, trạng thái, ngưỡng và tổng cảnh báo của toàn bộ bộ lọc; WinForms dùng dữ liệu API để tô màu và xuất CSV.
+- Giao diện: đồng bộ Login, Shell, POS và các màn hình quản lý; giữ nguyên kích thước cửa sổ và xử lý nghiệp vụ.
+- Cấu trúc: gộp báo cáo vào FormQuickReport.cs/Designer.cs, chuyển control về Designer và dùng các file DTO có sẵn.
+- README: cập nhật cấu trúc, giao diện, các kỳ báo cáo và quy trình lưu bài.
 '@
 git commit -m $commitMessage
 git push -u origin Buoi-6

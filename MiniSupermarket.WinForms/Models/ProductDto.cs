@@ -21,6 +21,13 @@ namespace MiniSupermarket.WinForms.Models
         public int CategoryId { get; set; }
 
         public string CategoryName { get; set; } = string.Empty;
+
+        // Các giá trị này do API tính; máy khách chỉ dùng để hiển thị.
+        public bool IsLowStock { get; set; }
+
+        public string StockStatus { get; set; } = string.Empty;
+
+        public int LowStockThreshold { get; set; }
     }
 
     // [BUỔI 6] Cấu trúc phân trang do API trả về (khớp PagedResult<T> bên API)
@@ -31,5 +38,11 @@ namespace MiniSupermarket.WinForms.Models
         public int TotalItems { get; set; }
         public int TotalPages { get; set; }
         public List<T> Items { get; set; } = new();
+    }
+
+    public class ProductPagedViewResult : PagedViewResult<ProductDto>
+    {
+        public int TotalLowStockItems { get; set; }
+        public int LowStockThreshold { get; set; }
     }
 }

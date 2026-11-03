@@ -48,6 +48,8 @@ namespace MiniSupermarket.WinForms
             _activeForm = childForm;
             childForm.TopLevel = false;                          // Bỏ thuộc tính cửa sổ độc lập cấp cao nhất
             childForm.FormBorderStyle = FormBorderStyle.None;     // Bỏ viền và thanh điều khiển Windows
+            // Form nhúng vừa vùng nội dung; kích thước cửa sổ độc lập vẫn giữ trong Designer.
+            childForm.MinimumSize = Size.Empty;
             childForm.Dock = DockStyle.Fill;                     // Tràn toàn bộ vùng panelMainContent
 
             panelMainContent.Controls.Clear();                   // Dọn dẹp màn hình cũ
@@ -64,14 +66,14 @@ namespace MiniSupermarket.WinForms
         /// </summary>
         private void HighlightActiveButton(Button activeButton)
         {
-            foreach (Control ctrl in panelSidebar.Controls)
+            foreach (Control ctrl in panelNavigation.Controls)
             {
                 if (ctrl is Button btn && btn != btnLogout)
                 {
-                    btn.BackColor = Color.FromArgb(24, 30, 48); // Màu gốc
+                    btn.BackColor = Color.FromArgb(20, 42, 67); // Màu nền Sidebar
                 }
             }
-            activeButton.BackColor = Color.FromArgb(41, 100, 180); // Màu xanh active
+            activeButton.BackColor = Color.FromArgb(37, 99, 235); // Màu menu đang chọn
         }
 
         /// <summary>
