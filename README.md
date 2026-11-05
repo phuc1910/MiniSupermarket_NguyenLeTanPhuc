@@ -153,6 +153,7 @@ Toàn bộ nghiệp vụ được điều hướng trong **một Form chính (`F
 * Khai báo control, vị trí, màu sắc, kích thước thành phần và gắn sự kiện được viết trong `FormTenManHinh.Designer.cs`. Các hàm xử lý sự kiện và gọi API nằm trong `FormTenManHinh.cs`, theo cách tổ chức cũ.
 * Mã báo cáo nằm trong `FormQuickReport.cs` và `FormQuickReport.Designer.cs`. Màn hình đơn hàng dùng `FormOrderManagement.cs` và `FormOrderManagement.Designer.cs`; DTO đọc hóa đơn phía client đặt cùng `FormOrderManagement.cs`, DTO báo cáo đặt cùng `FormQuickReport.cs`. DTO API đặt trong `CheckoutDtos.cs` có sẵn.
 * Các thay đổi giao diện không đổi quy tắc checkout, đổi điểm, tồn kho, phân quyền, kiểm tra dữ liệu hay cách tính doanh thu ở server.
+* **Tải lại / Tải lại danh sách** trên Danh mục, Sản phẩm, Khách hàng và Tài khoản sẽ nạp lại dữ liệu, bỏ chọn dòng và xóa các ô thông tin đang nhập; Sản phẩm bỏ chọn nhóm hàng, Tài khoản bỏ chọn vai trò. Các màn hình có tìm kiếm sẽ xóa từ khóa, trả bộ lọc về tất cả và quay về trang đầu. Cần chọn lại một dòng trước khi sửa/xóa hoặc nhập thông tin để thêm mới.
 
 ### Dashboard và báo cáo trên `FormQuickReport` — bổ sung Buổi 6
 
@@ -176,6 +177,7 @@ Quy ước kỳ báo cáo: ngày được chọn; tuần từ **thứ Hai đến
 * Khách có ít nhất 50 điểm và hóa đơn từ 50.000 đồng có thể dùng **50 điểm giảm 50.000 đồng**, tối đa một gói cho mỗi hóa đơn.
 * Server xử lý đổi điểm trong giao dịch thanh toán, tính điểm thưởng theo `floor(FinalAmount / 10.000)` và hoàn lại điểm đã đổi khi hủy hóa đơn.
 * WinForms cập nhật tiền phải trả và tiền thừa theo lựa chọn đổi điểm trước khi gửi checkout.
+* Bắt buộc nhập **tiền khách đưa lớn hơn tổng cần thanh toán sau khi trừ điểm**. Để trống, nhập sai số, số âm, đưa thiếu hoặc bằng đúng tổng đều bị chặn; giỏ hàng được giữ lại để sửa. WinForms kiểm tra khi bấm Thanh toán hoặc F9, API kiểm tra lại trước khi lưu hóa đơn. Khi thử `POST /api/orders/checkout` trên Swagger, cần gửi thêm `cashReceived`.
 
 ### Cảnh báo tồn kho và dùng chung kết nối — bổ sung, điều chỉnh Buổi 6
 

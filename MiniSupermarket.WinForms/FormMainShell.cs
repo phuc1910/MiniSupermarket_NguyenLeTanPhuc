@@ -99,7 +99,7 @@ namespace MiniSupermarket.WinForms
                     btnPOS.Visible = true;
                     btnCustomer.Visible = true;
                     btnCategory.Visible = false;
-                    btnProduct.Visible = false;
+                    btnProduct.Visible = true;
                     btnOrders.Visible = true;
                     btnReports.Visible = false;
                     btnUserManage.Visible = false;

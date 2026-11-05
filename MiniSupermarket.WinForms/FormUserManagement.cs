@@ -175,6 +175,13 @@ namespace MiniSupermarket.WinForms
                 return;
             }
 
+            if (cboRole.SelectedItem == null)
+            {
+                MessageBox.Show("Vui lòng chọn vai trò!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                cboRole.Focus();
+                return;
+            }
+
             var newUser = new
             {
                 Username = txtUsername.Text.Trim(),
@@ -392,6 +399,7 @@ namespace MiniSupermarket.WinForms
         private async void btnReload_Click(object sender, EventArgs e)
         {
             await LoadUsersAsync();
+            ClearInputs();
         }
 
 
@@ -471,10 +479,10 @@ namespace MiniSupermarket.WinForms
             txtFullName.Clear();
             txtPassword.Clear();
 
-            if (cboRole.Items.Count > 1)
-                cboRole.SelectedIndex = 1;
+            cboRole.SelectedIndex = -1;
 
             dgvUsers.ClearSelection();
+            dgvUsers.CurrentCell = null;
         }
     }
 
