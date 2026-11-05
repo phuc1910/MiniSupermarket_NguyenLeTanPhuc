@@ -157,6 +157,38 @@ namespace MiniSupermarket.API.Controllers
             return Ok(new { success = true, data });
         }
 
+        // GET: api/Reports/revenue-by-hour?date=2026-11-05
+        [HttpGet("revenue-by-hour")]
+        public async Task<IActionResult> GetRevenueByHour([FromQuery] DateTime? date)
+        {
+            DateTime day = (date ?? DateTime.Today).Date;
+            if (day == DateTime.MaxValue.Date)
+            {
+                return BadRequest(new { success = false, message = "Ngày phải nhỏ hơn ngày 31/12/9999!" });
+            }
+
+            DateTime nextDay = day.AddDays(1);
+            var hourly = await _context.Orders.AsNoTracking()
+                .Where(o => o.CreatedDate >= day && o.CreatedDate < nextDay)
+                .GroupBy(o => o.CreatedDate.Hour)
+                .Select(g => new
+                {
+                    hour = g.Key,
+                    totalOrders = g.Count(),
+                    totalRevenue = g.Sum(o => o.FinalAmount)
+                })
+                .ToListAsync(HttpContext.RequestAborted);
+
+            var byHour = hourly.ToDictionary(row => row.hour);
+            var data = Enumerable.Range(0, 24).Select(hour => new
+            {
+                hour,
+                totalOrders = byHour.TryGetValue(hour, out var row) ? row.totalOrders : 0,
+                totalRevenue = byHour.TryGetValue(hour, out var revenue) ? revenue.totalRevenue : 0m
+            });
+            return Ok(new { success = true, date = day.ToString("yyyy-MM-dd"), data });
+        }
+
         // =========================================================================
         // [TC 46] GET: api/Reports/best-sellers
         // Top 5 mặt hàng bán chạy nhất bằng LINQ: GroupBy -> OrderByDescending(Sum Quantity) -> Take(5)

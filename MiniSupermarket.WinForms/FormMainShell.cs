@@ -89,16 +89,18 @@ namespace MiniSupermarket.WinForms
                     btnCategory.Visible = true;
                     btnProduct.Visible = true;
                     btnCustomer.Visible = true;
+                    btnOrders.Visible = true;
                     btnReports.Visible = true;
                     btnUserManage.Visible = true;
                     break;
 
                 case "CASHIER":
-                    // Thu ngân: Chỉ truy cập màn hình Bán hàng (POS) và Khách hàng
+                    // Thu ngân: Bán hàng, Khách hàng và tra cứu Đơn hàng
                     btnPOS.Visible = true;
                     btnCustomer.Visible = true;
                     btnCategory.Visible = false;
                     btnProduct.Visible = false;
+                    btnOrders.Visible = true;
                     btnReports.Visible = false;
                     btnUserManage.Visible = false;
                     break;
@@ -107,6 +109,7 @@ namespace MiniSupermarket.WinForms
                     // Thủ kho: Chỉ quản lý Danh mục nhóm hàng và Sản phẩm tồn kho
                     btnPOS.Visible = false;
                     btnCustomer.Visible = false;
+                    btnOrders.Visible = false;
                     btnReports.Visible = false;
                     btnUserManage.Visible = false;
                     btnCategory.Visible = true;
@@ -163,6 +166,18 @@ namespace MiniSupermarket.WinForms
         private void btnUserManage_Click(object sender, EventArgs e)
         {
             OpenChildForm(new FormUserManagement(), "QUẢN LÝ TÀI KHOẢN", btnUserManage);
+        }
+
+        private void btnOrders_Click(object sender, EventArgs e)
+        {
+            if (!string.Equals(SessionManager.CurrentRole, "Admin", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(SessionManager.CurrentRole, "Cashier", StringComparison.OrdinalIgnoreCase))
+            {
+                MessageBox.Show("Bạn chưa được cấp quyền xem đơn hàng!", "Từ chối",
+                    MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                return;
+            }
+            OpenChildForm(new FormOrderManagement(), "ĐƠN HÀNG & CHI TIẾT", btnOrders);
         }
 
         private void btnReports_Click(object sender, EventArgs e)
