@@ -152,7 +152,10 @@ namespace MiniSupermarket.WinForms
             object sender,
             EventArgs e)
         {
+            txtKeyword.Clear();
+            _currentPage = 1;
             await LoadDataAsync();
+            ClearInputs();
         }
 
         // ============================================================
@@ -497,11 +500,12 @@ namespace MiniSupermarket.WinForms
             // Xóa địa chỉ.
             txtAddress.Text = "";
 
-            // Đưa điểm tích lũy về 0.
-            txtRewardPoints.Text = "0";
+            // Xóa điểm và hạng của khách hàng đang chọn.
+            txtRewardPoints.Clear();
 
-            // Đưa hạng thành viên về Chuẩn.
-            txtMembershipRank.Text = "Chuẩn";
+            txtMembershipRank.Clear();
+            dgvCustomers.ClearSelection();
+            dgvCustomers.CurrentCell = null;
         }
     }
 

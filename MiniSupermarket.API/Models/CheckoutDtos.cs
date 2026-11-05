@@ -23,6 +23,9 @@ namespace MiniSupermarket.API.Models
         // SĐT khách hàng - để trống hoặc không tìm thấy = khách vãng lai
         public string? CustomerPhone { get; set; }
 
+        // Số tiền khách đưa, bắt buộc lớn hơn số tiền cần thanh toán sau khi trừ điểm.
+        public decimal CashReceived { get; set; }
+
         // [TC 47] true = khách dùng 50 điểm tích lũy để được trừ 50.000 đ vào hóa đơn
         // (cần có SĐT khách hàng, đủ điểm và hóa đơn từ 50.000 đ trở lên)
         public bool UsePoints { get; set; } = false;
