@@ -124,6 +124,7 @@ namespace MiniSupermarket.WinForms
             _currentPage = 1;
             await LoadCategoriesToComboAsync();
             await LoadProductsAsync();
+            ClearInputs();
         }
 
         // [BUỔI 6] Phân trang phía máy chủ: mỗi lần chỉ tải 1 trang (pageSize dòng) từ API
@@ -399,6 +400,9 @@ namespace MiniSupermarket.WinForms
             txtProductName.Clear();
             nudPrice.Value = 0;
             nudStock.Value = 0;
+            cboCategory.SelectedIndex = -1;
+            dgvProducts.ClearSelection();
+            dgvProducts.CurrentCell = null;
         }
 
     }

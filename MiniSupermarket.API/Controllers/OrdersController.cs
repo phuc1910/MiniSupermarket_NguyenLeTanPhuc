@@ -168,6 +168,11 @@ namespace MiniSupermarket.API.Controllers
                 return BadRequest(new { message = "Thiếu thông tin tài khoản thu ngân lập hóa đơn!" });
             }
 
+            if (request.CashReceived <= 0)
+            {
+                return BadRequest(new { message = "Vui lòng nhập số tiền khách đưa lớn hơn 0!" });
+            }
+
             // Số lượng âm sẽ làm TĂNG tồn kho thay vì trừ -> phải chặn từ đầu
             if (request.Items.Any(i => i.Quantity <= 0))
             {
@@ -249,6 +254,13 @@ namespace MiniSupermarket.API.Controllers
 
                     // Số tiền thực thu (FinalAmount) = tiền hàng - tiền giảm từ điểm
                     decimal finalAmount = subtotal - discountAmount;
+
+                    // Kiểm tra lại ở server trước khi lưu hóa đơn, trừ kho và thay đổi điểm.
+                    if (request.CashReceived <= finalAmount)
+                    {
+                        throw new InvalidOperationException(
+                            $"Tiền khách đưa phải lớn hơn tổng cần thanh toán ({finalAmount:N0} đ)!");
+                    }
 
                     // Điểm thưởng mới (10.000đ = 1 điểm, chỉ khi có khách) tính trên số tiền khách thực trả
                     int rewardPoints = customerId.HasValue ? (int)(finalAmount / 10000) : 0;

@@ -235,12 +235,13 @@ namespace MiniSupermarket.WinForms
             if (decimal.TryParse(txtCashReceived.Text, out decimal cashReceived))
             {
                 decimal change = cashReceived - total;
-                lblChange.Text = change >= 0 ? $"{change:N0} đ" : "Chưa đủ tiền!";
-                lblChange.ForeColor = change >= 0 ? Color.FromArgb(15, 118, 110) : Color.FromArgb(185, 28, 28);
+                lblChange.Text = change > 0 ? $"{change:N0} đ" : "Cần đưa lớn hơn tổng!";
+                lblChange.ForeColor = change > 0 ? Color.FromArgb(15, 118, 110) : Color.FromArgb(185, 28, 28);
             }
             else
             {
                 lblChange.Text = "0 đ";
+                lblChange.ForeColor = Color.FromArgb(22, 54, 90);
             }
         }
 
@@ -252,11 +253,20 @@ namespace MiniSupermarket.WinForms
                 return;
             }
 
-            // [BUỔI 5] Nếu đã nhập tiền khách đưa thì phải đủ tiền mới cho thanh toán
-            decimal total = GetPayable(); // [TC 47] khách chỉ phải đưa đủ số tiền sau khi trừ điểm
-            if (decimal.TryParse(txtCashReceived.Text, out decimal cashReceived) && cashReceived < total)
+            // Bắt buộc nhập số tiền hợp lệ và lớn hơn số tiền phải trả sau khi trừ điểm.
+            decimal total = GetPayable();
+            if (!decimal.TryParse(txtCashReceived.Text, out decimal cashReceived))
             {
-                MessageBox.Show("Tiền khách đưa chưa đủ để thanh toán!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng nhập số tiền khách đưa hợp lệ!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtCashReceived.Focus();
+                txtCashReceived.SelectAll();
+                return;
+            }
+            if (cashReceived <= total)
+            {
+                MessageBox.Show($"Tiền khách đưa phải lớn hơn tổng cần thanh toán ({total:N0} đ)!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtCashReceived.Focus();
+                txtCashReceived.SelectAll();
                 return;
             }
 
@@ -264,6 +274,7 @@ namespace MiniSupermarket.WinForms
             {
                 CashierUsername = SessionManager.CurrentUsername,
                 CustomerPhone = txtCustomerPhone.Text.Trim(),
+                CashReceived = cashReceived,
                 UsePoints = chkUsePoints.Checked, // [TC 47] máy chủ kiểm tra lại điều kiện và trừ điểm trong Transaction
                 Items = _cart.Select(i => new { i.ProductId, i.Quantity, i.UnitPrice }).ToList()
             };

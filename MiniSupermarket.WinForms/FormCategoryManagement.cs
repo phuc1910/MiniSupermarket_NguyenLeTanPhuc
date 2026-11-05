@@ -130,7 +130,10 @@ namespace MiniSupermarket.WinForms
         // Nút Tải lại dữ liệu (Refresh)
         private async void btnLoad_Click(object sender, EventArgs e)
         {
+            txtKeyword.Clear();
+            _currentPage = 1;
             await LoadDataAsync();
+            ClearInputs();
         }
 
         // Sự kiện khi click vào một dòng trên DataGridView: Đưa dữ liệu lên các ô nhập (TextBox) để chuẩn bị Sửa/Xóa
@@ -265,6 +268,8 @@ namespace MiniSupermarket.WinForms
             txtId.Text = "";
             txtCategoryName.Text = "";
             txtDescription.Text = "";
+            dgvCategories.ClearSelection();
+            dgvCategories.CurrentCell = null;
         }
     }
 
