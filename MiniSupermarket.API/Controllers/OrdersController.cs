@@ -21,9 +21,8 @@ namespace MiniSupermarket.API.Controllers
         private readonly IConfiguration _configuration;
         private readonly SupermarketDbContext _context;
 
-        // [TC 47] Quy tắc đổi điểm: dùng 50 điểm -> trừ 50.000 đ (tức 1 điểm = 1.000 đ)
-        private const int PointsPerRedemption = 50;
-        private const decimal RedeemValue = 50000m;
+        // Quy tắc đổi điểm: mỗi điểm được giảm 1.000 đồng.
+        private const decimal PointValue = 1000m;
 
         // ADO.NET xử lý giao dịch; EF Core phục vụ các truy vấn báo cáo chỉ đọc.
         public OrdersController(IConfiguration configuration, SupermarketDbContext context)
@@ -168,9 +167,16 @@ namespace MiniSupermarket.API.Controllers
                 return BadRequest(new { message = "Thiếu thông tin tài khoản thu ngân lập hóa đơn!" });
             }
 
-            if (request.CashReceived <= 0)
+            if (request.CashReceived < 0)
             {
-                return BadRequest(new { message = "Vui lòng nhập số tiền khách đưa lớn hơn 0!" });
+                return BadRequest(new { message = "Tiền khách đưa không được âm!" });
+            }
+
+            if (request.PointsToRedeem < 0 ||
+                (request.UsePoints && request.PointsToRedeem == 0) ||
+                (!request.UsePoints && request.PointsToRedeem != 0))
+            {
+                return BadRequest(new { message = "Khi dùng điểm phải nhập số điểm muốn đổi lớn hơn 0; không dùng điểm thì số điểm đổi phải bằng 0!" });
             }
 
             // Số lượng âm sẽ làm TĂNG tồn kho thay vì trừ -> phải chặn từ đầu
@@ -237,26 +243,26 @@ namespace MiniSupermarket.API.Controllers
                         {
                             throw new InvalidOperationException("Cần nhập đúng SĐT khách hàng thân thiết mới được dùng điểm!");
                         }
-                        if (customerPoints < PointsPerRedemption)
+                        if (request.PointsToRedeem > customerPoints)
                         {
                             throw new InvalidOperationException(
-                                $"Khách hàng chỉ có {customerPoints} điểm, cần tối thiểu {PointsPerRedemption} điểm để đổi!");
+                                $"Khách hàng chỉ có {customerPoints} điểm, không thể đổi {request.PointsToRedeem} điểm!");
                         }
-                        if (subtotal < RedeemValue)
+                        if (request.PointsToRedeem * PointValue > subtotal)
                         {
                             throw new InvalidOperationException(
-                                $"Hóa đơn phải từ {RedeemValue:N0} đ trở lên mới được dùng điểm (hiện tại {subtotal:N0} đ)!");
+                                $"Chỉ được đổi tối đa {Math.Floor(subtotal / PointValue):N0} điểm cho hóa đơn {subtotal:N0} đ!");
                         }
 
-                        pointsRedeemed = PointsPerRedemption;
-                        discountAmount = RedeemValue;
+                        pointsRedeemed = request.PointsToRedeem;
+                        discountAmount = pointsRedeemed * PointValue;
                     }
 
                     // Số tiền thực thu (FinalAmount) = tiền hàng - tiền giảm từ điểm
                     decimal finalAmount = subtotal - discountAmount;
 
                     // Kiểm tra lại ở server trước khi lưu hóa đơn, trừ kho và thay đổi điểm.
-                    if (request.CashReceived <= finalAmount)
+                    if (finalAmount > 0 && request.CashReceived <= finalAmount)
                     {
                         throw new InvalidOperationException(
                             $"Tiền khách đưa phải lớn hơn tổng cần thanh toán ({finalAmount:N0} đ)!");
@@ -518,9 +524,9 @@ namespace MiniSupermarket.API.Controllers
                     }
 
                     // 4. Thu hồi điểm thưởng đã tặng VÀ hoàn lại điểm khách đã dùng để trừ tiền (nếu có)
-                    //    [TC 47] Tiền giảm = tổng chi tiết - FinalAmount; 1 điểm = RedeemValue / PointsPerRedemption = 1.000 đ
+                    // Tiền giảm = tổng chi tiết - FinalAmount; hoàn đúng số điểm đã đổi theo tỷ lệ 1.000 đ/điểm.
                     decimal discountGiven = Math.Max(0, linesTotal - finalAmountPaid);
-                    int pointsToRefund = (int)(discountGiven / (RedeemValue / PointsPerRedemption));
+                    int pointsToRefund = (int)(discountGiven / PointValue);
 
                     if (customerId.HasValue && (pointsToDeduct > 0 || pointsToRefund > 0))
                     {

@@ -23,12 +23,14 @@ namespace MiniSupermarket.API.Models
         // SĐT khách hàng - để trống hoặc không tìm thấy = khách vãng lai
         public string? CustomerPhone { get; set; }
 
-        // Số tiền khách đưa, bắt buộc lớn hơn số tiền cần thanh toán sau khi trừ điểm.
+        // Tổng sau đổi điểm bằng 0 thì tiền khách đưa được bằng 0; tổng dương phải đưa lớn hơn tổng.
         public decimal CashReceived { get; set; }
 
-        // [TC 47] true = khách dùng 50 điểm tích lũy để được trừ 50.000 đ vào hóa đơn
-        // (cần có SĐT khách hàng, đủ điểm và hóa đơn từ 50.000 đ trở lên)
+        // Bật đổi điểm cho khách hàng đã tra theo số điện thoại.
         public bool UsePoints { get; set; } = false;
+
+        // Số điểm nguyên muốn đổi; 1 điểm = 1.000 đồng, không vượt điểm hiện có hoặc tiền hàng.
+        public int PointsToRedeem { get; set; }
 
         // Danh sách mặt hàng cần thanh toán
         public List<CartItemCheckoutDto> Items { get; set; } = new();

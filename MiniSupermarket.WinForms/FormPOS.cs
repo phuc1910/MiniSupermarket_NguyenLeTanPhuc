@@ -18,9 +18,9 @@ namespace MiniSupermarket.WinForms
     {
         private readonly List<CartItemDto> _cart = new();
 
-        // [TC 47] Quy tắc đổi điểm (phải khớp với API): dùng 50 điểm -> trừ 50.000 đ
-        private const int PointsPerRedemption = 50;
-        private const decimal RedeemValue = 50000m;
+        // Quy tắc đổi điểm phải khớp với API: 1 điểm giảm 1.000 đồng.
+        private const decimal PointValue = 1000m;
+        private bool _updatingRedeemState;
         private int _customerPoints = 0;         // điểm hiện có của khách đang chọn
         private string _lookedUpPhone = string.Empty; // SĐT đã tra cứu (tránh gọi API lặp)
 
@@ -136,29 +136,44 @@ namespace MiniSupermarket.WinForms
 
         private decimal GetSubtotal() => _cart.Sum(x => x.TotalPrice);
 
-        private decimal GetDiscount() => chkUsePoints.Checked ? RedeemValue : 0m;
+        private decimal GetDiscount() => chkUsePoints.Checked ? (int)nudPointsToRedeem.Value * PointValue : 0m;
 
         // Số tiền khách phải trả = tiền hàng - tiền giảm từ điểm
         private decimal GetPayable() => Math.Max(0m, GetSubtotal() - GetDiscount());
 
-        // Ô "Dùng điểm" chỉ cho tick khi khách đủ điểm VÀ hóa đơn đủ lớn để trừ
+        // Giới hạn theo điểm hiện có và số tiền hàng, không giảm vượt tổng hóa đơn.
         private void UpdateRedeemState()
         {
-            bool eligible = _customerPoints >= PointsPerRedemption && GetSubtotal() >= RedeemValue;
-            if (!eligible && chkUsePoints.Checked)
+            _updatingRedeemState = true;
+            try
             {
-                chkUsePoints.Checked = false; // tự bỏ tick (vd: xóa bớt hàng làm hóa đơn < 50.000 đ)
+                decimal maxPoints = Math.Min(Math.Max(0, _customerPoints), Math.Floor(GetSubtotal() / PointValue));
+                nudPointsToRedeem.Maximum = Math.Max(0, maxPoints);
+                nudPointsToRedeem.Value = decimal.Truncate(nudPointsToRedeem.Value);
+                bool eligible = maxPoints > 0;
+                if (!eligible) chkUsePoints.Checked = false;
+                chkUsePoints.Enabled = eligible;
+                nudPointsToRedeem.Enabled = eligible && chkUsePoints.Checked;
+                if (!chkUsePoints.Checked) nudPointsToRedeem.Value = 0;
             }
-            chkUsePoints.Enabled = eligible;
+            finally { _updatingRedeemState = false; }
+        }
+
+        private void nudPointsToRedeem_ValueChanged(object? sender, EventArgs e)
+        {
+            RefreshTotals();
         }
 
         private void RefreshTotals()
         {
+            if (_updatingRedeemState) return;
             UpdateRedeemState();
 
             decimal discount = GetDiscount();
             lblTotalAmount.Text = $"{GetPayable():N0} đ";
-            lblDiscountInfo.Text = discount > 0 ? $"Đã trừ {discount:N0} đ ({PointsPerRedemption} điểm)" : string.Empty;
+            lblDiscountInfo.Text = discount > 0 ? $"Đã trừ {discount:N0} đ ({(int)nudPointsToRedeem.Value:N0} điểm)" : string.Empty;
+            if (_customerPoints > 0)
+                lblCustomerPoints.Text = $"Có {_customerPoints:N0} điểm | Đổi tối đa {nudPointsToRedeem.Maximum:N0} điểm";
             CalculateChange();
         }
 
@@ -202,6 +217,7 @@ namespace MiniSupermarket.WinForms
                 }
 
                 using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+                if (IsDisposed || txtCustomerPhone.Text.Trim() != phone) return;
                 foreach (var c in doc.RootElement.EnumerateArray())
                 {
                     if (c.GetProperty("phoneNumber").GetString() == phone)
@@ -235,8 +251,9 @@ namespace MiniSupermarket.WinForms
             if (decimal.TryParse(txtCashReceived.Text, out decimal cashReceived))
             {
                 decimal change = cashReceived - total;
-                lblChange.Text = change > 0 ? $"{change:N0} đ" : "Cần đưa lớn hơn tổng!";
-                lblChange.ForeColor = change > 0 ? Color.FromArgb(15, 118, 110) : Color.FromArgb(185, 28, 28);
+                bool validCash = cashReceived >= 0 && (total == 0 || cashReceived > total);
+                lblChange.Text = validCash ? $"{change:N0} đ" : "Cần đưa lớn hơn tổng!";
+                lblChange.ForeColor = validCash ? Color.FromArgb(15, 118, 110) : Color.FromArgb(185, 28, 28);
             }
             else
             {
@@ -253,7 +270,15 @@ namespace MiniSupermarket.WinForms
                 return;
             }
 
-            // Bắt buộc nhập số tiền hợp lệ và lớn hơn số tiền phải trả sau khi trừ điểm.
+            RefreshTotals();
+            if (chkUsePoints.Checked && nudPointsToRedeem.Value <= 0)
+            {
+                MessageBox.Show("Vui lòng nhập số điểm muốn đổi lớn hơn 0!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                nudPointsToRedeem.Focus();
+                return;
+            }
+
+            // Tổng bằng 0 sau đổi điểm thì được nhập tiền khách đưa bằng 0.
             decimal total = GetPayable();
             if (!decimal.TryParse(txtCashReceived.Text, out decimal cashReceived))
             {
@@ -262,9 +287,11 @@ namespace MiniSupermarket.WinForms
                 txtCashReceived.SelectAll();
                 return;
             }
-            if (cashReceived <= total)
+            if (cashReceived < 0 || (total > 0 && cashReceived <= total))
             {
-                MessageBox.Show($"Tiền khách đưa phải lớn hơn tổng cần thanh toán ({total:N0} đ)!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                string message = total == 0 ? "Tiền khách đưa không được âm!" :
+                    $"Tiền khách đưa phải lớn hơn tổng cần thanh toán ({total:N0} đ)!";
+                MessageBox.Show(message, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtCashReceived.Focus();
                 txtCashReceived.SelectAll();
                 return;
@@ -276,6 +303,7 @@ namespace MiniSupermarket.WinForms
                 CustomerPhone = txtCustomerPhone.Text.Trim(),
                 CashReceived = cashReceived,
                 UsePoints = chkUsePoints.Checked, // [TC 47] máy chủ kiểm tra lại điều kiện và trừ điểm trong Transaction
+                PointsToRedeem = chkUsePoints.Checked ? (int)nudPointsToRedeem.Value : 0,
                 Items = _cart.Select(i => new { i.ProductId, i.Quantity, i.UnitPrice }).ToList()
             };
 
@@ -298,9 +326,10 @@ namespace MiniSupermarket.WinForms
                     decimal finalAmount = root.GetProperty("finalAmount").GetDecimal();
                     int points = root.GetProperty("rewardPointsAdded").GetInt32();
                     int pointsRedeemed = root.TryGetProperty("pointsRedeemed", out var pr) ? pr.GetInt32() : 0;
+                    decimal discountAmount = root.TryGetProperty("discountAmount", out var da) ? da.GetDecimal() : 0m;
 
                     string redeemLine = pointsRedeemed > 0
-                        ? $"\nĐã dùng {pointsRedeemed} điểm (giảm {RedeemValue:N0} đ)"
+                        ? $"\nĐã dùng {pointsRedeemed} điểm (giảm {discountAmount:N0} đ)"
                         : string.Empty;
 
                     MessageBox.Show(

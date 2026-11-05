@@ -37,6 +37,7 @@ namespace MiniSupermarket.WinForms
             lblCustomerName = new Label();
             lblCustomerPoints = new Label();
             chkUsePoints = new CheckBox();
+            nudPointsToRedeem = new NumericUpDown();
             lblDiscountInfo = new Label();
             txtCustomerPhone = new TextBox();
             label3 = new Label();
@@ -50,6 +51,7 @@ namespace MiniSupermarket.WinForms
             btnCheckout = new Button();
             btnClearCart = new Button();
             ((System.ComponentModel.ISupportInitialize)dgvCart).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)nudPointsToRedeem).BeginInit();
             tableLayoutMain.SuspendLayout();
             tableLayoutCheckout.SuspendLayout();
             groupBox1.SuspendLayout();
@@ -212,6 +214,7 @@ namespace MiniSupermarket.WinForms
             tableLayoutCheckout.TabIndex = 1;
             // groupBox2
             groupBox2.BackColor = Color.White;
+            groupBox2.Controls.Add(nudPointsToRedeem);
             groupBox2.Controls.Add(chkUsePoints);
             groupBox2.Controls.Add(lblCustomerPoints);
             groupBox2.Controls.Add(lblCustomerName);
@@ -259,15 +262,28 @@ namespace MiniSupermarket.WinForms
             lblCustomerPoints.Name = "lblCustomerPoints";
             lblCustomerPoints.Size = new Size(292, 22);
             // chkUsePoints
-            chkUsePoints.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            chkUsePoints.Anchor = AnchorStyles.Top | AnchorStyles.Left;
             chkUsePoints.Enabled = false;
             chkUsePoints.Font = new Font("Segoe UI", 9F);
             chkUsePoints.Location = new Point(16, 146);
             chkUsePoints.Name = "chkUsePoints";
-            chkUsePoints.Size = new Size(292, 28);
+            chkUsePoints.Size = new Size(180, 28);
             chkUsePoints.TabIndex = 1;
-            chkUsePoints.Text = "Dùng 50 điểm trừ 50.000 đ";
+            chkUsePoints.Text = "Nhập điểm muốn đổi";
             chkUsePoints.UseVisualStyleBackColor = true;
+            // nudPointsToRedeem
+            nudPointsToRedeem.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            nudPointsToRedeem.BorderStyle = BorderStyle.FixedSingle;
+            nudPointsToRedeem.Enabled = false;
+            nudPointsToRedeem.Font = new Font("Segoe UI", 9F);
+            nudPointsToRedeem.Location = new Point(200, 147);
+            nudPointsToRedeem.Maximum = 0;
+            nudPointsToRedeem.Name = "nudPointsToRedeem";
+            nudPointsToRedeem.Size = new Size(108, 27);
+            nudPointsToRedeem.TabIndex = 2;
+            nudPointsToRedeem.TextAlign = HorizontalAlignment.Right;
+            nudPointsToRedeem.ThousandsSeparator = true;
+            nudPointsToRedeem.ValueChanged += nudPointsToRedeem_ValueChanged;
             // groupBox3
             groupBox3.BackColor = Color.White;
             groupBox3.Controls.Add(lblDiscountInfo);
@@ -386,6 +402,7 @@ namespace MiniSupermarket.WinForms
             groupBox3.PerformLayout();
             groupBox2.ResumeLayout(false);
             groupBox2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)nudPointsToRedeem).EndInit();
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             tableLayoutCheckout.ResumeLayout(false);
@@ -412,6 +429,7 @@ namespace MiniSupermarket.WinForms
         private Label lblCustomerName;
         private Label lblCustomerPoints;
         private CheckBox chkUsePoints;
+        private NumericUpDown nudPointsToRedeem;
         private Label lblDiscountInfo;
         private TextBox txtCustomerPhone;
         private Label label3;
