@@ -22,6 +22,12 @@ namespace MiniSupermarket.WinForms
         {
             InitializeComponent();
 
+            bool isAdmin = string.Equals(SessionManager.CurrentRole, "Admin", StringComparison.OrdinalIgnoreCase);
+            bool isCashier = string.Equals(SessionManager.CurrentRole, "Cashier", StringComparison.OrdinalIgnoreCase);
+            btnAdd.Enabled = isAdmin || isCashier;
+            btnUpdate.Enabled = isAdmin;
+            btnDelete.Enabled = isAdmin;
+
             dgvCustomers.Parent!.Controls.Add(_paging);
             _paging.PrevClicked += async (s, e) => { if (_currentPage > 1) { _currentPage--; await LoadDataAsync(); } };
             _paging.NextClicked += async (s, e) => { if (_currentPage < _paging.TotalPages) { _currentPage++; await LoadDataAsync(); } };

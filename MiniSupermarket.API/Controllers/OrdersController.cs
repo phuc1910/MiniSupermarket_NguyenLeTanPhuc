@@ -32,14 +32,14 @@ namespace MiniSupermarket.API.Controllers
             _context = context;
         }
 
-        // GET: api/orders?fromDate=2026-10-01&toDate=2026-10-31&pageNumber=1&pageSize=20
+        // GET: api/orders?fromDate=2026-10-01&toDate=2026-10-31&pageNumber=1&pageSize=5
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Cashier")]
         public async Task<IActionResult> GetOrders(
             [FromQuery] DateTime? fromDate,
             [FromQuery] DateTime? toDate,
             [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 20)
+            [FromQuery] int pageSize = 5)
         {
             DateTime? fromDay = fromDate?.Date;
             DateTime? toDay = toDate?.Date;
@@ -54,7 +54,7 @@ namespace MiniSupermarket.API.Controllers
             }
 
             if (pageNumber < 1) pageNumber = 1;
-            if (pageSize < 1 || pageSize > 100) pageSize = 20;
+            if (pageSize < 1 || pageSize > 100) pageSize = 5;
             long skip = ((long)pageNumber - 1) * pageSize;
             if (skip > int.MaxValue)
             {
@@ -108,7 +108,7 @@ namespace MiniSupermarket.API.Controllers
 
         // GET: api/orders/1 - phép chiếu cả header và các dòng hàng, không truy vấn từng sản phẩm.
         [HttpGet("{id:int}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Cashier")]
         public async Task<IActionResult> GetOrderById(int id)
         {
             var order = await _context.Orders

@@ -161,7 +161,7 @@ namespace MiniSupermarket.API.Controllers
         // POST: api/Customers
         // Thêm khách hàng - nhận CustomerRequestDto (không nhận thẳng Entity)
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Cashier")]
         public async Task<IActionResult> Create([FromBody] CustomerRequestDto dto)
         {
             if (!ModelState.IsValid)

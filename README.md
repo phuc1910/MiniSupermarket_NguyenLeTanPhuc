@@ -70,6 +70,8 @@ MiniSupermarket_NguyenLeTanPhuc/
     ├── FormPOS.cs                        # Giỏ hàng, tra khách, đổi điểm, checkout (Buổi 5, 6)
     ├── FormQuickReport.cs                # Sự kiện, gọi API, DTO báo cáo và bộ lọc kỳ
     ├── FormQuickReport.Designer.cs       # Bố cục, khai báo control, bảng, thẻ và các tab báo cáo
+    ├── FormOrderManagement.cs            # Gọi API danh sách, phân trang và chi tiết đơn hàng
+    ├── FormOrderManagement.Designer.cs   # Bộ lọc ngày, lưới đơn hàng và lưới chi tiết
     ├── PagingBar.cs                      # Thanh phân trang dùng chung
     └── Models/ProductDto.cs              # DTO sản phẩm và dữ liệu phân trang phía máy khách
 ```
@@ -86,11 +88,13 @@ Khác với Buổi 2 (tài khoản hard-code trong code), từ Buổi 4 hệ th�
 |----------|----------------|
 | `POST /api/auth/login` | Công khai |
 | Đọc danh mục, sản phẩm, khách hàng | Phải đăng nhập (chưa đăng nhập → **401**) |
-| Thêm, sửa, xóa danh mục, sản phẩm, khách hàng | Chỉ Admin; API kiểm tra quyền ghi |
+| Thêm, sửa, xóa danh mục, sản phẩm | Chỉ Admin; API kiểm tra quyền ghi |
+| Thêm khách hàng | Admin, Cashier |
+| Sửa, xóa khách hàng | Chỉ Admin |
 | `GET /api/users` | Chỉ Admin |
 | `POST /api/users` | Chỉ Admin — tạo tài khoản nhân viên mới |
 | `POST /api/orders/checkout` | Admin, Cashier — thanh toán POS và đổi điểm (Buổi 5, 6) |
-| `GET /api/orders`, `GET /api/orders/{id}` | Chỉ Admin — đọc danh sách và chi tiết đơn hàng |
+| `GET /api/orders`, `GET /api/orders/{id}` | Admin, Cashier — đọc danh sách và chi tiết đơn hàng |
 | `DELETE /api/orders/cancel/{orderId}` | Chỉ Admin — hủy hóa đơn (Buổi 5) |
 | `GET /api/reports/*` | Chỉ Admin — báo cáo, Dashboard, biểu đồ, Top 5 (Buổi 5, 6) |
 
@@ -98,8 +102,8 @@ Khác với Buổi 2 (tài khoản hard-code trong code), từ Buổi 4 hệ th�
 
 | Vai trò | Màn hình mặc định | Các màn hình được phép truy cập |
 |---------|---------------------|----------------------------------|
-| Admin | Quản lý Danh mục | Bán hàng (POS), Danh mục, Sản phẩm, Khách hàng, Báo cáo Doanh thu, Quản trị Tài khoản |
-| Cashier | Quản lý Khách hàng | Bán hàng (POS), Khách hàng |
+| Admin | Quản lý Danh mục | Bán hàng (POS), Danh mục, Sản phẩm, Khách hàng, Đơn hàng & chi tiết, Báo cáo Doanh thu, Quản trị Tài khoản |
+| Cashier | Quản lý Khách hàng | Bán hàng (POS), Khách hàng (xem, tìm kiếm, thêm mới), Đơn hàng & chi tiết |
 | Warehouse | Quản lý Danh mục | Danh mục, Sản phẩm |
 
 ---
@@ -147,18 +151,19 @@ Toàn bộ nghiệp vụ được điều hướng trong **một Form chính (`F
 * Các màn hình Đăng nhập, Shell, POS, Danh mục, Sản phẩm, Khách hàng, Tài khoản và Báo cáo dùng cùng kiểu chữ Segoe UI, nền sáng, nút xanh và bảng dữ liệu có tiêu đề rõ ràng.
 * Giữ nguyên `ClientSize`, kích thước tối thiểu và trạng thái cửa sổ hiện có; bố cục chỉ được sắp xếp lại bên trong bằng các panel/layout của WinForms.
 * Khai báo control, vị trí, màu sắc, kích thước thành phần và gắn sự kiện được viết trong `FormTenManHinh.Designer.cs`. Các hàm xử lý sự kiện và gọi API nằm trong `FormTenManHinh.cs`, theo cách tổ chức cũ.
-* Mã báo cáo được gộp vào `FormQuickReport.cs` và `FormQuickReport.Designer.cs`; không dùng file partial báo cáo bổ sung. DTO đọc hóa đơn đặt trong `CheckoutDtos.cs` có sẵn; DTO phản hồi phía client đặt cùng `FormQuickReport.cs`.
+* Mã báo cáo nằm trong `FormQuickReport.cs` và `FormQuickReport.Designer.cs`. Màn hình đơn hàng dùng `FormOrderManagement.cs` và `FormOrderManagement.Designer.cs`; DTO đọc hóa đơn phía client đặt cùng `FormOrderManagement.cs`, DTO báo cáo đặt cùng `FormQuickReport.cs`. DTO API đặt trong `CheckoutDtos.cs` có sẵn.
 * Các thay đổi giao diện không đổi quy tắc checkout, đổi điểm, tồn kho, phân quyền, kiểm tra dữ liệu hay cách tính doanh thu ở server.
 
 ### Dashboard và báo cáo trên `FormQuickReport` — bổ sung Buổi 6
 
 * **Thẻ tổng quan:** doanh thu hôm nay, số hóa đơn hôm nay, khách đăng ký mới hôm nay và số sản phẩm tồn thấp trên toàn kho.
 * **Báo cáo theo khoảng ngày:** tổng hóa đơn, doanh thu và sản phẩm bán chạy nhất theo **Từ ngày – Đến ngày**; chọn hai ô cùng ngày để xem đúng một ngày.
-* **Biểu đồ cột:** doanh thu từng ngày từ API `revenue-by-day`; ngày không có hóa đơn được hiển thị bằng 0 trên biểu đồ.
+* **Biểu đồ cột trên tab Tổng quan:** chọn đúng một ngày thì hiển thị đủ 24 giờ từ 00:00 đến 23:00 qua API `revenue-by-hour?date=yyyy-MM-dd`. Khoảng nhiều ngày dùng `revenue-by-day`; giờ/ngày chưa có đơn có doanh thu bằng 0. Máy chủ tổng hợp theo thời điểm `Orders.CreatedDate` đang lưu, lấy trọn ngày được chọn.
+* **Biểu đồ tròn trên tab Tổng quan:** tỷ trọng doanh thu thực thu theo thu ngân, dùng API `revenue-by-cashier` với cùng khoảng ngày đang lọc. Chú giải ghi tên thu ngân, rê chuột xem tiền và tỷ lệ. Kỳ không có doanh thu hiển thị thông báo dữ liệu rỗng.
 * **Top 5 sản phẩm bán chạy:** lấy từ API `best-sellers`, tính trên toàn bộ lịch sử bán hàng.
 * **Xuất dữ liệu:** nút **Xuất tồn kho** xuất toàn bộ sản phẩm; nút **Xuất doanh thu** xuất theo khoảng ngày. CSV có UTF-8 BOM, dấu phân cách theo vùng, xử lý dấu ngoặc kép và dữ liệu có thể bị Excel hiểu là công thức.
-* **Tab Đơn hàng & chi tiết:** chọn khoảng ngày, xem danh sách có phân trang 20 đơn/trang. Chọn một đơn để xem khách hàng, thu ngân, thời điểm lập, tiền thực thu, điểm thưởng và từng dòng sản phẩm với số lượng, đơn giá lịch sử, thành tiền. Tổng thực thu phía dưới tính trên toàn bộ kết quả lọc, không chỉ trang đang xem.
-* **Tab Doanh thu theo kỳ:** chọn **Ngày**, **Tuần**, **Tháng** hoặc **Năm** và mốc thời gian tương ứng; xem số đơn, tiền thực thu, sản phẩm bán chạy nhất và doanh thu từng thu ngân trong kỳ. Nút xem đơn hàng chuyển sang danh sách đơn với cùng khoảng ngày.
+* **Màn hình Đơn hàng & chi tiết:** mở từ menu riêng trên thanh bên. Chọn **Ngày**, **Tháng**, **Năm** và mốc tương ứng hoặc **Tùy chọn** khoảng Từ/Đến, rồi nhấn **Tải đơn hàng**. Danh sách phân trang **5 đơn/trang**, đổi bộ lọc sẽ đưa về trang đầu. Chọn đơn để xem khách hàng, thu ngân, thời điểm lập, tiền thực thu, điểm thưởng và từng dòng sản phẩm với số lượng, đơn giá lịch sử, thành tiền. Tổng thực thu phía dưới tính trên toàn bộ kết quả lọc. Màn hình chỉ tra cứu danh sách và chi tiết. Admin và Cashier được xem danh sách, lọc và đọc chi tiết đơn hàng; quyền này được kiểm tra tại API và menu WinForms.
+* **Tab Doanh thu theo kỳ:** chọn **Ngày**, **Tuần**, **Tháng** hoặc **Năm** và mốc thời gian tương ứng; xem số đơn, tiền thực thu, sản phẩm bán chạy nhất và doanh thu từng thu ngân trong kỳ. Báo cáo có ba tab Tổng quan, Doanh thu theo kỳ và Doanh thu thu ngân.
 * **Tab Doanh thu thu ngân:** hiển thị tài khoản thu ngân, số đơn, doanh thu thực thu và điểm đã cộng. Lọc theo ngày/tuần/tháng/năm, khoảng ngày tùy chọn hoặc **Toàn bộ lịch sử**.
 
 Bộ lọc trên tab Tổng quan có **Ngày**, **Tuần**, **Tháng**, **Năm** và **Tùy chọn**; áp dụng cho báo cáo theo khoảng, biểu đồ và CSV doanh thu. Các thẻ hôm nay và Top 5 toàn lịch sử có phạm vi riêng. Các tab có bộ lọc độc lập. Kỳ không có đơn hiển thị 0 và danh sách rỗng.
@@ -215,8 +220,8 @@ Nếu dùng SQL Express, đổi `Server=localhost` thành `Server=.\\SQLEXPRESS`
 3. Đăng nhập bằng các tài khoản có vai trò khác nhau (lấy từ bảng `Users` trong SQL Server) để kiểm tra Sidebar hiển thị đúng chức năng theo từng vai trò.
 4. Dùng Admin kiểm tra Danh mục, Sản phẩm, Khách hàng: tải danh sách, thêm, sửa, xóa, tìm kiếm và phân trang. Màn hình Sản phẩm có nút **<< Trang trước / Trang sau >>**, lọc nhóm và tô màu tồn thấp (Buổi 6); quyền ghi được kiểm tra tại API.
 5. Với tài khoản Admin, thử tạo tài khoản nhân viên mới trong màn hình Quản trị Tài khoản.
-6. Dùng Cashier mở POS, nhập mã vạch và số điện thoại khách hoặc để trống với khách vãng lai. Kiểm tra đổi 50 điểm, tiền phải trả, tiền thừa và thanh toán bằng nút **THANH TOÁN** hoặc F9. Khi cần kiểm tra server Rollback do thiếu tồn, dùng Swagger trên database thử nghiệm vì WinForms có thể chặn số lượng trước khi gửi.
-7. Dùng Admin mở **Báo cáo Doanh thu** và kiểm tra bốn tab: **Tổng quan**, **Đơn hàng & chi tiết**, **Doanh thu theo kỳ**, **Doanh thu thu ngân**. Kiểm tra đổi trang đơn hàng, chọn đơn để xem các dòng hàng; chuyển bộ lọc ngày/tuần/tháng/năm và khoảng tùy chọn; kiểm tra kỳ có/không có đơn và toàn lịch sử theo thu ngân. Tab Tổng quan vẫn có biểu đồ, Top 5 và hai nút xuất CSV. Tài khoản mẫu: `admin01`, `cashier01`, `ware01`; mật khẩu mẫu `123456`.
+6. Dùng Cashier mở **Khách hàng** để thêm khách mới, tìm kiếm và tra cứu hồ sơ; nút sửa/xóa dành cho Admin. Mở **Đơn hàng & chi tiết** để lọc và xem hóa đơn. Vào POS, nhập mã vạch và số điện thoại khách hoặc để trống với khách vãng lai. Kiểm tra đổi 50 điểm, tiền phải trả, tiền thừa và thanh toán bằng nút **THANH TOÁN** hoặc F9. Khi cần kiểm tra server Rollback do thiếu tồn, dùng Swagger trên database thử nghiệm vì WinForms có thể chặn số lượng trước khi gửi.
+7. Dùng Admin mở **Đơn hàng & chi tiết** từ thanh bên, lọc ngày, đổi trang và chọn đơn để xem từng dòng hàng. Mở **Báo cáo doanh thu** và kiểm tra ba tab **Tổng quan**, **Doanh thu theo kỳ**, **Doanh thu thu ngân**; chuyển bộ lọc ngày/tuần/tháng/năm và khoảng tùy chọn; kiểm tra kỳ có/không có đơn và toàn lịch sử theo thu ngân. Tab Tổng quan có biểu đồ, Top 5 và hai nút xuất CSV. Tài khoản mẫu: `admin01`, `cashier01`, `ware01`; mật khẩu mẫu `123456`.
 8. Tắt cả hai ứng dụng rồi mở lại — dữ liệu vẫn còn nguyên vì đã lưu trên SQL Server.
 
 ---
@@ -243,7 +248,7 @@ Tạo commit có tiêu đề và nội dung chi tiết về những phần vừa
 $commitMessage = @'
 Buoi 6: đồng bộ Designer WinForms, lọc doanh thu theo kỳ và báo cáo đơn hàng
 
-- API đơn hàng: thêm danh sách phân trang, lọc ngày, tổng thực thu toàn bộ kết quả và chi tiết từng đơn; chỉ Admin được đọc.
+- API đơn hàng: thêm danh sách phân trang, lọc ngày, tổng thực thu toàn bộ kết quả và chi tiết từng đơn; Admin và Cashier được đọc.
 - Báo cáo: revenue-by-cashier hỗ trợ lọc ngày, giữ báo cáo toàn lịch sử khi bỏ tham số ngày.
 - WinForms: tab Đơn hàng & chi tiết, Doanh thu theo kỳ và Doanh thu thu ngân; lọc ngày/tuần/tháng/năm, giữ Dashboard và xuất CSV.
 - Tồn kho: server trả cờ, trạng thái, ngưỡng và tổng cảnh báo của toàn bộ bộ lọc; WinForms dùng dữ liệu API để tô màu và xuất CSV.

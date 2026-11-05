@@ -1,4 +1,4 @@
-namespace MiniSupermarket.WinForms
+﻿namespace MiniSupermarket.WinForms
 {
     partial class FormMainShell
     {
@@ -23,6 +23,7 @@ namespace MiniSupermarket.WinForms
             btnProduct = new Button();
             btnCustomer = new Button();
             btnCategory = new Button();
+            btnOrders = new Button();
             btnReports = new Button();
             btnPOS = new Button();
             label1 = new Label();
@@ -74,6 +75,7 @@ namespace MiniSupermarket.WinForms
             panelNavigation.Controls.Add(btnCategory);
             panelNavigation.Controls.Add(btnProduct);
             panelNavigation.Controls.Add(btnCustomer);
+            panelNavigation.Controls.Add(btnOrders);
             panelNavigation.Controls.Add(btnReports);
             panelNavigation.Controls.Add(btnUserManage);
             panelNavigation.Dock = DockStyle.Fill;
@@ -155,6 +157,24 @@ namespace MiniSupermarket.WinForms
             btnCustomer.TextAlign = ContentAlignment.MiddleLeft;
             btnCustomer.UseVisualStyleBackColor = false;
             btnCustomer.Click += btnCustomer_Click;
+            // btnOrders
+            btnOrders.BackColor = Color.FromArgb(20, 42, 67);
+            btnOrders.Cursor = Cursors.Hand;
+            btnOrders.FlatAppearance.BorderSize = 0;
+            btnOrders.FlatAppearance.MouseOverBackColor = Color.FromArgb(32, 60, 90);
+            btnOrders.FlatAppearance.MouseDownBackColor = Color.FromArgb(37, 99, 235);
+            btnOrders.FlatStyle = FlatStyle.Flat;
+            btnOrders.Font = new Font("Segoe UI", 10F);
+            btnOrders.ForeColor = Color.FromArgb(226, 232, 240);
+            btnOrders.Margin = new Padding(0, 0, 0, 8);
+            btnOrders.Name = "btnOrders";
+            btnOrders.Padding = new Padding(14, 0, 8, 0);
+            btnOrders.Size = new Size(192, 48);
+            btnOrders.TabIndex = 4;
+            btnOrders.Text = "Đơn hàng & chi tiết";
+            btnOrders.TextAlign = ContentAlignment.MiddleLeft;
+            btnOrders.UseVisualStyleBackColor = false;
+            btnOrders.Click += btnOrders_Click;
             // btnReports
             btnReports.BackColor = Color.FromArgb(20, 42, 67);
             btnReports.Cursor = Cursors.Hand;
@@ -168,7 +188,7 @@ namespace MiniSupermarket.WinForms
             btnReports.Name = "btnReports";
             btnReports.Padding = new Padding(14, 0, 8, 0);
             btnReports.Size = new Size(192, 48);
-            btnReports.TabIndex = 4;
+            btnReports.TabIndex = 5;
             btnReports.Text = "Báo cáo doanh thu";
             btnReports.TextAlign = ContentAlignment.MiddleLeft;
             btnReports.UseVisualStyleBackColor = false;
@@ -186,7 +206,7 @@ namespace MiniSupermarket.WinForms
             btnUserManage.Name = "btnUserManage";
             btnUserManage.Padding = new Padding(14, 0, 8, 0);
             btnUserManage.Size = new Size(192, 48);
-            btnUserManage.TabIndex = 5;
+            btnUserManage.TabIndex = 6;
             btnUserManage.Text = "Tài khoản nhân viên";
             btnUserManage.TextAlign = ContentAlignment.MiddleLeft;
             btnUserManage.UseVisualStyleBackColor = false;
@@ -294,6 +314,7 @@ namespace MiniSupermarket.WinForms
         private Button btnProduct;
         private Button btnCustomer;
         private Button btnCategory;
+        private Button btnOrders;
         private Button btnReports;
         private Button btnPOS;
         private Label label1;
